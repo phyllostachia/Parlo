@@ -1,0 +1,17 @@
+.codeflicker/
+prompts.md
+backend/config.yaml
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+.pytest_cache/
+
+# Backend runtime data
+backend/data/
+backend/.env

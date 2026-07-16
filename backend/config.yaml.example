@@ -1,0 +1,83 @@
+# Parlo backend configuration file.
+#
+# Copy this file to `config.yaml` (in the same directory you run the server
+# from) and edit it. The server reads it at startup via `load_config`.
+#
+# This file contains NO secrets. API keys and the shared auth token live in
+# `.env`; each model below references its key by environment-variable name in
+# the `api_key` field, so the actual secret never appears here. That makes it
+# safe to commit `config.yaml` to version control.
+
+# Model used by default when a new conversation is created without an
+# explicit choice. Must match the `id` of one of the entries in `models`
+# below.
+default_model: claude-sonnet-5
+
+# Non-secret server runtime parameters.
+server:
+  # Origins permitted by CORS. The Flutter web build runs on a separate
+  # origin, so list the address users will visit, for example
+  # http://your-server or http://localhost:8080 for local development.
+  cors_origins:
+    - http://localhost:8080
+
+# SQLite database URL. The default stores the database file under ./data.
+database:
+  url: sqlite+aiosqlite:///./data/parlo.db
+
+# Image upload storage.
+images:
+  # Directory where uploaded images are stored.
+  upload_dir: ./data/images
+  # Maximum image upload size in bytes (10 MiB by default).
+  max_bytes: 10485760
+
+# Available models. Add or remove entries as needed; each entry's `api_key`
+# field names an environment variable that must be set in `.env`.
+models:
+  - id: gpt-5.6
+    display_name: GPT-5.6
+    api_key: OPENAI_API_KEY
+    base_url: https://api.openai.com/v1
+    family: openai
+    protocol: openai-response
+    vision: true
+    # Thinking-effort levels this model accepts. The first entry is used as
+    # the default when a new conversation is created.
+    thinking_effort:
+      - medium
+      - low
+      - high
+      - xhigh
+    # Output budget (thinking + visible text) sent upstream as the hard cap.
+    max_tokens: 32768
+
+  - id: claude-sonnet-5
+    display_name: Claude Sonnet 5
+    api_key: ANTHROPIC_API_KEY
+    base_url: https://api.anthropic.com
+    family: anthropic
+    protocol: anthropic-message
+    vision: true
+    thinking_effort:
+      - high
+      - medium
+      - low
+      - xhigh
+      - max
+    max_tokens: 65536
+
+  - id: claude-opus-4-8
+    display_name: Claude Opus 4.8
+    api_key: ANTHROPIC_API_KEY
+    base_url: https://api.anthropic.com
+    family: anthropic
+    protocol: anthropic-message
+    vision: true
+    thinking_effort:
+      - high
+      - medium
+      - low
+      - xhigh
+      - max
+    max_tokens: 32768
