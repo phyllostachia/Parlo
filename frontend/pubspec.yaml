@@ -1,0 +1,119 @@
+# Parlo Flutter frontend.
+#
+# This is the single-page AI chatbot described in `frontend/design.md` and the
+# architecture document. Web first; mobile platforms will be added in a later
+# phase (see the development plan).
+name: parlo
+description: "Parlo AI Chatbot"
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State management. We use the manual Riverpod API (Provider, NotifierProvider,
+  # AsyncNotifierProvider) instead of the riverpod_generator codegen style. The
+  # architecture document chose codegen for consistency; this implementation uses
+  # the manual style to keep the build simple and avoid an extra code-generation
+  # step for providers. The freezed models below still use code generation.
+  flutter_riverpod: ^2.5.1
+
+  # Networking. dio is required (not package:http) because dio on Flutter Web
+  # uses fetch + ReadableStream, which is the only way to get true streaming
+  # Server-Sent Events in the browser.
+  dio: ^5.7.0
+
+  # Routing. go_router with a ShellRoute keeps the sidebar mounted while the
+  # main area swaps between conversations, so sidebar state survives navigation.
+  go_router: ^14.6.2
+
+  # Data models. freezed + json_serializable generate immutable value types and
+  # JSON converters. field_rename: snake is set in build.yaml so the generated
+  # fromJson maps snake_case API fields to camelCase Dart fields automatically.
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
+  # Local preferences for the bearer token, the mobile base URL, and the theme
+  # choice. Web maps this to localStorage, mobile maps to native prefs.
+  shared_preferences: ^2.3.3
+
+  # Markdown renderer that is friendly to streaming (it can re-parse partial
+  # text on every token without flicker). Used for assistant message bodies.
+  # v1.x exposes the widget as `GptMarkdown` and has better streaming support
+  # than the 0.1.x line (which used `TexMarkdown`).
+  gpt_markdown: ^1.1.8
+
+  # Optional code highlighter wired into gpt_markdown's custom code builder.
+  # Wired up in a later phase; declared here so the dependency is ready.
+  flutter_highlight: ^0.7.0
+
+  # File picker used by the image attachment feature (Phase 5). Supports the
+  # web (HTML file input), Android, iOS, and desktop, so one call site works
+  # across every platform the app targets.
+  file_picker: ^8.1.4
+
+  # Drag-and-drop used by the image attachment feature (Phase 5). On the web
+  # it hooks the HTML drop event; on desktop it uses platform channels. The
+  # app uses it to accept images dragged onto the chat input.
+  desktop_drop: ^0.4.4
+
+  # Cross-platform `XFile` abstraction used by `file_picker` and
+  # `desktop_drop`. Declared as a direct dependency because the image
+  # attachment helpers import `XFile` in their public signatures.
+  cross_file: ^0.3.4+1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Code generation runner for freezed and json_serializable.
+  build_runner: ^2.4.13
+
+  # Generates immutable value classes (==, hashCode, copyWith, sealed unions).
+  freezed: ^2.5.7
+
+  # Generates fromJson / toJson for the freezed models.
+  json_serializable: ^6.8.0
+
+  # Mocking library used by unit and widget tests for dio and other dependencies.
+  mocktail: ^1.0.4
+
+  # Recommended lint set for Flutter apps. Stricter rules are added in
+  # analysis_options.yaml.
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Self-hosted font files (see architecture section 9). We ship the TTFs in
+  # the app bundle so the app never has to fetch fonts from the network at run
+  # time, which matters for users on networks where fonts.gstatic.com is slow.
+  assets:
+    - assets/fonts/
+
+  fonts:
+    # Source Serif 4 stands in for the private Anthropic Serif. Used only for
+    # display headlines (the rare serif in the UI).
+    - family: SourceSerif4
+      fonts:
+        - asset: assets/fonts/SourceSerif4-Regular.ttf
+          weight: 400
+
+    # Inter stands in for the private Anthropic Sans. It carries all other UI
+    # text. The design uses weights 400, 500, 550, 580, and 600, where 580 is
+    # the heaviest weight the design ever uses. Flutter's pubspec only accepts
+    # standard 100-step weights, so the 580-weight file is exposed at the 600
+    # slot. The app never uses FontWeight.w700+, so the visual heaviest stays
+    # faithful to the design.
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-W580.ttf
+          weight: 600

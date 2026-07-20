@@ -1,0 +1,25 @@
+# Configuration for build_runner code generation.
+#
+# The single global setting that matters here is `field_rename: snake` for
+# json_serializable. The backend sends JSON with snake_case keys (created_at,
+# model_id, etc.); this setting makes the generated fromJson code map those
+# keys to our camelCase Dart field names automatically, so the freezed classes
+# stay idiomatic Dart on the inside.
+
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          # Map snake_case JSON keys to camelCase Dart fields in both directions.
+          field_rename: snake
+          # Do not generate nullable fields as required. Keep the generator
+          # forgiving so partial backend responses do not crash the client.
+          any_map: false
+          checked: false
+          explicit_to_json: true
+      freezed:
+        options:
+          # Generate the private `_*` constructors freezed expects. Defaults are
+          # fine; this section exists so the intent is documented.
+          generate_private_constructor: true

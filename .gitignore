@@ -15,3 +15,5 @@ build/
 # Backend runtime data
 backend/data/
 backend/.env
+
+.DS_Store
