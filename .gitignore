@@ -1,6 +1,7 @@
 .codeflicker/
 prompts.md
 backend/config.yaml
+.vscode/
 
 # Python
 __pycache__/
