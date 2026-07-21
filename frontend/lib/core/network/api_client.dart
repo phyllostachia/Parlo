@@ -15,16 +15,14 @@ import 'base_url_providers.dart';
 
 /// The base URL prepended to every API request.
 ///
-/// Reads the current value from [baseUrlStoreProvider]. On the web the store
-/// stays empty (the user never sees a base URL field), so this returns an
-/// empty string — an empty base URL plus a path like `/api/profiles` becomes
-/// a same-origin relative URL, which is correct when the API is
-/// reverse-proxied onto the same domain as the app.
+/// Reads the current value from [baseUrlStoreProvider]. The base URL is a
+/// required value — the user must enter the backend host (domain + port) in
+/// the token dialog or the settings panel before the app can make any
+/// request. The router keeps the user on `/` and the token dialog host pops
+/// up the dialog until a non-empty value is stored.
 ///
-/// On mobile, the user enters a host (e.g. `https://parlo.example.com`) in
-/// the token dialog; the store persists it and the dio provider rebuilds
-/// with the new host. Watching the store (instead of reading once) is what
-/// makes a base URL change rebuild dio.
+/// Watching the store (instead of reading once) is what makes a base URL
+/// change rebuild dio.
 final baseUrlProvider = Provider<String>((ref) {
   return ref.watch(baseUrlStoreProvider).read();
 });

@@ -1,15 +1,13 @@
 /// The mutable holder for the backend base URL used by the dio client.
 ///
-/// On the web the app is served from the same origin as the API, so the base
-/// URL is always an empty string (same-origin relative paths). On mobile the
-/// app talks to a user-entered host, so the base URL must be persisted and
-/// restored on startup.
+/// The base URL is a required value on every platform: the user must tell the
+/// app which host to talk to, and there is no same-origin fallback. The store
+/// persists the value so it survives a restart; the dio provider watches the
+/// store and rebuilds when the value changes.
 ///
 /// This store is a [ChangeNotifier] for the same reason [AuthStore] is one:
-/// the dio provider watches the base URL and rebuilds when it changes. The
-/// token dialog writes to this store when the user enters a backend address
-/// (only shown on mobile, where `PlatformCapabilities.canInputBackendUrl`
-/// is `true`).
+/// the dio provider watches the base URL and rebuilds when it changes. Both
+/// the token dialog and the settings panel write to this store.
 library;
 
 import 'package:flutter/foundation.dart';

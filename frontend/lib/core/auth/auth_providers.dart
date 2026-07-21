@@ -16,8 +16,7 @@ import 'auth_store.dart';
 ///
 /// This is overridden in `main.dart` with the instance obtained from
 /// `SharedPreferences.getInstance()` so the rest of the app can read it
-/// synchronously. Mobile-only preferences (the base URL) are also stored
-/// here.
+/// synchronously. The bearer token and the base URL are both stored here.
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
   // The default factory throws so a missing override is caught early instead
   // of silently producing null values deep in the app.

@@ -5,11 +5,12 @@
 /// conversations does not rebuild the sidebar, so its state (expand/collapse,
 /// scroll position, inline-edit text) is preserved.
 ///
-/// Auth is enforced in `redirect`: if the auth store has no token, or the
-/// backend has flagged the current token as a 401, every route is redirected
-/// to `/`, where the token dialog pops up. The `refreshListenable` hook
-/// re-runs `redirect` whenever the auth store changes, so a 401 mid-session
-/// bounces the user back to `/` immediately.
+/// Auth and the backend address are enforced in `redirect`: if the auth store
+/// has no token, the backend has flagged the current token as a 401, or the
+/// base URL store is empty, every route is redirected to `/`, where the token
+/// dialog pops up. The `refreshListenable` hook re-runs `redirect` whenever
+/// either store changes, so a 401 mid-session or a cleared address bounces the
+/// user back to `/` immediately.
 library;
 
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../auth/auth_providers.dart';
+import '../network/base_url_providers.dart';
 import '../../features/chat/chat_screen.dart';
 import '../../features/chat/empty_state.dart';
 import 'app_shell.dart';
@@ -24,25 +26,29 @@ import 'app_shell.dart';
 /// The go_router instance for the app.
 ///
 /// We use [Provider] (not autoDispose) so the router lives for the whole app
-/// session and keeps its navigation history. We read the auth store with
+/// session and keeps its navigation history. We read the stores with
 /// `ref.read` so the router is built exactly once; the `refreshListenable`
-/// hook is what makes the router react to auth changes.
+/// hook is what makes the router react to store changes.
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authStore = ref.read(authStoreProvider);
+  final baseUrlStore = ref.read(baseUrlStoreProvider);
   return GoRouter(
-    // Re-evaluate `redirect` whenever the auth store notifies (token written,
-    // token cleared, 401 flagged). This is what makes a mid-session 401 bounce
-    // the user back to `/` without a manual navigation.
-    refreshListenable: authStore,
+    // Re-evaluate `redirect` whenever either store notifies (token written,
+    // token cleared, 401 flagged, base URL written, base URL cleared). This
+    // is what makes a mid-session 401 or a cleared address bounce the user
+    // back to `/` without a manual navigation.
+    refreshListenable: Listenable.merge([authStore, baseUrlStore]),
     initialLocation: '/',
     redirect: (context, state) {
       final hasToken = authStore.hasToken;
       final isUnauthorized = authStore.isUnauthorized;
+      final hasBaseUrl = baseUrlStore.hasValue;
       final path = state.uri.path;
 
-      // While the token is missing or known-invalid, force every route back to
-      // `/`. The token dialog pops up over `/` (Phase 5).
-      if (!hasToken || isUnauthorized) {
+      // While the token is missing, known-invalid, or the backend address is
+      // not set, force every route back to `/`. The token dialog pops up over
+      // `/` (Phase 5).
+      if (!hasToken || isUnauthorized || !hasBaseUrl) {
         return path == '/' ? null : '/';
       }
       return null;
@@ -84,4 +90,3 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
-

@@ -9,7 +9,7 @@ Parlo 的 Flutter 客户端。Parlo 是一款自托管、单用户的 BYOK（自
 
 ## 当前状态
 
-开发计划的第 0 至第 8 阶段已经完成。应用在 Web 上编译运行，`flutter analyze` 无任何警告，23 个单元测试与 widget 测试全部通过。第 9 阶段（深色主题）被有意推迟，原因见下文。
+开发计划的第 0 至第 8 阶段已经完成。应用在 Web 上编译运行，`flutter analyze` 无任何警告，25 个单元测试与 widget 测试全部通过。第 9 阶段（深色主题）被有意推迟，原因见下文。
 
 | 阶段 | 完成的内容 |
 |------|-----------|
@@ -18,10 +18,10 @@ Parlo 的 Flutter 客户端。Parlo 是一款自托管、单用户的 BYOK（自
 | 2 — 侧栏 | Profile 文件夹树（展开与折叠、悬停显示的「...」菜单、行内重命名、带确认的删除）、每个 profile 下的对话列表、设置入口 |
 | 3 — 聊天基础 | 空状态页面（模型选择器 + 居中大输入框）、聊天页面（顶栏 + 消息列表 + 输入框）、消息气泡、`CurrentConversationNotifier` 的完整状态机以及 `stop()` |
 | 4 — 聊天进阶 | 思考小条（可折叠，流式时显示脉冲指示器）、`< n/m >` 分支切换器、悬停操作条（复制 + 重新生成）、断流/停止后的「连接中断，重试」按钮、`regenerate()` 与 `switchBranch()` 状态机动作 |
-| 5 — 鉴权与多模态 | 首次使用/401 专用 token 弹窗（移动端额外询问后端地址）、`BaseUrlStore`（持久化后端地址）、图片附件（点击选择 + 拖拽，base64 data URL 转换，非 vision 模型禁用入口）、移动端平台能力与入口 |
+| 5 — 鉴权与多模态 | 首次使用/401 专用 token 弹窗（同时询问后端地址）、`BaseUrlStore`（持久化后端地址）、图片附件（点击选择 + 拖拽，base64 data URL 转换，非 vision 模型禁用入口）、移动端平台能力与入口 |
 | 6 — 错误边界与响应式 | 统一的 `ErrorBanner`（带重试按钮）替换会话与模型加载的裸文本错误、窄屏侧栏改为带遮罩的浮层抽屉（汉堡按钮切换） |
 | 7 — 测试 | 在原有 12 个测试基础上新增 11 个：`regenerate`、`switchBranch` 状态机测试，`imageDataUrlFromBytes` 的 MIME 检测测试，token 弹窗的首用、保存关闭、已有 token 不弹出测试 |
-| 8 — 移动端 | `MobilePlatformCapabilities`（`canInputBackendUrl=true`、`canDragImage=false`、`messageActions=always`）与 `main_mobile.dart` 入口。响应式侧栏抽屉复用第 6 阶段的实现 |
+| 8 — 移动端 | `MobilePlatformCapabilities`（`canDragImage=false`、`messageActions=always`）与 `main_mobile.dart` 入口。响应式侧栏抽屉复用第 6 阶段的实现。后端地址入口在所有平台一致，由 token 弹窗与设置面板统一收集 |
 
 ### 第 9 阶段（深色主题）的推迟原因
 
@@ -44,7 +44,7 @@ SSE 流式是 `send()` 操作的副作用，而非独立的状态源。调用 `P
 
 ## 运行方式
 
-在生产环境中，应用通过同域反向代理与 Parlo 后端通信。本地开发时：
+在生产环境中，应用可以与 Parlo 后端同域部署，也可以跨域部署——用户在应用内指定后端地址即可。本地开发时：
 
 ```bash
 cd frontend
@@ -53,7 +53,9 @@ dart run build_runner build --delete-conflicting-outputs   # 重新生成 *.free
 flutter run -d chrome
 ```
 
-首次启动时，应用会弹出 token 弹窗要求输入 bearer token，该值需要与后端 `.env` 文件中的 `AUTH_TOKEN` 一致。在侧栏齿轮中可以后续修改 token。
+首次启动时，应用会弹出弹窗要求输入 bearer token 和后端地址（域名 + 端口）。token 需要与后端 `.env` 文件中的 `AUTH_TOKEN` 一致；后端地址是 Parlo 后端的访问入口，例如 `localhost:8000`（本地开发）或 `parlo.example.com:443`（生产部署）。两个值都持久化在 `shared_preferences` 中，后续可以在侧栏齿轮的设置面板里随时修改。
+
+跨域部署时，后端需要开放 CORS（允许前端的来源域）。这是后端的配置，前端无法绕过。
 
 在移动端运行（需要连接设备或模拟器，本次会话未在真机验证）：
 
@@ -61,7 +63,7 @@ flutter run -d chrome
 flutter run -t lib/main_mobile.dart -d <device>
 ```
 
-`main_mobile.dart` 用 `MobilePlatformCapabilities` 覆写 `platformCapabilitiesProvider`，使 token 弹窗额外显示后端地址输入框、隐藏拖拽区、让消息操作条常驻显示。后端地址通过 `BaseUrlStore` 持久化到 `shared_preferences`，`dioProvider` 会据此重建 dio 实例。
+`main_mobile.dart` 用 `MobilePlatformCapabilities` 覆写 `platformCapabilitiesProvider`，隐藏拖拽区、让消息操作条常驻显示。后端地址入口在所有平台一致，由 token 弹窗与设置面板统一收集；`BaseUrlStore` 持久化到 `shared_preferences`，`dioProvider` 会据此重建 dio 实例。
 
 ## 测试
 
@@ -69,13 +71,13 @@ flutter run -t lib/main_mobile.dart -d <device>
 flutter test
 ```
 
-23 个测试覆盖以下场景：
+25 个测试覆盖以下场景：
 - 应用启动后正确渲染空状态页面标题（1 个 widget 测试）
 - 侧栏渲染文件夹列表与空状态提示（2 个 widget 测试）
 - SSE 解析器正确拆分事件、处理跨块边界的情况、解析所有事件类型、忽略未知事件（6 个单元测试）
 - 聊天 notifier 的 send → stream → done、stop、error、regenerate、switchBranch 状态机（5 个单元测试，使用 mock 的 dio 实例）
 - `imageDataUrlFromBytes` 对 PNG/JPEG/GIF/WebP 的 MIME 检测、空输入与未知签名拒绝（6 个单元测试）
-- token 弹窗的首用弹出、保存后关闭、已有 token 不弹出（3 个 widget 测试）
+- token 弹窗的首用弹出、保存后关闭、两值齐备不弹出、仅有 token 时弹出后端地址弹窗、Save 按钮禁用逻辑（5 个 widget 测试）
 
 ## 字体
 
@@ -108,4 +110,4 @@ python3 -m venv /tmp/fontenv && /tmp/fontenv/bin/pip install fonttools
 - **`currentConversationProvider` 使用 `autoDispose.family`**：架构文档描述为单例 `currentConversationProvider`，切换 `/c/{id}` 时 reset 重新加载。本实现使用 `autoDispose.family`，让 Riverpod 自动管理生命周期，离开页面时自动取消 SSE 订阅，无需手写 reset 逻辑。`pendingStreamProvider` 用于跨路由传递空状态首条消息的流式启动信息。
 - **`SendMessageResponse` 模型**：架构文档的模型清单未覆盖，但 `POST /api/conversations/{id}/messages` 的响应体确实同时返回用户消息与 assistant 占位消息，前端需要将其反序列化。
 - **`ChatActionsNotifier` + `pendingStreamProvider`**：架构未提及，但空状态首条消息需要先创建对话再发送消息，然后跨路由传递流式启动信息。这两个抽象实现了必要的跨路由协调。
-- **`BaseUrlStore`**：架构文档将 `baseUrlProvider` 描述为 Web 端返回空字符串、移动端覆写。本实现新增了 `BaseUrlStore`（`ChangeNotifier`，通过 `shared_preferences` 持久化），让 `baseUrlProvider` 在所有平台上都从该 store 读取。Web 端 store 永远为空（没有 UI 让用户设置），所以行为与架构一致；移动端通过 token 弹窗写入，无需覆写 `baseUrlProvider`。这降低了移动端入口的复杂度，也让后端地址变更能驱动 dio 重建。
+- **`BaseUrlStore`**：架构文档将 `baseUrlProvider` 描述为 Web 端返回空字符串、移动端覆写。本实现新增了 `BaseUrlStore`（`ChangeNotifier`，通过 `shared_preferences` 持久化），让 `baseUrlProvider` 在所有平台上都从该 store 读取。后端地址在所有平台都是必填项——首次启动的 token 弹窗与设置面板都会收集该值（域名 + 端口分框，scheme 智能补齐），没有同源回退。这降低了入口的复杂度，也让后端地址变更能驱动 dio 重建。

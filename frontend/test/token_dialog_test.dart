@@ -1,9 +1,9 @@
-/// Widget tests for the token dialog.
+/// Widget tests for the token + backend address dialog.
 ///
 /// The dialog is shown by [TokenDialogHost], which watches the auth store and
-/// opens the dialog when there is no token or the token was flagged as
-/// unauthorized. These tests verify both triggers and that saving a token
-/// closes the dialog.
+/// the base URL store and opens the dialog when there is no token, the token
+/// was flagged as unauthorized, or the base URL is empty. These tests verify
+/// each trigger and that saving both values closes the dialog.
 library;
 
 import 'package:flutter/material.dart';
@@ -16,6 +16,7 @@ import 'package:parlo/core/auth/auth_providers.dart';
 import 'package:parlo/core/auth/auth_store.dart';
 import 'package:parlo/core/models/model.dart';
 import 'package:parlo/core/models/profile.dart';
+import 'package:parlo/core/network/base_url_store.dart';
 import 'package:parlo/features/chat/chat_providers.dart';
 import 'package:parlo/features/sidebar/sidebar_providers.dart';
 
@@ -50,12 +51,15 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // The dialog opens because no token has been set yet.
+    // The dialog opens because no token has been set yet. The headline is the
+    // "first use" variant.
     expect(find.text('Welcome to Parlo'), findsOneWidget);
     expect(find.text('Bearer token'), findsOneWidget);
+    expect(find.text('Backend domain'), findsOneWidget);
+    expect(find.text('Port'), findsOneWidget);
   });
 
-  testWidgets('saving a token closes the dialog', (tester) async {
+  testWidgets('saving a token and address closes the dialog', (tester) async {
     SharedPreferences.setMockInitialValues(<String, Object>{});
     final prefs = await SharedPreferences.getInstance();
 
@@ -73,28 +77,62 @@ void main() {
 
     expect(find.text('Welcome to Parlo'), findsOneWidget);
 
-    // Type a token into the dialog's text field (the empty state also has a
-    // text field, so scope the finder to the dialog).
-    final tokenField = find.descendant(
+    // The dialog has three text fields: domain, port, token (in order).
+    final fields = find.descendant(
       of: find.byType(AlertDialog),
       matching: find.byType(TextField),
     );
-    await tester.enterText(tokenField, 'test-token');
+    await tester.enterText(fields.at(0), 'parlo.example.com');
+    await tester.pump();
+    await tester.enterText(fields.at(1), '8000');
+    await tester.pump();
+    await tester.enterText(fields.at(2), 'test-token');
+    await tester.pump();
+
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
-    // The dialog closes after the token is written and the auth store
-    // notifies the host.
+    // The dialog closes after both values are written and the stores notify
+    // the host.
     expect(find.text('Welcome to Parlo'), findsNothing);
 
-    // The token was persisted to SharedPreferences.
+    // The token and base URL were both persisted to SharedPreferences.
     expect(prefs.getString(kAuthTokenKey), 'test-token');
+    expect(prefs.getString(kBaseUrlKey), 'https://parlo.example.com:8000');
   });
 
-  testWidgets('does not show the dialog when a token is already set',
+  testWidgets(
+      'does not show the dialog when both a token and an address are set',
       (tester) async {
-    // Seed the preferences with a token so the auth store bootstraps with
-    // it; the host should not open the dialog.
+    // Seed the preferences with a token and a base URL so both stores
+    // bootstrap with them; the host should not open the dialog.
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      kAuthTokenKey: 'already-here',
+      kBaseUrlKey: 'https://parlo.example.com:8000',
+    });
+    final prefs = await SharedPreferences.getInstance();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          profilesProvider.overrideWith(() => _EmptyProfilesNotifier()),
+          modelsProvider.overrideWith(() => _EmptyModelsNotifier()),
+        ],
+        child: const ParloApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Welcome to Parlo'), findsNothing);
+    expect(find.text('Set your backend address'), findsNothing);
+  });
+
+  testWidgets('shows the "backend address" dialog when only the token is set',
+      (tester) async {
+    // Seed only the token; the base URL is still missing, so the dialog
+    // should appear with the "set your backend address" headline (not the
+    // first-use "Welcome" headline, because the user already has a token).
     SharedPreferences.setMockInitialValues(<String, Object>{
       kAuthTokenKey: 'already-here',
     });
@@ -113,5 +151,51 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Welcome to Parlo'), findsNothing);
+    expect(find.text('Set your backend address'), findsOneWidget);
+    expect(find.text('Backend domain'), findsOneWidget);
+    expect(find.text('Port'), findsOneWidget);
+  });
+
+  testWidgets('Save button stays disabled until all fields are filled',
+      (tester) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    final prefs = await SharedPreferences.getInstance();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          profilesProvider.overrideWith(() => _EmptyProfilesNotifier()),
+          modelsProvider.overrideWith(() => _EmptyModelsNotifier()),
+        ],
+        child: const ParloApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // The Save button is disabled (onPressed is null) when fields are empty.
+    FilledButton saveButton() =>
+        tester.widget<FilledButton>(find.byType(FilledButton));
+    expect(saveButton().onPressed, isNull);
+
+    // Fill only the token — Save stays disabled because the address is
+    // still missing.
+    final fields = find.descendant(
+      of: find.byType(AlertDialog),
+      matching: find.byType(TextField),
+    );
+    await tester.enterText(fields.at(2), 'test-token');
+    await tester.pump();
+    expect(saveButton().onPressed, isNull);
+
+    // Fill the domain — Save still disabled because the port is missing.
+    await tester.enterText(fields.at(0), 'parlo.example.com');
+    await tester.pump();
+    expect(saveButton().onPressed, isNull);
+
+    // Fill the port — Save is now enabled.
+    await tester.enterText(fields.at(1), '8000');
+    await tester.pump();
+    expect(saveButton().onPressed, isNotNull);
   });
 }

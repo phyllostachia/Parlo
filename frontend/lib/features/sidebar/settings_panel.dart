@@ -1,8 +1,8 @@
 /// The settings panel shown when the sidebar gear is tapped.
 ///
-/// Per `product.md` §7.2 the panel only manages two things the frontend can
-/// really own: the bearer token and the theme. Everything else lives in the
-/// backend `config.yaml`.
+/// Per `product.md` §7.2 the panel only manages three things the frontend can
+/// really own: the bearer token, the backend address, and the theme.
+/// Everything else lives in the backend `config.yaml`.
 ///
 /// v1 ships only the light theme. The dark and "follow system" options are
 /// listed but disabled with a "Coming soon" tag so the panel does not lie
@@ -13,8 +13,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/auth/auth_providers.dart';
+import '../../core/network/base_url_providers.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
+import '../settings/backend_url_field.dart';
 
 /// The settings panel shown as a centered dialog.
 class SettingsPanelDialog extends ConsumerWidget {
@@ -42,6 +44,8 @@ class SettingsPanelDialog extends ConsumerWidget {
               Text('Settings', style: Theme.of(context).textTheme.titleLarge),
               SizedBox(height: spacing.s24),
               const _TokenSection(),
+              SizedBox(height: spacing.s24),
+              const _BackendUrlSection(),
               SizedBox(height: spacing.s24),
               const _ThemeSection(),
               SizedBox(height: spacing.s16),
@@ -147,6 +151,96 @@ class _TokenSectionState extends ConsumerState<_TokenSection> {
             onPressed: hasToken ? _clear : null,
             child: const Text('Clear token'),
           ),
+        ),
+      ],
+    );
+  }
+}
+
+/// The backend address section: shows the current state, lets the user edit
+/// the domain and port, and save or clear.
+///
+/// Clearing the address removes it from the store, which the token dialog
+/// host watches — so the token dialog pops up immediately, asking the user to
+/// re-enter the address.
+class _BackendUrlSection extends ConsumerStatefulWidget {
+  const _BackendUrlSection();
+
+  @override
+  ConsumerState<_BackendUrlSection> createState() =>
+      _BackendUrlSectionState();
+}
+
+class _BackendUrlSectionState extends ConsumerState<_BackendUrlSection> {
+  late final TextEditingController _domainController;
+  late final TextEditingController _portController;
+
+  @override
+  void initState() {
+    super.initState();
+    final baseUrlStore = ref.read(baseUrlStoreProvider);
+    final parsed = parseBackendUrl(baseUrlStore.read());
+    _domainController = TextEditingController(text: parsed?.domain ?? '');
+    _portController = TextEditingController(text: parsed?.port ?? '');
+  }
+
+  @override
+  void dispose() {
+    _domainController.dispose();
+    _portController.dispose();
+    super.dispose();
+  }
+
+  bool get _canSave {
+    return buildBackendUrl(_domainController.text, _portController.text) != null;
+  }
+
+  void _save() {
+    if (!_canSave) return;
+    final url = buildBackendUrl(_domainController.text, _portController.text)!;
+    ref.read(baseUrlStoreProvider).write(url);
+    Navigator.of(context).maybePop();
+  }
+
+  void _clear() {
+    ref.read(baseUrlStoreProvider).clear();
+    _domainController.clear();
+    _portController.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final hasUrl = ref.watch(baseUrlStoreProvider).hasValue;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Backend address', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 4),
+        Text(
+          hasUrl
+              ? 'An address is set. The app sends every request to this host.'
+              : 'No address set. The app will prompt for one on first use.',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 12),
+        BackendUrlField(
+          domainController: _domainController,
+          portController: _portController,
+          onChanged: () => setState(() {}),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            FilledButton(
+              onPressed: _canSave ? _save : null,
+              child: const Text('Save'),
+            ),
+            const SizedBox(width: 8),
+            TextButton(
+              onPressed: hasUrl ? _clear : null,
+              child: const Text('Clear address'),
+            ),
+          ],
         ),
       ],
     );

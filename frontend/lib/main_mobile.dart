@@ -7,13 +7,13 @@
 ///
 /// This file mirrors [main.dart] (the web entry point) and adds one override:
 /// [platformCapabilitiesProvider] is replaced with [MobilePlatformCapabilities]
-/// so the rest of the app gets the mobile behavior (backend URL input, no
-/// drag-and-drop, always-visible message actions) without touching feature
-/// code.
+/// so the rest of the app gets the mobile behavior (no drag-and-drop,
+/// always-visible message actions) without touching feature code.
 ///
-/// The base URL provider already reads from the persisted store, so on
-/// mobile the token dialog's backend URL field writes to the store and the
-/// dio client picks the new host up automatically. No override is needed.
+/// The backend address is collected by the token dialog and the settings panel
+/// on every platform, so no capability flag is needed for it. The base URL
+/// provider reads from the persisted store, so the dio client picks the new
+/// host up automatically.
 ///
 /// Note: this entry point is analyzable and compiles, but the device build
 /// (Android APK / iOS IPA) has not been run in this session. Verifying the
@@ -43,8 +43,8 @@ Future<void> main() async {
       overrides: [
         // Hand the real preferences instance to the rest of the app.
         sharedPreferencesProvider.overrideWithValue(prefs),
-        // Swap in the mobile capabilities so the UI shows the backend URL
-        // field, hides the drag zone, and keeps message actions visible.
+        // Swap in the mobile capabilities so the UI hides the drag zone and
+        // keeps message actions visible.
         platformCapabilitiesProvider
             .overrideWithValue(const MobilePlatformCapabilities()),
       ],

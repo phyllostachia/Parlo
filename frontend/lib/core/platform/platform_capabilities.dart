@@ -26,13 +26,6 @@ enum MessageActionsMode {
 /// differences should be added here rather than scattered as `Platform.isXxx`
 /// checks, so the surface stays small and obvious.
 abstract class PlatformCapabilities {
-  /// Whether the token dialog should show a "backend URL" input.
-  ///
-  /// `false` on the web (the app is same-origin with the API, so there is no
-  /// separate address to enter). `true` on mobile, where the user must tell
-  /// the app which host to talk to.
-  bool get canInputBackendUrl;
-
   /// Whether the chat input should accept images dragged onto it.
   ///
   /// `true` on the web (a mouse can drag files). `false` on mobile (touch
