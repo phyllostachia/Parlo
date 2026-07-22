@@ -59,10 +59,10 @@ class VersionSwitcher extends StatelessWidget {
       children: [
         IconButton(
           icon: const Icon(Icons.chevron_left),
-          iconSize: 18,
+          iconSize: 16,
           padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-          color: canGoPrevious ? colors.graphite : colors.mist,
+          constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+          color: canGoPrevious ? colors.ashen : colors.mist,
           onPressed: canGoPrevious
               ? () => onSwitch(siblings.siblings[activeIndex - 1])
               : null,
@@ -73,16 +73,17 @@ class VersionSwitcher extends StatelessWidget {
           child: Text(
             '$position / $total',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: colors.graphite,
-                ),
+              color: colors.ashen,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
         IconButton(
           icon: const Icon(Icons.chevron_right),
-          iconSize: 18,
+          iconSize: 16,
           padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-          color: canGoNext ? colors.graphite : colors.mist,
+          constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+          color: canGoNext ? colors.ashen : colors.mist,
           onPressed: canGoNext
               ? () => onSwitch(siblings.siblings[activeIndex + 1])
               : null,

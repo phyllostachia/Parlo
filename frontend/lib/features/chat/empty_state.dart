@@ -38,9 +38,11 @@ class EmptyState extends ConsumerStatefulWidget {
 
 class _EmptyStateState extends ConsumerState<EmptyState> {
   final TextEditingController _controller = TextEditingController();
+
   /// The currently attached image, or `null` when none is attached.
-  final ValueNotifier<ImageDataUrl?> _attachment =
-      ValueNotifier<ImageDataUrl?>(null);
+  final ValueNotifier<ImageDataUrl?> _attachment = ValueNotifier<ImageDataUrl?>(
+    null,
+  );
   String? _selectedModelId;
   bool _sending = false;
   bool _isDropHovered = false;
@@ -71,17 +73,13 @@ class _EmptyStateState extends ConsumerState<EmptyState> {
     try {
       final conversationId = await ref
           .read(chatActionsProvider.notifier)
-          .sendFirstMessage(
-            modelId: modelId,
-            text: text,
-            imageData: imageData,
-          );
+          .sendFirstMessage(modelId: modelId, text: text, imageData: imageData);
       widget.onNavigate('/c/$conversationId');
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not send: $error')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not send: $error')));
       }
     } finally {
       if (mounted) setState(() => _sending = false);
@@ -153,14 +151,15 @@ class _EmptyStateState extends ConsumerState<EmptyState> {
             ),
             data: (response) {
               final models = response?.models ?? const <ModelRead>[];
-              final selectedModel =
-                  _selectedModel(models, response?.defaultModel);
+              final selectedModel = _selectedModel(
+                models,
+                response?.defaultModel,
+              );
               return _PickerAndInput(
                 models: models,
                 defaultModelId: response?.defaultModel,
                 selectedModelId: _selectedModelId,
-                onModelChanged: (id) =>
-                    setState(() => _selectedModelId = id),
+                onModelChanged: (id) => setState(() => _selectedModelId = id),
                 controller: _controller,
                 attachment: _attachment,
                 onRemoveAttachment: () => _attachment.value = null,
@@ -183,6 +182,9 @@ class _EmptyStateState extends ConsumerState<EmptyState> {
 }
 
 /// The model dropdown above the empty-state input.
+///
+/// Matches the design's "Model Selector": a bordered capsule with a sparkles
+/// icon, the model name, and a chevron.
 class _ModelPicker extends StatelessWidget {
   const _ModelPicker({
     required this.models,
@@ -198,6 +200,7 @@ class _ModelPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<ParloColors>()!;
     if (models.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(16),
@@ -209,19 +212,44 @@ class _ModelPicker extends StatelessWidget {
       );
     }
     final effectiveId = selectedId ?? defaultModelId ?? models.first.id;
-    return DropdownButtonFormField<String>(
-      // `initialValue` (not the deprecated `value`) so the form field owns its
-      // selection. The parent only needs to know the chosen id at send time.
-      initialValue: effectiveId,
-      decoration: const InputDecoration(labelText: 'Model'),
-      items: [
-        for (final model in models)
-          DropdownMenuItem<String>(
-            value: model.id,
-            child: Text(model.displayName),
-          ),
-      ],
-      onChanged: (value) => onChanged(value),
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+      decoration: BoxDecoration(
+        color: colors.paperWhite,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colors.mist, width: 1),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: effectiveId,
+          isDense: true,
+          borderRadius: BorderRadius.circular(8),
+          icon: Icon(Icons.expand_more, size: 16, color: colors.ashen),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(color: colors.graphite),
+          selectedItemBuilder: (context) => [
+            for (final model in models)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.auto_awesome, size: 15, color: colors.graphite),
+                  const SizedBox(width: 6),
+                  Text(model.displayName),
+                ],
+              ),
+          ],
+          items: [
+            for (final model in models)
+              DropdownMenuItem<String>(
+                value: model.id,
+                child: Text(model.displayName),
+              ),
+          ],
+          onChanged: (value) => onChanged(value),
+        ),
+      ),
     );
   }
 }
@@ -274,15 +302,9 @@ class _PickerAndInput extends StatelessWidget {
       onDragExited: (_) => onDropHoverChanged(false),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            'How can I help?',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.displayLarge,
-          ),
-          SizedBox(height: spacing.s24),
           _ModelPicker(
             models: models,
             defaultModelId: defaultModelId,
@@ -290,32 +312,56 @@ class _PickerAndInput extends StatelessWidget {
             onChanged: onModelChanged,
           ),
           SizedBox(height: spacing.s16),
-          ValueListenableBuilder<ImageDataUrl?>(
-            valueListenable: attachment,
-            builder: (context, attached, _) {
-              if (attached == null) return const SizedBox.shrink();
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: ImageAttachmentBar(
-                  attachment: attached,
-                  onRemove: onRemoveAttachment,
-                ),
-              );
-            },
+          Text(
+            '今天想聊些什么？',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.displayLarge,
           ),
+          SizedBox(height: spacing.s16),
           AnimatedContainer(
             duration: const Duration(milliseconds: 120),
             decoration: BoxDecoration(
-              color: isDropHovered ? colors.chalk : Colors.transparent,
-              borderRadius: BorderRadius.circular(8),
+              color: colors.paperWhite,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isDropHovered ? colors.graphite : colors.mist,
+                width: 1,
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color.fromRGBO(0, 0, 0, 0.04),
+                  blurRadius: 20,
+                  offset: Offset(0, 4),
+                ),
+              ],
             ),
-            child: _LargeInputField(
-              controller: controller,
-              onSend: onSend,
-              disabled: disabled,
-              accentColor: accentColor,
-              canAttachImage: canAttachImage,
-              onPickImage: onPickImage,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ValueListenableBuilder<ImageDataUrl?>(
+                  valueListenable: attachment,
+                  builder: (context, attached, _) {
+                    if (attached == null) return const SizedBox.shrink();
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: ImageAttachmentBar(
+                        attachment: attached,
+                        onRemove: onRemoveAttachment,
+                      ),
+                    );
+                  },
+                ),
+                _LargeInputField(
+                  controller: controller,
+                  onSend: onSend,
+                  disabled: disabled,
+                  accentColor: accentColor,
+                  canAttachImage: canAttachImage,
+                  onPickImage: onPickImage,
+                ),
+              ],
             ),
           ),
         ],
@@ -330,6 +376,10 @@ class _PickerAndInput extends StatelessWidget {
 /// widget intercepts Enter (with no modifiers) and invokes the send action
 /// before the text field turns it into a newline; Shift+Enter is not matched,
 /// so the field handles it normally.
+///
+/// The field itself is borderless — the surrounding card carries the border
+/// and shadow. Below the field sits the actions row: a paperclip button on
+/// the left and the send button on the right.
 class _LargeInputField extends StatelessWidget {
   const _LargeInputField({
     required this.controller,
@@ -349,6 +399,9 @@ class _LargeInputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<ParloColors>()!;
+    final textTheme = Theme.of(context).textTheme;
+
     return Shortcuts(
       shortcuts: <ShortcutActivator, Intent>{
         LogicalKeySet(LogicalKeyboardKey.enter): const _SendIntent(),
@@ -362,37 +415,81 @@ class _LargeInputField extends StatelessWidget {
             },
           ),
         },
-        child: TextField(
-          controller: controller,
-          enabled: !disabled,
-          maxLines: null,
-          minLines: 3,
-          textInputAction: TextInputAction.newline,
-          decoration: InputDecoration(
-            hintText: 'Message Parlo…',
-            border: const OutlineInputBorder(),
-            prefixIcon: canAttachImage
-                ? IconButton(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: controller,
+              enabled: !disabled,
+              maxLines: null,
+              minLines: 1,
+              textInputAction: TextInputAction.newline,
+              decoration: InputDecoration(
+                hintText: '输入你的问题...',
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                filled: false,
+                contentPadding: EdgeInsets.zero,
+                isDense: true,
+                hintStyle: textTheme.bodyLarge?.copyWith(
+                  color: colors.pebble,
+                  fontSize: 16,
+                ),
+              ),
+              style: textTheme.bodyLarge?.copyWith(
+                color: colors.carbonInk,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (canAttachImage)
+                  IconButton(
                     tooltip: 'Attach image',
                     icon: const Icon(Icons.attach_file),
+                    iconSize: 20,
+                    padding: const EdgeInsets.all(6),
+                    constraints: const BoxConstraints(
+                      minWidth: 32,
+                      minHeight: 32,
+                    ),
+                    color: colors.graphite,
                     onPressed: onPickImage,
                   )
-                : null,
-            suffixIcon: disabled
-                ? const Padding(
-                    padding: EdgeInsets.all(12),
+                else
+                  const SizedBox(width: 34),
+                // The design's disabled send button: chalk fill, pebble
+                // glyph. While the first message is being sent a small
+                // spinner replaces the arrow.
+                Material(
+                  color: colors.chalk,
+                  borderRadius: BorderRadius.circular(8),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: disabled ? null : onSend,
                     child: SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      width: 34,
+                      height: 34,
+                      child: disabled
+                          ? const Padding(
+                              padding: EdgeInsets.all(9),
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Icon(
+                              Icons.arrow_upward,
+                              size: 16,
+                              color: colors.pebble,
+                            ),
                     ),
-                  )
-                : IconButton(
-                    icon: const Icon(Icons.arrow_upward),
-                    color: accentColor,
-                    onPressed: onSend,
                   ),
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

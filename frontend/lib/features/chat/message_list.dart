@@ -73,55 +73,69 @@ class _MessageListState extends ConsumerState<MessageList> {
       error: (error, _) => ErrorBanner(
         message: 'Could not load the conversation.',
         error: error,
-        onRetry: () => ref.invalidate(
-          currentConversationProvider(widget.conversationId),
-        ),
+        onRetry: () =>
+            ref.invalidate(currentConversationProvider(widget.conversationId)),
       ),
       data: (path) {
         if (path.path.isEmpty) {
           return const _EmptyConversation();
         }
         final streamState = ref.watch(streamStateProvider);
-        return ListView.builder(
-          controller: _scrollController,
-          padding: EdgeInsets.symmetric(
-            horizontal: spacing.s32,
-            vertical: spacing.s24,
-          ),
-          itemCount: path.path.length,
-          itemBuilder: (context, index) {
-            final node = path.path[index];
-            final isLast = index == path.path.length - 1;
-            // The last assistant message is "streaming" if it is not yet
-            // complete; that drives the loading cursor and the "Thinking…"
-            // placeholder.
-            final isStreaming = isLast &&
-                node.message.role == MessageRole.assistant &&
-                !node.message.isComplete;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: MessageBubble(
-                message: node.message,
-                conversation: path.conversation,
-                siblings: node.siblings,
-                isStreaming: isStreaming,
-                isLast: isLast,
-                streamState: streamState,
-                onRegenerate: (assistantMessageId) {
-                  ref
-                      .read(currentConversationProvider(widget.conversationId)
-                          .notifier)
-                      .regenerate(assistantMessageId: assistantMessageId);
-                },
-                onSwitchBranch: (leafId) {
-                  ref
-                      .read(currentConversationProvider(widget.conversationId)
-                          .notifier)
-                      .switchBranch(leafId: leafId);
-                },
+        // Design "Message Flow": the column is 720px wide, centered on the
+        // canvas, with 32px of vertical padding and 32px between messages.
+        return Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: ListView.builder(
+              controller: _scrollController,
+              padding: EdgeInsets.symmetric(
+                horizontal: spacing.s16,
+                vertical: spacing.s32,
               ),
-            );
-          },
+              itemCount: path.path.length,
+              itemBuilder: (context, index) {
+                final node = path.path[index];
+                final isLast = index == path.path.length - 1;
+                // The last assistant message is "streaming" if it is not yet
+                // complete; that drives the loading cursor and the "Thinking…"
+                // placeholder.
+                final isStreaming =
+                    isLast &&
+                    node.message.role == MessageRole.assistant &&
+                    !node.message.isComplete;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 32),
+                  child: MessageBubble(
+                    message: node.message,
+                    conversation: path.conversation,
+                    siblings: node.siblings,
+                    isStreaming: isStreaming,
+                    isLast: isLast,
+                    streamState: streamState,
+                    onRegenerate: (assistantMessageId) {
+                      ref
+                          .read(
+                            currentConversationProvider(
+                              widget.conversationId,
+                            ).notifier,
+                          )
+                          .regenerate(assistantMessageId: assistantMessageId);
+                    },
+                    onSwitchBranch: (leafId) {
+                      ref
+                          .read(
+                            currentConversationProvider(
+                              widget.conversationId,
+                            ).notifier,
+                          )
+                          .switchBranch(leafId: leafId);
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
         );
       },
     );

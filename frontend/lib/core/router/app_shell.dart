@@ -19,7 +19,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../theme/colors.dart';
-import '../theme/spacing.dart';
 import '../../features/settings/token_dialog_host.dart';
 import '../../features/sidebar/sidebar_screen.dart';
 
@@ -35,11 +34,7 @@ const double _kWideBreakpoint = 800;
 /// active conversation.
 class AppShell extends ConsumerStatefulWidget {
   /// Creates the shell.
-  const AppShell({
-    required this.child,
-    this.currentConversationId,
-    super.key,
-  });
+  const AppShell({required this.child, this.currentConversationId, super.key});
 
   /// The widget built by the matched child route, shown in the main area.
   final Widget child;
@@ -67,7 +62,6 @@ class _AppShellState extends ConsumerState<AppShell> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<ParloColors>()!;
-    final spacing = Theme.of(context).extension<ParloSpacing>()!;
 
     return Scaffold(
       body: LayoutBuilder(
@@ -77,11 +71,6 @@ class _AppShellState extends ConsumerState<AppShell> {
             currentConversationId: widget.currentConversationId,
             onNavigate: _navigate,
           );
-          final divider = Container(
-            width: 1,
-            color: colors.mist,
-            margin: EdgeInsets.symmetric(vertical: spacing.s16),
-          );
 
           if (isWide) {
             return Stack(
@@ -89,7 +78,6 @@ class _AppShellState extends ConsumerState<AppShell> {
                 Row(
                   children: [
                     sidebar,
-                    divider,
                     Expanded(child: widget.child),
                   ],
                 ),
@@ -104,9 +92,7 @@ class _AppShellState extends ConsumerState<AppShell> {
             children: [
               Column(
                 children: [
-                  _NarrowTopBar(
-                    onMenu: _openDrawer,
-                  ),
+                  _NarrowTopBar(onMenu: _openDrawer),
                   Expanded(child: widget.child),
                 ],
               ),
@@ -142,9 +128,7 @@ class _NarrowTopBar extends StatelessWidget {
       height: 48,
       decoration: BoxDecoration(
         color: colors.boneParchment,
-        border: Border(
-          bottom: BorderSide(color: colors.mist, width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: colors.mist, width: 1)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Row(
@@ -155,10 +139,7 @@ class _NarrowTopBar extends StatelessWidget {
             onPressed: onMenu,
           ),
           const SizedBox(width: 8),
-          Text(
-            'Parlo',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          Text('Parlo', style: Theme.of(context).textTheme.titleMedium),
         ],
       ),
     );
@@ -177,9 +158,7 @@ class _DrawerScrim extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Container(
-        color: Colors.black.withValues(alpha: 0.32),
-      ),
+      child: Container(color: Colors.black.withValues(alpha: 0.32)),
     );
   }
 }

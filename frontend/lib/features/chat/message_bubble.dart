@@ -109,16 +109,18 @@ class _UserBubble extends StatelessWidget {
         ? null
         : '$baseUrl${message.imageUrl}';
 
+    // Design "User Message Row": the bubble hugs the right edge of the
+    // 720px column; the bubble itself caps at ~420px of text width.
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: Alignment.centerRight,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 720),
+        constraints: const BoxConstraints(maxWidth: 452),
         child: Container(
           decoration: BoxDecoration(
             color: colors.softStone,
             borderRadius: BorderRadius.circular(ParloRadius.light.card),
           ),
-          padding: EdgeInsets.all(spacing.s16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -126,9 +128,9 @@ class _UserBubble extends StatelessWidget {
               if (message.content.isNotEmpty)
                 Text(
                   message.content,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: colors.carbonInk,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: colors.carbonInk),
                 ),
               if (imageUrl != null) ...[
                 SizedBox(height: spacing.s8),
@@ -188,9 +190,7 @@ class _AssistantBlockState extends ConsumerState<_AssistantBlock> {
       (widget.streamState == StreamState.error ||
           widget.streamState == StreamState.stopped);
 
-  bool get _showActions =>
-      widget.message.isComplete &&
-      !widget.isStreaming;
+  bool get _showActions => widget.message.isComplete && !widget.isStreaming;
 
   @override
   Widget build(BuildContext context) {
@@ -204,11 +204,11 @@ class _AssistantBlockState extends ConsumerState<_AssistantBlock> {
 
     // The action bar is shown when the message is complete AND (we are on
     // mobile, which always shows it, OR the pointer is hovering on web).
-    final actionsVisible = _showActions &&
-        (!showActionsOnHover || _isHovered);
+    final actionsVisible = _showActions && (!showActionsOnHover || _isHovered);
 
     final hasReasoning =
-        widget.message.reasoning != null && widget.message.reasoning!.isNotEmpty;
+        widget.message.reasoning != null &&
+        widget.message.reasoning!.isNotEmpty;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -224,8 +224,8 @@ class _AssistantBlockState extends ConsumerState<_AssistantBlock> {
                 padding: const EdgeInsets.only(bottom: 8),
                 child: ThinkingStrip(
                   reasoning: widget.message.reasoning!,
-                  isStreaming: widget.isStreaming &&
-                      widget.message.content.isEmpty,
+                  isStreaming:
+                      widget.isStreaming && widget.message.content.isEmpty,
                 ),
               ),
             if (widget.message.content.isEmpty && widget.isStreaming)
@@ -233,9 +233,9 @@ class _AssistantBlockState extends ConsumerState<_AssistantBlock> {
             else
               GptMarkdown(
                 widget.message.content,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: colors.carbonInk,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: colors.carbonInk),
               ),
             if (widget.isStreaming && widget.message.content.isNotEmpty)
               Padding(
@@ -247,32 +247,48 @@ class _AssistantBlockState extends ConsumerState<_AssistantBlock> {
                 padding: EdgeInsets.only(top: spacing.s8),
                 child: _RetryButton(
                   streamState: widget.streamState,
-                  onPressed: () =>
-                      widget.onRegenerate(widget.message.id),
+                  onPressed: () => widget.onRegenerate(widget.message.id),
                 ),
               ),
             if (widget.message.isComplete) ...[
               SizedBox(height: spacing.s8),
+              // Design "Assistant Footer Row": model attribution on the
+              // left, the version switcher centered, and the hover actions
+              // on the right.
               Row(
                 children: [
-                  if (actionsVisible)
-                    MessageActions(
-                      content: widget.message.content,
-                      onRegenerate: () =>
-                          widget.onRegenerate(widget.message.id),
-                      canRegenerate: !widget.isStreaming,
-                    ),
                   Expanded(
-                    child: VersionSwitcher(
-                      siblings: widget.siblings,
-                      onSwitch: widget.onSwitchBranch,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: modelName != null
+                          ? Text(
+                              modelName,
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    color: colors.pebble,
+                                    fontSize: 12,
+                                  ),
+                            )
+                          : const SizedBox.shrink(),
                     ),
                   ),
-                  if (modelName != null)
-                    Text(
-                      modelName,
-                      style: Theme.of(context).textTheme.labelSmall,
+                  VersionSwitcher(
+                    siblings: widget.siblings,
+                    onSwitch: widget.onSwitchBranch,
+                  ),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: actionsVisible
+                          ? MessageActions(
+                              content: widget.message.content,
+                              onRegenerate: () =>
+                                  widget.onRegenerate(widget.message.id),
+                              canRegenerate: !widget.isStreaming,
+                            )
+                          : const SizedBox.shrink(),
                     ),
+                  ),
                 ],
               ),
             ],
@@ -309,10 +325,7 @@ class _StreamingPlaceholder extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        Text(
-          'Thinking…',
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
+        Text('Thinking…', style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }
@@ -354,10 +367,7 @@ class _StreamingDotState extends State<_StreamingDot>
       child: Container(
         width: 8,
         height: 8,
-        decoration: BoxDecoration(
-          color: widget.color,
-          shape: BoxShape.circle,
-        ),
+        decoration: BoxDecoration(color: widget.color, shape: BoxShape.circle),
       ),
     );
   }
@@ -367,10 +377,7 @@ class _StreamingDotState extends State<_StreamingDot>
 /// the user stopped it. The label changes with the stream state so the user
 /// understands what happened.
 class _RetryButton extends StatelessWidget {
-  const _RetryButton({
-    required this.streamState,
-    required this.onPressed,
-  });
+  const _RetryButton({required this.streamState, required this.onPressed});
 
   final StreamState streamState;
   final VoidCallback onPressed;

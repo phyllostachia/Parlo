@@ -13,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/colors.dart';
-import '../../core/theme/spacing.dart';
 import 'profile_tree.dart';
 import 'settings_panel.dart';
 import 'sidebar_providers.dart';
@@ -40,9 +39,16 @@ class SidebarScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).extension<ParloColors>()!;
 
+    // Design "Sidebar": 280px wide, soft-stone fill, 16px padding, 16px gap
+    // between the three sections (top / tree / settings row), with a hairline
+    // chalk border on the right edge.
     return Container(
       width: 280,
-      color: colors.boneParchment,
+      decoration: BoxDecoration(
+        color: colors.softStone,
+        border: Border(right: BorderSide(color: colors.chalk, width: 1)),
+      ),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -50,25 +56,15 @@ class SidebarScreen extends ConsumerWidget {
             onNewProfile: () => _promptForProfileName(context, ref),
             onNewConversation: () => onNavigate('/'),
           ),
-          Divider(
-            height: 1,
-            thickness: 1,
-            color: colors.mist,
-          ),
+          const SizedBox(height: 16),
           Expanded(
             child: ProfileTree(
               currentConversationId: currentConversationId,
               onNavigate: onNavigate,
             ),
           ),
-          Divider(
-            height: 1,
-            thickness: 1,
-            color: colors.mist,
-          ),
-          _SidebarFooter(
-            onSettings: () => _openSettingsPanel(context),
-          ),
+          const SizedBox(height: 16),
+          _SidebarFooter(onSettings: () => _openSettingsPanel(context)),
         ],
       ),
     );
@@ -88,9 +84,7 @@ class SidebarScreen extends ConsumerWidget {
     if (name == null || name.trim().isEmpty) return;
     // Fire-and-forget; the AsyncNotifier state will reflect the refetch.
     // Errors surface via the AsyncValue in the tree.
-    await ref
-        .read(profilesProvider.notifier)
-        .createProfile(name.trim());
+    await ref.read(profilesProvider.notifier).createProfile(name.trim());
   }
 
   Future<void> _openSettingsPanel(BuildContext context) async {
@@ -101,7 +95,8 @@ class SidebarScreen extends ConsumerWidget {
   }
 }
 
-/// The sidebar's top row: the Parlo wordmark and two create buttons.
+/// The sidebar's top section: the brand row (serif wordmark + collapse icon)
+/// and two full-width action buttons ("新建对话" and "新建分组").
 class _SidebarHeader extends StatelessWidget {
   const _SidebarHeader({
     required this.onNewProfile,
@@ -113,39 +108,123 @@ class _SidebarHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final spacing = Theme.of(context).extension<ParloSpacing>()!;
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        spacing.s16,
-        spacing.s16,
-        spacing.s8,
-        spacing.s8,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              'Parlo',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
+    final colors = Theme.of(context).extension<ParloColors>()!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Design "Brand Row": 20px serif wordmark on the left, an 18px
+        // panel-left-close icon on the right, 4px padding.
+        Padding(
+          padding: const EdgeInsets.all(4),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Parlo',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontSize: 20,
+                    color: colors.carbonInk,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.keyboard_double_arrow_left,
+                size: 18,
+                color: colors.ashen,
+              ),
+            ],
           ),
-          IconButton(
-            tooltip: 'New folder',
-            icon: const Icon(Icons.create_new_folder_outlined),
-            onPressed: onNewProfile,
+        ),
+        const SizedBox(height: 8),
+        // Design "New Actions Row": two full-width ghost buttons, 4px apart.
+        _SidebarActionButton(
+          icon: Icons.edit_outlined,
+          label: '新建对话',
+          onTap: onNewConversation,
+        ),
+        const SizedBox(height: 4),
+        _SidebarActionButton(
+          icon: Icons.create_new_folder_outlined,
+          label: '新建分组',
+          onTap: onNewProfile,
+        ),
+      ],
+    );
+  }
+}
+
+/// A full-width ghost button used for the sidebar's action rows
+/// ("新建对话" / "新建分组") and the settings row at the bottom.
+///
+/// Matches the design: 16px icon + 14px medium label, 10px gap, padding
+/// 8x10, 8px corner radius, transparent fill that lightens on hover.
+class _SidebarActionButton extends StatefulWidget {
+  const _SidebarActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.topBorder = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  /// Whether to draw the hairline top border (used by the settings row,
+  /// which sits at the bottom of the sidebar separated by a divider).
+  final bool topBorder;
+
+  @override
+  State<_SidebarActionButton> createState() => _SidebarActionButtonState();
+}
+
+class _SidebarActionButtonState extends State<_SidebarActionButton> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<ParloColors>()!;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          decoration: BoxDecoration(
+            color: _hovered ? colors.chalk : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            border: widget.topBorder
+                ? Border(top: BorderSide(color: colors.chalk, width: 1))
+                : null,
           ),
-          IconButton(
-            tooltip: 'New chat',
-            icon: const Icon(Icons.add_comment_outlined),
-            onPressed: onNewConversation,
+          child: Row(
+            children: [
+              Icon(widget.icon, size: 16, color: colors.graphite),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  widget.label,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: colors.graphite,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
-/// The sidebar's bottom row: the settings gear.
+/// The sidebar's bottom row: a full-width "设置" row with a hairline divider
+/// above it (the design's "Settings Row").
 class _SidebarFooter extends StatelessWidget {
   const _SidebarFooter({required this.onSettings});
 
@@ -153,14 +232,11 @@ class _SidebarFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final spacing = Theme.of(context).extension<ParloSpacing>()!;
-    return Padding(
-      padding: EdgeInsets.all(spacing.s8),
-      child: IconButton(
-        tooltip: 'Settings',
-        icon: const Icon(Icons.settings_outlined),
-        onPressed: onSettings,
-      ),
+    return _SidebarActionButton(
+      icon: Icons.settings_outlined,
+      label: '设置',
+      onTap: onSettings,
+      topBorder: true,
     );
   }
 }
@@ -195,8 +271,7 @@ Future<String?> _showNameDialog({
             child: const Text('Cancel'),
           ),
           FilledButton(
-            onPressed: () =>
-                Navigator.of(dialogContext).pop(controller.text),
+            onPressed: () => Navigator.of(dialogContext).pop(controller.text),
             child: Text(confirmText),
           ),
         ],

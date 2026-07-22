@@ -55,7 +55,7 @@ void main() {
     // Let the async providers settle.
     await tester.pumpAndSettle();
 
-    // The empty-state headline ("How can I help?") should be on the screen.
-    expect(find.text('How can I help?'), findsOneWidget);
+    // The empty-state headline ("今天想聊些什么？") should be on the screen.
+    expect(find.text('今天想聊些什么？'), findsOneWidget);
   });
 }

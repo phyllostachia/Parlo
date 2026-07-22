@@ -35,11 +35,13 @@ class ChatInput extends ConsumerStatefulWidget {
 
 class _ChatInputState extends ConsumerState<ChatInput> {
   final TextEditingController _controller = TextEditingController();
+
   /// The currently attached image, or `null` when none is attached. Kept as
   /// a [ValueNotifier] so the [ImageAttachmentBar] rebuilds only when the
   /// attachment changes, not on every keystroke.
-  final ValueNotifier<ImageDataUrl?> _attachment =
-      ValueNotifier<ImageDataUrl?>(null);
+  final ValueNotifier<ImageDataUrl?> _attachment = ValueNotifier<ImageDataUrl?>(
+    null,
+  );
 
   /// Whether the drag-and-drop zone is currently being hovered. Drives the
   /// border highlight so the user gets feedback that a drop is accepted.
@@ -67,9 +69,9 @@ class _ChatInputState extends ConsumerState<ChatInput> {
       // Restore the attachment so the user can retry without re-picking.
       _attachment.value = attachmentCopy;
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not send: $error')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not send: $error')));
       }
     }
   }
@@ -129,26 +131,23 @@ class _ChatInputState extends ConsumerState<ChatInput> {
     final spacing = Theme.of(context).extension<ParloSpacing>()!;
     final colors = Theme.of(context).extension<ParloColors>()!;
     final canAttachImage = _canAttachImage;
+    final textTheme = Theme.of(context).textTheme;
 
     return DropTarget(
       onDragDone: _handleDrop,
       onDragEntered: (_) => setState(() => _isDropHovered = true),
       onDragExited: (_) => setState(() => _isDropHovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 120),
-        decoration: BoxDecoration(
-          color: _isDropHovered ? colors.chalk : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
+      child: Padding(
+        // Design "Input Wrap": 16px above, 24px below, centered 720px column.
         padding: EdgeInsets.fromLTRB(
-          spacing.s32,
-          spacing.s8,
-          spacing.s32,
           spacing.s16,
+          spacing.s16,
+          spacing.s16,
+          spacing.s24,
         ),
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 800),
+            constraints: const BoxConstraints(maxWidth: 720),
             child: Shortcuts(
               shortcuts: <ShortcutActivator, Intent>{
                 LogicalKeySet(LogicalKeyboardKey.enter): const _SendIntent(),
@@ -162,60 +161,90 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                     },
                   ),
                 },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    ValueListenableBuilder<ImageDataUrl?>(
-                      valueListenable: _attachment,
-                      builder: (context, attachment, _) {
-                        if (attachment == null) {
-                          return const SizedBox.shrink();
-                        }
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: ImageAttachmentBar(
-                            attachment: attachment,
-                            onRemove: () => _attachment.value = null,
-                          ),
-                        );
-                      },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 120),
+                  decoration: BoxDecoration(
+                    color: colors.paperWhite,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: _isDropHovered ? colors.graphite : colors.mist,
+                      width: 1,
                     ),
-                    TextField(
-                      controller: _controller,
-                      // The field stays editable while streaming so the user
-                      // can type the next message; only the send button is
-                      // disabled.
-                      enabled: true,
-                      maxLines: null,
-                      minLines: 1,
-                      textInputAction: TextInputAction.newline,
-                      decoration: InputDecoration(
-                        hintText: 'Message Parlo…',
-                        prefixIcon: canAttachImage
-                            ? IconButton(
-                                tooltip: 'Attach image',
-                                icon: const Icon(Icons.attach_file),
-                                onPressed: _pickImage,
-                              )
-                            : null,
-                        suffixIcon: isStreaming
-                            ? IconButton(
-                                tooltip: 'Stop',
-                                icon:
-                                    const Icon(Icons.stop_circle_outlined),
-                                color: colors.clay,
-                                onPressed: _stop,
-                              )
-                            : IconButton(
-                                tooltip: 'Send',
-                                icon: const Icon(Icons.arrow_upward),
-                                color: colors.clay,
-                                onPressed: _send,
-                              ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color.fromRGBO(0, 0, 0, 0.04),
+                        blurRadius: 20,
+                        offset: Offset(0, 4),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      ValueListenableBuilder<ImageDataUrl?>(
+                        valueListenable: _attachment,
+                        builder: (context, attachment, _) {
+                          if (attachment == null) {
+                            return const SizedBox.shrink();
+                          }
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: ImageAttachmentBar(
+                              attachment: attachment,
+                              onRemove: () => _attachment.value = null,
+                            ),
+                          );
+                        },
+                      ),
+                      TextField(
+                        controller: _controller,
+                        // The field stays editable while streaming so the user
+                        // can type the next message; only the send button is
+                        // disabled.
+                        enabled: true,
+                        maxLines: null,
+                        minLines: 1,
+                        textInputAction: TextInputAction.newline,
+                        decoration: InputDecoration(
+                          hintText: '输入消息...',
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          filled: false,
+                          contentPadding: EdgeInsets.zero,
+                          isDense: true,
+                          hintStyle: textTheme.bodyLarge?.copyWith(
+                            color: colors.pebble,
+                            fontSize: 15,
+                          ),
+                        ),
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: colors.carbonInk,
+                          fontSize: 15,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          if (canAttachImage)
+                            _AttachButton(onPressed: _pickImage)
+                          else
+                            const SizedBox(width: 34),
+                          _SendButton(
+                            isStreaming: isStreaming,
+                            onSend: _send,
+                            onStop: _stop,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -230,4 +259,63 @@ class _ChatInputState extends ConsumerState<ChatInput> {
 /// chat input.
 class _SendIntent extends Intent {
   const _SendIntent();
+}
+
+/// The paperclip button that opens the image picker. Matches the design's
+/// "Attach Image Button": a 17px icon with 6px padding and an 8px radius.
+class _AttachButton extends StatelessWidget {
+  const _AttachButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<ParloColors>()!;
+    return IconButton(
+      tooltip: 'Attach image',
+      icon: const Icon(Icons.attach_file),
+      iconSize: 20,
+      padding: const EdgeInsets.all(6),
+      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+      color: colors.graphite,
+      onPressed: onPressed,
+    );
+  }
+}
+
+/// The send button from the design: a 32x32 carbon-ink square with an 8px
+/// radius and a white arrow-up glyph. While streaming it becomes a stop
+/// button that cancels the SSE stream.
+class _SendButton extends StatelessWidget {
+  const _SendButton({
+    required this.isStreaming,
+    required this.onSend,
+    required this.onStop,
+  });
+
+  final bool isStreaming;
+  final VoidCallback onSend;
+  final VoidCallback onStop;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<ParloColors>()!;
+    return Material(
+      color: colors.carbonInk,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: isStreaming ? onStop : onSend,
+        child: SizedBox(
+          width: 32,
+          height: 32,
+          child: Icon(
+            isStreaming ? Icons.stop : Icons.arrow_upward,
+            size: 16,
+            color: colors.boneParchment,
+          ),
+        ),
+      ),
+    );
+  }
 }

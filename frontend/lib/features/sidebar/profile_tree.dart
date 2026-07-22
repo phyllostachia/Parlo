@@ -51,13 +51,19 @@ class ProfileTree extends ConsumerWidget {
           );
         }
         return ListView.builder(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: EdgeInsets.zero,
           itemCount: profiles.length,
           itemBuilder: (context, index) {
-            return _ProfileFolder(
-              profile: profiles[index],
-              currentConversationId: currentConversationId,
-              onNavigate: onNavigate,
+            return Padding(
+              // Design "Profile List": 4px gap between profile groups.
+              padding: EdgeInsets.only(
+                bottom: index == profiles.length - 1 ? 0 : 4,
+              ),
+              child: _ProfileFolder(
+                profile: profiles[index],
+                currentConversationId: currentConversationId,
+                onNavigate: onNavigate,
+              ),
             );
           },
         );
@@ -150,16 +156,26 @@ class _ProfileFolderState extends ConsumerState<_ProfileFolder> {
         .watch(expandedProfilesProvider)
         .contains(widget.profile.id);
 
+    final colors = Theme.of(context).extension<ParloColors>()!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _TreeRow(
-          leading: IconButton(
-            icon: Icon(
-              expanded ? Icons.expand_more : Icons.chevron_right,
-            ),
-            onPressed: _toggleExpanded,
-            tooltip: expanded ? 'Collapse' : 'Expand',
+          // Design "Profile Header": a 14px chevron (down when expanded,
+          // right when collapsed) followed by a 15px folder icon, both in
+          // the muted ashen color.
+          leading: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                expanded ? Icons.expand_more : Icons.chevron_right,
+                size: 14,
+                color: colors.ashen,
+              ),
+              const SizedBox(width: 8),
+              Icon(Icons.folder_outlined, size: 15, color: colors.ashen),
+            ],
           ),
           label: _isRenaming
               ? TextField(
@@ -174,15 +190,17 @@ class _ProfileFolderState extends ConsumerState<_ProfileFolder> {
                 )
               : Text(
                   widget.profile.name,
-                  style: Theme.of(context).textTheme.titleMedium,
+                  // Design: 13px, weight 550, ashen.
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: colors.ashen,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
           onTap: _isRenaming ? null : _toggleExpanded,
-          menuItems: const [
-            _MenuItem.rename,
-            _MenuItem.delete,
-          ],
+          menuItems: const [_MenuItem.rename, _MenuItem.delete],
           onMenuItem: (item) {
             switch (item) {
               case _MenuItem.rename:
@@ -217,16 +235,15 @@ class _ConversationsList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final convosAsync = ref.watch(
-      conversationsForProfileProvider(profileId),
-    );
+    final convosAsync = ref.watch(conversationsForProfileProvider(profileId));
 
     return convosAsync.when(
       loading: () => const _IndentedHint(text: 'Loading…'),
       error: (error, _) => _IndentedHint(
         text: 'Could not load: $error',
         actionLabel: 'Retry',
-        onAction: () => ref.invalidate(conversationsForProfileProvider(profileId)),
+        onAction: () =>
+            ref.invalidate(conversationsForProfileProvider(profileId)),
       ),
       data: (conversations) {
         if (conversations.isEmpty) {
@@ -294,7 +311,9 @@ class _ConversationRowState extends ConsumerState<_ConversationRow> {
     final title = _renameController.text.trim();
     setState(() => _isRenaming = false);
     if (title.isEmpty || title == widget.conversation.title) return;
-    await ref.read(sidebarActionsProvider.notifier).renameConversation(
+    await ref
+        .read(sidebarActionsProvider.notifier)
+        .renameConversation(
           profileId: widget.profileId,
           conversationId: widget.conversation.id,
           title: title,
@@ -311,7 +330,9 @@ class _ConversationRowState extends ConsumerState<_ConversationRow> {
       confirmText: 'Delete',
     );
     if (confirmed) {
-      await ref.read(sidebarActionsProvider.notifier).deleteConversation(
+      await ref
+          .read(sidebarActionsProvider.notifier)
+          .deleteConversation(
             profileId: widget.profileId,
             conversationId: widget.conversation.id,
           );
@@ -328,7 +349,9 @@ class _ConversationRowState extends ConsumerState<_ConversationRow> {
     return _TreeRow(
       indent: true,
       highlight: widget.isActive,
-      highlightColor: colors.chalk,
+      // Design "Conversation Row (active)": paper-white fill, carbon-ink
+      // text at weight 550. Inactive rows are transparent with graphite text.
+      highlightColor: colors.paperWhite,
       label: _isRenaming
           ? TextField(
               controller: _renameController,
@@ -342,7 +365,12 @@ class _ConversationRowState extends ConsumerState<_ConversationRow> {
             )
           : Text(
               title,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: widget.isActive ? colors.carbonInk : colors.graphite,
+                fontWeight: widget.isActive
+                    ? FontWeight.w600
+                    : FontWeight.normal,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -400,7 +428,6 @@ class _TreeRowState extends State<_TreeRow> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<ParloColors>()!;
-    final spacing = Theme.of(context).extension<ParloSpacing>()!;
     final background = widget.highlight
         ? (widget.highlightColor ?? colors.chalk)
         : Colors.transparent;
@@ -415,12 +442,15 @@ class _TreeRowState extends State<_TreeRow> {
         onTap: widget.onTap,
         behavior: HitTestBehavior.opaque,
         child: Container(
-          color: background,
-          padding: EdgeInsets.symmetric(
-            horizontal: spacing.s8,
-            vertical: 4,
+          // Design rows: 8px corner radius, 8x10 padding. Conversation rows
+          // sit 18px to the right of their folder header (design's
+          // "Profile Items" left padding).
+          decoration: BoxDecoration(
+            color: background,
+            borderRadius: BorderRadius.circular(8),
           ),
-          margin: EdgeInsets.only(left: widget.indent ? spacing.s24 : 0),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          margin: EdgeInsets.only(left: widget.indent ? 18 : 0),
           child: Row(
             children: [
               if (widget.leading != null) ...[
@@ -432,6 +462,7 @@ class _TreeRowState extends State<_TreeRow> {
                 PopupMenuButton<_MenuItem>(
                   icon: const Icon(Icons.more_horiz, size: 18),
                   tooltip: 'More',
+                  padding: EdgeInsets.zero,
                   itemBuilder: (_) => [
                     for (final item in widget.menuItems)
                       PopupMenuItem<_MenuItem>(
@@ -470,20 +501,19 @@ class _IndentedHint extends StatelessWidget {
   Widget build(BuildContext context) {
     final spacing = Theme.of(context).extension<ParloSpacing>()!;
     return Padding(
-      padding: EdgeInsets.fromLTRB(spacing.s32, spacing.s8, spacing.s16, spacing.s8),
+      padding: EdgeInsets.fromLTRB(
+        spacing.s32,
+        spacing.s8,
+        spacing.s16,
+        spacing.s8,
+      ),
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              text,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+            child: Text(text, style: Theme.of(context).textTheme.bodySmall),
           ),
           if (actionLabel != null && onAction != null)
-            TextButton(
-              onPressed: onAction,
-              child: Text(actionLabel!),
-            ),
+            TextButton(onPressed: onAction, child: Text(actionLabel!)),
         ],
       ),
     );
@@ -515,10 +545,7 @@ class _CenteredHint extends StatelessWidget {
             ),
             if (actionLabel != null && onAction != null) ...[
               const SizedBox(height: 8),
-              TextButton(
-                onPressed: onAction,
-                child: Text(actionLabel!),
-              ),
+              TextButton(onPressed: onAction, child: Text(actionLabel!)),
             ],
           ],
         ),
