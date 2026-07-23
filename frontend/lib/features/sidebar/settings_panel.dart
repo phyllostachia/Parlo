@@ -19,12 +19,59 @@ import '../../core/theme/spacing.dart';
 import '../settings/backend_url_field.dart';
 
 /// The settings panel shown as a centered dialog.
-class SettingsPanelDialog extends ConsumerWidget {
+class SettingsPanelDialog extends ConsumerStatefulWidget {
   /// Creates the dialog.
   const SettingsPanelDialog({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsPanelDialog> createState() =>
+      _SettingsPanelDialogState();
+}
+
+class _SettingsPanelDialogState extends ConsumerState<SettingsPanelDialog> {
+  late final TextEditingController _tokenController;
+  late final TextEditingController _domainController;
+  late final TextEditingController _portController;
+  bool _obscured = true;
+
+  @override
+  void initState() {
+    super.initState();
+    final baseUrlStore = ref.read(baseUrlStoreProvider);
+    final parsed = parseBackendUrl(baseUrlStore.read());
+    _tokenController = TextEditingController(
+      text: ref.read(authStoreProvider).read() ?? '',
+    );
+    _domainController = TextEditingController(text: parsed?.domain ?? '');
+    _portController = TextEditingController(text: parsed?.port ?? '');
+  }
+
+  @override
+  void dispose() {
+    _tokenController.dispose();
+    _domainController.dispose();
+    _portController.dispose();
+    super.dispose();
+  }
+
+  bool get _canSave {
+    return _tokenController.text.trim().isNotEmpty &&
+        buildBackendUrl(_domainController.text, _portController.text) != null;
+  }
+
+  void _save() {
+    if (!_canSave) return;
+
+    ref.read(authStoreProvider).write(_tokenController.text.trim());
+    ref.read(authStoreProvider).markAuthorized();
+    ref
+        .read(baseUrlStoreProvider)
+        .write(buildBackendUrl(_domainController.text, _portController.text)!);
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<ParloColors>()!;
     final spacing = Theme.of(context).extension<ParloSpacing>()!;
 
@@ -34,29 +81,57 @@ class SettingsPanelDialog extends ConsumerWidget {
         borderRadius: BorderRadius.circular(ParloRadius.light.elevatedCard),
       ),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 420),
-        child: Padding(
-          padding: EdgeInsets.all(spacing.s24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('Settings', style: Theme.of(context).textTheme.titleLarge),
-              SizedBox(height: spacing.s24),
-              const _TokenSection(),
-              SizedBox(height: spacing.s24),
-              const _BackendUrlSection(),
-              SizedBox(height: spacing.s24),
-              const _ThemeSection(),
-              SizedBox(height: spacing.s16),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Close'),
+        constraints: const BoxConstraints(maxWidth: 720, maxHeight: 700),
+        child: SizedBox(
+          key: const ValueKey('settings-modal'),
+          width: 720,
+          height: 700,
+          child: Padding(
+            padding: const EdgeInsets.all(40),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Settings',
+                  style: Theme.of(context).textTheme.displayLarge,
                 ),
-              ),
-            ],
+                SizedBox(height: spacing.s24),
+                _TokenSection(
+                  controller: _tokenController,
+                  obscured: _obscured,
+                  onToggleObscured: () =>
+                      setState(() => _obscured = !_obscured),
+                  onChanged: () => setState(() {}),
+                ),
+                SizedBox(height: spacing.s24),
+                _BackendUrlSection(
+                  domainController: _domainController,
+                  portController: _portController,
+                  onChanged: () => setState(() {}),
+                ),
+                SizedBox(height: spacing.s24),
+                const _ThemeSection(),
+                const Spacer(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Close'),
+                    ),
+                    SizedBox(width: spacing.s16),
+                    SizedBox(
+                      width: 160,
+                      height: 52,
+                      child: FilledButton(
+                        onPressed: _canSave ? _save : null,
+                        child: const Text('Save'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -64,92 +139,46 @@ class SettingsPanelDialog extends ConsumerWidget {
   }
 }
 
-/// The token management section: shows the current token (masked), lets the
-/// user edit it, and save or clear.
-class _TokenSection extends ConsumerStatefulWidget {
-  const _TokenSection();
+/// The token field from the settings design.
+class _TokenSection extends StatelessWidget {
+  const _TokenSection({
+    required this.controller,
+    required this.obscured,
+    required this.onToggleObscured,
+    required this.onChanged,
+  });
 
-  @override
-  ConsumerState<_TokenSection> createState() => _TokenSectionState();
-}
-
-class _TokenSectionState extends ConsumerState<_TokenSection> {
-  late final TextEditingController _controller;
-  bool _obscured = true;
-
-  @override
-  void initState() {
-    super.initState();
-    final authStore = ref.read(authStoreProvider);
-    _controller = TextEditingController(text: authStore.read() ?? '');
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _save() {
-    final token = _controller.text;
-    if (token.isEmpty) return;
-    ref.read(authStoreProvider).write(token);
-    // Clear the unauthorized flag in case the user is re-entering after a 401.
-    ref.read(authStoreProvider).markAuthorized();
-    Navigator.of(context).maybePop();
-  }
-
-  void _clear() {
-    _controller.clear();
-    ref.read(authStoreProvider).clear();
-  }
+  final TextEditingController controller;
+  final bool obscured;
+  final VoidCallback onToggleObscured;
+  final VoidCallback onChanged;
 
   @override
   Widget build(BuildContext context) {
-    final hasToken = ref.watch(authStoreProvider).hasToken;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Token', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 4),
-        Text(
-          hasToken
-              ? 'A token is set. The backend uses it as a Bearer credential.'
-              : 'No token set. The app will prompt for one on first use.',
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _controller,
-                obscureText: _obscured,
-                decoration: InputDecoration(
-                  hintText: 'Paste your token here',
-                  suffixIcon: IconButton(
-                    tooltip: _obscured ? 'Show' : 'Hide',
-                    icon: Icon(
-                      _obscured
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                    ),
-                    onPressed: () => setState(() => _obscured = !_obscured),
-                  ),
+        Text('Token', style: Theme.of(context).textTheme.headlineMedium),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 56,
+          child: TextField(
+            controller: controller,
+            obscureText: obscured,
+            onChanged: (_) => onChanged(),
+            style: Theme.of(context).textTheme.bodyLarge,
+            decoration: InputDecoration(
+              hintText: 'Paste your token here',
+              suffixIcon: IconButton(
+                tooltip: obscured ? 'Show token' : 'Hide token',
+                icon: Icon(
+                  obscured
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
                 ),
-                onSubmitted: (_) => _save(),
+                onPressed: onToggleObscured,
               ),
             ),
-            const SizedBox(width: 8),
-            FilledButton(onPressed: _save, child: const Text('Save')),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton(
-            onPressed: hasToken ? _clear : null,
-            child: const Text('Clear token'),
           ),
         ),
       ],
@@ -157,90 +186,34 @@ class _TokenSectionState extends ConsumerState<_TokenSection> {
   }
 }
 
-/// The backend address section: shows the current state, lets the user edit
-/// the domain and port, and save or clear.
-///
-/// Clearing the address removes it from the store, which the token dialog
-/// host watches — so the token dialog pops up immediately, asking the user to
-/// re-enter the address.
-class _BackendUrlSection extends ConsumerStatefulWidget {
-  const _BackendUrlSection();
+/// The backend address fields from the settings design.
+class _BackendUrlSection extends StatelessWidget {
+  const _BackendUrlSection({
+    required this.domainController,
+    required this.portController,
+    required this.onChanged,
+  });
 
-  @override
-  ConsumerState<_BackendUrlSection> createState() =>
-      _BackendUrlSectionState();
-}
-
-class _BackendUrlSectionState extends ConsumerState<_BackendUrlSection> {
-  late final TextEditingController _domainController;
-  late final TextEditingController _portController;
-
-  @override
-  void initState() {
-    super.initState();
-    final baseUrlStore = ref.read(baseUrlStoreProvider);
-    final parsed = parseBackendUrl(baseUrlStore.read());
-    _domainController = TextEditingController(text: parsed?.domain ?? '');
-    _portController = TextEditingController(text: parsed?.port ?? '');
-  }
-
-  @override
-  void dispose() {
-    _domainController.dispose();
-    _portController.dispose();
-    super.dispose();
-  }
-
-  bool get _canSave {
-    return buildBackendUrl(_domainController.text, _portController.text) != null;
-  }
-
-  void _save() {
-    if (!_canSave) return;
-    final url = buildBackendUrl(_domainController.text, _portController.text)!;
-    ref.read(baseUrlStoreProvider).write(url);
-    Navigator.of(context).maybePop();
-  }
-
-  void _clear() {
-    ref.read(baseUrlStoreProvider).clear();
-    _domainController.clear();
-    _portController.clear();
-  }
+  final TextEditingController domainController;
+  final TextEditingController portController;
+  final VoidCallback onChanged;
 
   @override
   Widget build(BuildContext context) {
-    final hasUrl = ref.watch(baseUrlStoreProvider).hasValue;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Backend address', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 4),
         Text(
-          hasUrl
-              ? 'An address is set. The app sends every request to this host.'
-              : 'No address set. The app will prompt for one on first use.',
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        const SizedBox(height: 12),
-        BackendUrlField(
-          domainController: _domainController,
-          portController: _portController,
-          onChanged: () => setState(() {}),
+          'Backend address',
+          style: Theme.of(context).textTheme.headlineMedium,
         ),
         const SizedBox(height: 8),
-        Row(
-          children: [
-            FilledButton(
-              onPressed: _canSave ? _save : null,
-              child: const Text('Save'),
-            ),
-            const SizedBox(width: 8),
-            TextButton(
-              onPressed: hasUrl ? _clear : null,
-              child: const Text('Clear address'),
-            ),
-          ],
+        BackendUrlField(
+          domainController: domainController,
+          portController: portController,
+          onChanged: onChanged,
+          fieldGap: 12,
+          portWidth: 140,
         ),
       ],
     );
@@ -250,9 +223,6 @@ class _BackendUrlSectionState extends ConsumerState<_BackendUrlSection> {
 /// The theme section. v1 only supports the light theme; the others are
 /// listed but disabled.
 ///
-/// Built with plain [ListTile]s instead of [RadioListTile] because the
-/// `groupValue`/`onChanged` API on [RadioListTile] is deprecated in recent
-/// Flutter, and we only need to show a single selected option anyway.
 class _ThemeSection extends StatelessWidget {
   const _ThemeSection();
 
@@ -261,53 +231,93 @@ class _ThemeSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Theme', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 4),
+        Text('Theme', style: Theme.of(context).textTheme.headlineMedium),
+        const SizedBox(height: 8),
         Text(
           'v1 supports the light theme. Dark and system-follow arrive in a '
           'later phase.',
-          style: Theme.of(context).textTheme.bodySmall,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).extension<ParloColors>()!.ashen,
+          ),
         ),
-        const SizedBox(height: 12),
-        const ListTile(
-          leading: Icon(Icons.radio_button_checked, size: 20),
-          title: Text('Light'),
-          contentPadding: EdgeInsets.zero,
-          dense: true,
+        const SizedBox(height: 8),
+        const _ThemeOption(label: 'Light', selected: true),
+        const SizedBox(height: 8),
+        _ThemeOption(
+          label: 'Dark',
+          disabled: true,
+          disabledColor: Theme.of(context).disabledColor,
         ),
-        ListTile(
-          leading: Icon(
-            Icons.radio_button_unchecked,
-            size: 20,
-            color: Theme.of(context).disabledColor,
-          ),
-          title: Text(
-            'Dark',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).disabledColor,
-                ),
-          ),
-          subtitle: const Text('Coming soon'),
-          contentPadding: EdgeInsets.zero,
-          dense: true,
-        ),
-        ListTile(
-          leading: Icon(
-            Icons.radio_button_unchecked,
-            size: 20,
-            color: Theme.of(context).disabledColor,
-          ),
-          title: Text(
-            'Follow system',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).disabledColor,
-                ),
-          ),
-          subtitle: const Text('Coming soon'),
-          contentPadding: EdgeInsets.zero,
-          dense: true,
+        const SizedBox(height: 8),
+        _ThemeOption(
+          label: 'Follow system',
+          disabled: true,
+          disabledColor: Theme.of(context).disabledColor,
         ),
       ],
+    );
+  }
+}
+
+class _ThemeOption extends StatelessWidget {
+  const _ThemeOption({
+    required this.label,
+    this.disabled = false,
+    this.disabledColor,
+    this.selected = false,
+  });
+
+  final String label;
+  final bool disabled;
+  final Color? disabledColor;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<ParloColors>()!;
+    final mutedColor = disabledColor ?? colors.pebble;
+    final radioColor = disabled ? colors.mist : colors.graphite;
+
+    return SizedBox(
+      height: disabled ? 52 : 44,
+      child: Row(
+        children: [
+          Icon(
+            selected
+                ? Icons.radio_button_checked
+                : Icons.radio_button_unchecked,
+            size: 24,
+            color: radioColor,
+          ),
+          const SizedBox(width: 12),
+          if (disabled)
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: mutedColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  'Coming soon',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+            )
+          else
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: colors.carbonInk,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

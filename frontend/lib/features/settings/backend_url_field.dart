@@ -61,9 +61,10 @@ String _ensureScheme(String domain) {
   if (domain.startsWith('http://') || domain.startsWith('https://')) {
     return domain;
   }
-  final isLocal = domain == 'localhost'
-      || domain.startsWith('127.0.0.1')
-      || domain.startsWith('0.0.0.0');
+  final isLocal =
+      domain == 'localhost' ||
+      domain.startsWith('127.0.0.1') ||
+      domain.startsWith('0.0.0.0');
   return isLocal ? 'http://$domain' : 'https://$domain';
 }
 
@@ -82,7 +83,9 @@ class BackendUrlField extends StatefulWidget {
   const BackendUrlField({
     required this.domainController,
     required this.portController,
+    this.fieldGap = 8,
     this.onChanged,
+    this.portWidth = 96,
     super.key,
   });
 
@@ -92,9 +95,15 @@ class BackendUrlField extends StatefulWidget {
   /// The controller for the port text.
   final TextEditingController portController;
 
+  /// The horizontal space between the domain and port fields.
+  final double fieldGap;
+
   /// Called whenever either text changes. The parent uses this to re-evaluate
   /// its Save button.
   final VoidCallback? onChanged;
+
+  /// The width of the port field.
+  final double portWidth;
 
   @override
   State<BackendUrlField> createState() => _BackendUrlFieldState();
@@ -156,9 +165,9 @@ class _BackendUrlFieldState extends State<BackendUrlField> {
             enableSuggestions: false,
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: widget.fieldGap),
         SizedBox(
-          width: 96,
+          width: widget.portWidth,
           child: TextField(
             controller: widget.portController,
             decoration: InputDecoration(
