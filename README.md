@@ -5,7 +5,7 @@
 - 后端容器化
 - 优化 `frontend/README.md` `backend/README.md`
 - 前端构建目标迁移到 WASM
-- 完善 `README.md`
+- 国际化
 
 # 开发者如何部署本项目
 
