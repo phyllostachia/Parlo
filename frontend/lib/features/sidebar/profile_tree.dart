@@ -462,6 +462,12 @@ class _TreeRow extends StatefulWidget {
 
 class _TreeRowState extends State<_TreeRow> {
   bool _isHovered = false;
+  bool _isMenuOpen = false;
+
+  void _handleMenuSelected(_MenuItem item) {
+    setState(() => _isMenuOpen = false);
+    widget.onMenuItem?.call(item);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -496,11 +502,17 @@ class _TreeRowState extends State<_TreeRow> {
                 const SizedBox(width: 8),
               ],
               Expanded(child: widget.label),
-              if (_isHovered && widget.menuItems.isNotEmpty)
+              // Keep the button in the tree while its route is open. Without
+              // this, moving the pointer from the row into the popup fires
+              // `onExit`, disposes the button, and the selected item loses
+              // its callback before it can run.
+              if ((_isHovered || _isMenuOpen) && widget.menuItems.isNotEmpty)
                 PopupMenuButton<_MenuItem>(
                   icon: const Icon(Icons.more_horiz, size: 18),
                   tooltip: 'More',
                   padding: EdgeInsets.zero,
+                  onOpened: () => setState(() => _isMenuOpen = true),
+                  onCanceled: () => setState(() => _isMenuOpen = false),
                   itemBuilder: (_) => [
                     for (final item in widget.menuItems)
                       PopupMenuItem<_MenuItem>(
@@ -508,7 +520,7 @@ class _TreeRowState extends State<_TreeRow> {
                         child: Text(_labelForItem(item)),
                       ),
                   ],
-                  onSelected: widget.onMenuItem,
+                  onSelected: _handleMenuSelected,
                 ),
             ],
           ),

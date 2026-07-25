@@ -5,6 +5,8 @@
 /// hint, which are the two visible states the user can land on.
 library;
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -80,6 +82,56 @@ void main() {
 
     expect(find.text('Learning'), findsOneWidget);
     expect(find.text('Research'), findsOneWidget);
+  });
+
+  testWidgets('profile Rename menu activates inline editing', (tester) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      kAuthTokenKey: 'test-token',
+      kBaseUrlKey: 'http://localhost:8000',
+    });
+    final prefs = await SharedPreferences.getInstance();
+    await tester.binding.setSurfaceSize(const Size(1200, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final profiles = <Profile>[
+      Profile(
+        id: 1,
+        name: 'Learning',
+        createdAt: DateTime.utc(2026, 7, 1),
+        updatedAt: DateTime.utc(2026, 7, 2),
+      ),
+    ];
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          profilesProvider.overrideWith(() => _FixedProfilesNotifier(profiles)),
+          modelsProvider.overrideWith(() => _EmptyModelsNotifier()),
+        ],
+        child: const ParloApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer();
+    await mouse.moveTo(tester.getCenter(find.text('Learning')));
+    await tester.pump();
+    expect(find.byTooltip('More'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('More'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Rename'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is TextField && widget.controller?.text == 'Learning',
+      ),
+      findsOneWidget,
+    );
+    await mouse.removePointer();
   });
 
   testWidgets('sidebar shows the empty hint when there are no folders', (
