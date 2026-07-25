@@ -135,10 +135,10 @@ class _EmptyStateState extends ConsumerState<EmptyState> {
     final colors = Theme.of(context).extension<ParloColors>()!;
 
     return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 720),
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: spacing.s32),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: spacing.s32),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 720),
           child: modelsAsync.when(
             loading: () => const Padding(
               padding: EdgeInsets.all(16),
@@ -293,7 +293,6 @@ class _PickerAndInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final spacing = Theme.of(context).extension<ParloSpacing>()!;
     final colors = Theme.of(context).extension<ParloColors>()!;
 
     return DropTarget(
@@ -311,13 +310,13 @@ class _PickerAndInput extends StatelessWidget {
             selectedId: selectedModelId,
             onChanged: onModelChanged,
           ),
-          SizedBox(height: spacing.s16),
+          SizedBox(height: 20),
           Text(
             '今天想聊些什么？',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.displayLarge,
           ),
-          SizedBox(height: spacing.s16),
+          SizedBox(height: 20),
           AnimatedContainer(
             duration: const Duration(milliseconds: 120),
             decoration: BoxDecoration(
@@ -372,14 +371,9 @@ class _PickerAndInput extends StatelessWidget {
 
 /// The large centered input on the empty state.
 ///
-/// Enter sends the message, Shift+Enter inserts a newline. The [Shortcuts]
-/// widget intercepts Enter (with no modifiers) and invokes the send action
-/// before the text field turns it into a newline; Shift+Enter is not matched,
-/// so the field handles it normally.
-///
-/// The field itself is borderless — the surrounding card carries the border
-/// and shadow. Below the field sits the actions row: a paperclip button on
-/// the left and the send button on the right.
+/// Enter sends the message, Shift+Enter inserts a newline. The field and its
+/// actions share one horizontal row so the input matches the compact paper
+/// input in the prototype.
 class _LargeInputField extends StatelessWidget {
   const _LargeInputField({
     required this.controller,
@@ -415,79 +409,75 @@ class _LargeInputField extends StatelessWidget {
             },
           ),
         },
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            TextField(
-              controller: controller,
-              enabled: !disabled,
-              maxLines: null,
-              minLines: 1,
-              textInputAction: TextInputAction.newline,
-              decoration: InputDecoration(
-                hintText: '输入你的问题...',
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                filled: false,
-                contentPadding: EdgeInsets.zero,
-                isDense: true,
-                hintStyle: textTheme.bodyLarge?.copyWith(
-                  color: colors.pebble,
-                  fontSize: 16,
-                ),
-              ),
-              style: textTheme.bodyLarge?.copyWith(
-                color: colors.carbonInk,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 14),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                if (canAttachImage)
-                  IconButton(
-                    tooltip: 'Attach image',
-                    icon: const Icon(Icons.attach_file),
-                    iconSize: 20,
-                    padding: const EdgeInsets.all(6),
-                    constraints: const BoxConstraints(
-                      minWidth: 32,
-                      minHeight: 32,
-                    ),
-                    color: colors.graphite,
-                    onPressed: onPickImage,
-                  )
-                else
-                  const SizedBox(width: 34),
-                // The design's disabled send button: chalk fill, pebble
-                // glyph. While the first message is being sent a small
-                // spinner replaces the arrow.
-                Material(
-                  color: colors.chalk,
-                  borderRadius: BorderRadius.circular(8),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(8),
-                    onTap: disabled ? null : onSend,
-                    child: SizedBox(
-                      width: 34,
-                      height: 34,
-                      child: disabled
-                          ? const Padding(
-                              padding: EdgeInsets.all(9),
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Icon(
-                              Icons.arrow_upward,
-                              size: 16,
-                              color: colors.pebble,
-                            ),
+            if (canAttachImage)
+              IconButton(
+                tooltip: 'Attach image',
+                icon: const Icon(Icons.attach_file),
+                iconSize: 20,
+                padding: const EdgeInsets.all(6),
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                color: colors.graphite,
+                onPressed: onPickImage,
+              )
+            else
+              const SizedBox(width: 34, height: 34),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Transform.translate(
+                offset: const Offset(0, -4),
+                child: TextField(
+                  controller: controller,
+                  enabled: !disabled,
+                  maxLines: null,
+                  minLines: 1,
+                  textInputAction: TextInputAction.newline,
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: InputDecoration(
+                    hintText: '输入你的问题...',
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    filled: false,
+                    isCollapsed: true,
+                    contentPadding: EdgeInsets.zero,
+                    isDense: true,
+                    hintStyle: textTheme.bodyLarge?.copyWith(
+                      color: colors.pebble,
+                      fontSize: 16,
                     ),
                   ),
+                  style: textTheme.bodyLarge?.copyWith(
+                    color: colors.carbonInk,
+                    fontSize: 16,
+                  ),
                 ),
-              ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Material(
+              color: colors.chalk,
+              borderRadius: BorderRadius.circular(8),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: disabled ? null : onSend,
+                child: SizedBox(
+                  width: 34,
+                  height: 34,
+                  child: disabled
+                      ? const Padding(
+                          padding: EdgeInsets.all(9),
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Icon(
+                          Icons.arrow_upward,
+                          size: 16,
+                          color: colors.pebble,
+                        ),
+                ),
+              ),
             ),
           ],
         ),

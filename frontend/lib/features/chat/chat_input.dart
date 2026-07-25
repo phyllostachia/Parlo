@@ -201,41 +201,49 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                           );
                         },
                       ),
-                      TextField(
-                        controller: _controller,
-                        // The field stays editable while streaming so the user
-                        // can type the next message; only the send button is
-                        // disabled.
-                        enabled: true,
-                        maxLines: null,
-                        minLines: 1,
-                        textInputAction: TextInputAction.newline,
-                        decoration: InputDecoration(
-                          hintText: '输入消息...',
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          filled: false,
-                          contentPadding: EdgeInsets.zero,
-                          isDense: true,
-                          hintStyle: textTheme.bodyLarge?.copyWith(
-                            color: colors.pebble,
-                            fontSize: 15,
-                          ),
-                        ),
-                        style: textTheme.bodyLarge?.copyWith(
-                          color: colors.carbonInk,
-                          fontSize: 15,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           if (canAttachImage)
                             _AttachButton(onPressed: _pickImage)
                           else
-                            const SizedBox(width: 34),
+                            const SizedBox(width: 32, height: 32),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Transform.translate(
+                              offset: const Offset(0, -4),
+                              child: TextField(
+                                controller: _controller,
+                                // The field stays editable while streaming so the
+                                // user can type the next message; only the send
+                                // button is disabled.
+                                enabled: true,
+                                maxLines: null,
+                                minLines: 1,
+                                textInputAction: TextInputAction.newline,
+                                textAlignVertical: TextAlignVertical.center,
+                                decoration: InputDecoration(
+                                  hintText: '输入消息...',
+                                  border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  filled: false,
+                                  isCollapsed: true,
+                                  contentPadding: EdgeInsets.zero,
+                                  isDense: true,
+                                  hintStyle: textTheme.bodyLarge?.copyWith(
+                                    color: colors.pebble,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                style: textTheme.bodyLarge?.copyWith(
+                                  color: colors.carbonInk,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
                           _SendButton(
                             isStreaming: isStreaming,
                             onSend: _send,

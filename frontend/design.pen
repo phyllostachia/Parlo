@@ -1068,18 +1068,6 @@
                   ],
                   "children": [
                     {
-                      "type": "text",
-                      "id": "oXXUw",
-                      "name": "Input Placeholder",
-                      "fill": "$pebble",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "输入消息...",
-                      "fontFamily": "$font-sans",
-                      "fontSize": 15,
-                      "fontWeight": "normal"
-                    },
-                    {
                       "type": "frame",
                       "id": "tdHnW",
                       "name": "Input Actions Row",
@@ -1115,6 +1103,18 @@
                               ]
                             }
                           ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "oXXUw",
+                          "name": "Input Placeholder",
+                          "fill": "$pebble",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "输入消息...",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "frame",
@@ -1716,18 +1716,6 @@
                   ],
                   "children": [
                     {
-                      "type": "text",
-                      "id": "tUF5J",
-                      "name": "Big Input Placeholder",
-                      "fill": "$pebble",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "输入你的问题...",
-                      "fontFamily": "$font-sans",
-                      "fontSize": 16,
-                      "fontWeight": "normal"
-                    },
-                    {
                       "type": "frame",
                       "id": "RWuuI",
                       "name": "Big Input Actions Row",
@@ -1763,6 +1751,18 @@
                               ]
                             }
                           ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "tUF5J",
+                          "name": "Big Input Placeholder",
+                          "fill": "$pebble",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "输入你的问题...",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 16,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "frame",
@@ -2364,18 +2364,6 @@
                   ],
                   "children": [
                     {
-                      "type": "text",
-                      "id": "n68ID",
-                      "name": "Big Input Placeholder",
-                      "fill": "$pebble",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "输入你的问题...",
-                      "fontFamily": "$font-sans",
-                      "fontSize": 16,
-                      "fontWeight": "normal"
-                    },
-                    {
                       "type": "frame",
                       "id": "D97Zw",
                       "name": "Big Input Actions Row",
@@ -2411,6 +2399,18 @@
                               ]
                             }
                           ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "n68ID",
+                          "name": "Big Input Placeholder",
+                          "fill": "$pebble",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "输入你的问题...",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 16,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "frame",
@@ -3636,18 +3636,6 @@
                   ],
                   "children": [
                     {
-                      "type": "text",
-                      "id": "MgX4Q",
-                      "name": "Input Placeholder",
-                      "fill": "$pebble",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "输入消息...",
-                      "fontFamily": "$font-sans",
-                      "fontSize": 15,
-                      "fontWeight": "normal"
-                    },
-                    {
                       "type": "frame",
                       "id": "XmoLo",
                       "name": "Input Actions Row",
@@ -3683,6 +3671,18 @@
                               ]
                             }
                           ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "MgX4Q",
+                          "name": "Input Placeholder",
+                          "fill": "$pebble",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "输入消息...",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "frame",
@@ -5046,18 +5046,6 @@
                   ],
                   "children": [
                     {
-                      "type": "text",
-                      "id": "X8lSm",
-                      "name": "Input Placeholder",
-                      "fill": "$pebble",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "输入消息...",
-                      "fontFamily": "$font-sans",
-                      "fontSize": 15,
-                      "fontWeight": "normal"
-                    },
-                    {
                       "type": "frame",
                       "id": "kXP8e",
                       "name": "Input Actions Row",
@@ -5093,6 +5081,18 @@
                               ]
                             }
                           ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "X8lSm",
+                          "name": "Input Placeholder",
+                          "fill": "$pebble",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "输入消息...",
+                          "fontFamily": "$font-sans",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "frame",
