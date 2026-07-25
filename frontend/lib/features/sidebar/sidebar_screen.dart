@@ -23,6 +23,8 @@ class SidebarScreen extends ConsumerWidget {
   const SidebarScreen({
     required this.currentConversationId,
     required this.onNavigate,
+    this.collapsed = false,
+    this.onToggle,
     super.key,
   });
 
@@ -35,37 +37,62 @@ class SidebarScreen extends ConsumerWidget {
   /// router directly) so the shell owns navigation.
   final void Function(String path) onNavigate;
 
+  /// Whether to render the 80px icon-only sidebar used on narrow screens and
+  /// after manually collapsing the wide sidebar.
+  final bool collapsed;
+
+  /// Toggles between the full sidebar and the compact icon-only sidebar.
+  final VoidCallback? onToggle;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).extension<ParloColors>()!;
+    final contentWidth = collapsed ? 56.0 : 248.0;
 
-    // Design "Sidebar": 280px wide, soft-stone fill, 16px padding, 16px gap
-    // between the three sections (top / tree / settings row), with a hairline
-    // chalk border on the right edge.
-    return Container(
-      width: 280,
+    // Design "Sidebar": 280px wide when expanded and 80px when collapsed,
+    // with a soft-stone fill, 16px padding, 16px gap between the three
+    // sections (top / tree / settings row), and a hairline chalk border.
+    return AnimatedContainer(
+      width: collapsed ? 80 : 280,
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeInOutCubic,
+      clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
         color: colors.softStone,
         border: Border(right: BorderSide(color: colors.chalk, width: 1)),
       ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _SidebarHeader(
-            onNewProfile: () => _promptForProfileName(context, ref),
-            onNewConversation: () => onNavigate('/'),
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: ProfileTree(
-              currentConversationId: currentConversationId,
-              onNavigate: onNavigate,
+      padding: collapsed
+          ? const EdgeInsets.symmetric(horizontal: 12, vertical: 16)
+          : const EdgeInsets.all(16),
+      child: OverflowBox(
+        alignment: Alignment.topLeft,
+        minWidth: contentWidth,
+        maxWidth: contentWidth,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _SidebarHeader(
+              collapsed: collapsed,
+              onNewProfile: () => _promptForProfileName(context, ref),
+              onNewConversation: () => onNavigate('/'),
+              onToggle: onToggle,
             ),
-          ),
-          const SizedBox(height: 16),
-          _SidebarFooter(onSettings: () => _openSettingsPanel(context)),
-        ],
+            const SizedBox(height: 16),
+            Expanded(
+              child: ProfileTree(
+                currentConversationId: currentConversationId,
+                onNavigate: onNavigate,
+                collapsed: collapsed,
+                onExpand: collapsed ? onToggle : null,
+              ),
+            ),
+            const SizedBox(height: 16),
+            _SidebarFooter(
+              collapsed: collapsed,
+              onSettings: () => _openSettingsPanel(context),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -99,16 +126,47 @@ class SidebarScreen extends ConsumerWidget {
 /// and two full-width action buttons ("新建对话" and "新建分组").
 class _SidebarHeader extends StatelessWidget {
   const _SidebarHeader({
+    required this.collapsed,
     required this.onNewProfile,
     required this.onNewConversation,
+    required this.onToggle,
   });
 
+  final bool collapsed;
   final VoidCallback onNewProfile;
   final VoidCallback onNewConversation;
+  final VoidCallback? onToggle;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<ParloColors>()!;
+    if (collapsed) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _SidebarIconButton(
+            icon: const _SidebarToggleIcon(collapsed: true),
+            tooltip: '展开侧栏',
+            onTap: onToggle,
+          ),
+          const SizedBox(height: 8),
+          _SidebarActionButton(
+            icon: Icons.edit_outlined,
+            label: '新建对话',
+            onTap: onNewConversation,
+            collapsed: true,
+          ),
+          const SizedBox(height: 4),
+          _SidebarActionButton(
+            icon: Icons.create_new_folder_outlined,
+            label: '新建分组',
+            onTap: onNewProfile,
+            collapsed: true,
+          ),
+        ],
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -127,11 +185,18 @@ class _SidebarHeader extends StatelessWidget {
                   ),
                 ),
               ),
-              Icon(
-                Icons.keyboard_double_arrow_left,
-                size: 18,
-                color: colors.ashen,
-              ),
+              if (onToggle != null)
+                IconButton(
+                  icon: const _SidebarToggleIcon(collapsed: false),
+                  color: colors.ashen,
+                  tooltip: '收起侧栏',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
+                  onPressed: onToggle,
+                ),
             ],
           ),
         ),
@@ -163,12 +228,16 @@ class _SidebarActionButton extends StatefulWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    this.collapsed = false,
     this.topBorder = false,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+
+  /// Whether to show only the icon in the compact sidebar.
+  final bool collapsed;
 
   /// Whether to draw the hairline top border (used by the settings row,
   /// which sits at the bottom of the sidebar separated by a divider).
@@ -184,39 +253,49 @@ class _SidebarActionButtonState extends State<_SidebarActionButton> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<ParloColors>()!;
+    final child = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: _hovered ? colors.chalk : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+        border: widget.topBorder
+            ? Border(top: BorderSide(color: colors.chalk, width: 1))
+            : null,
+      ),
+      child: Row(
+        mainAxisAlignment: widget.collapsed
+            ? MainAxisAlignment.center
+            : MainAxisAlignment.start,
+        children: [
+          Icon(widget.icon, size: 16, color: colors.graphite),
+          if (!widget.collapsed) ...[
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                widget.label,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: colors.graphite,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: widget.onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          decoration: BoxDecoration(
-            color: _hovered ? colors.chalk : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-            border: widget.topBorder
-                ? Border(top: BorderSide(color: colors.chalk, width: 1))
-                : null,
-          ),
-          child: Row(
-            children: [
-              Icon(widget.icon, size: 16, color: colors.graphite),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  widget.label,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colors.graphite,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
+      child: Tooltip(
+        message: widget.label,
+        child: GestureDetector(
+          onTap: widget.onTap,
+          behavior: HitTestBehavior.opaque,
+          child: child,
         ),
       ),
     );
@@ -226,8 +305,9 @@ class _SidebarActionButtonState extends State<_SidebarActionButton> {
 /// The sidebar's bottom row: a full-width "设置" row with a hairline divider
 /// above it (the design's "Settings Row").
 class _SidebarFooter extends StatelessWidget {
-  const _SidebarFooter({required this.onSettings});
+  const _SidebarFooter({required this.collapsed, required this.onSettings});
 
+  final bool collapsed;
   final VoidCallback onSettings;
 
   @override
@@ -236,9 +316,90 @@ class _SidebarFooter extends StatelessWidget {
       icon: Icons.settings_outlined,
       label: '设置',
       onTap: onSettings,
+      collapsed: collapsed,
       topBorder: true,
     );
   }
+}
+
+/// An icon-only button used by the compact sidebar header.
+class _SidebarIconButton extends StatelessWidget {
+  const _SidebarIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  final Widget icon;
+  final String tooltip;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: icon,
+      color: Theme.of(context).extension<ParloColors>()!.ashen,
+      tooltip: tooltip,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 56, minHeight: 36),
+      onPressed: onTap,
+    );
+  }
+}
+
+/// A small Lucide-style panel-left open/close icon.
+class _SidebarToggleIcon extends StatelessWidget {
+  const _SidebarToggleIcon({required this.collapsed});
+
+  final bool collapsed;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: const Size.square(18),
+      painter: _SidebarToggleIconPainter(
+        color: IconTheme.of(context).color ?? Colors.black,
+        collapsed: collapsed,
+      ),
+    );
+  }
+}
+
+class _SidebarToggleIconPainter extends CustomPainter {
+  const _SidebarToggleIconPainter({
+    required this.color,
+    required this.collapsed,
+  });
+
+  final Color color;
+  final bool collapsed;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.4
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    final panel = RRect.fromRectAndRadius(
+      Rect.fromLTWH(1.5, 1.5, size.width - 3, size.height - 3),
+      const Radius.circular(2),
+    );
+    canvas.drawRRect(panel, paint);
+
+    canvas.drawLine(Offset(7, 2.5), Offset(7, size.height - 2.5), paint);
+
+    final arrow = Path()
+      ..moveTo(collapsed ? 10 : 13, 6)
+      ..lineTo(collapsed ? 13 : 10, 9)
+      ..lineTo(collapsed ? 10 : 13, 12);
+    canvas.drawPath(arrow, paint);
+  }
+
+  @override
+  bool shouldRepaint(_SidebarToggleIconPainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.collapsed != collapsed;
 }
 
 /// A small reusable dialog that asks the user for a single text value.

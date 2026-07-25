@@ -24,6 +24,8 @@ class ProfileTree extends ConsumerWidget {
   const ProfileTree({
     required this.currentConversationId,
     required this.onNavigate,
+    this.collapsed = false,
+    this.onExpand,
     super.key,
   });
 
@@ -33,21 +35,57 @@ class ProfileTree extends ConsumerWidget {
   /// Called with a path like `/c/123` when the user picks a conversation.
   final void Function(String path) onNavigate;
 
+  /// Whether to render the compact icon-only profile list.
+  final bool collapsed;
+
+  /// Expands the full sidebar when a compact profile icon is selected.
+  final VoidCallback? onExpand;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profilesAsync = ref.watch(profilesProvider);
 
     return profilesAsync.when(
-      loading: () => const _CenteredHint(text: 'Loading…'),
-      error: (error, _) => _CenteredHint(
-        text: 'Could not load folders:\n$error',
-        actionLabel: 'Retry',
-        onAction: () => ref.invalidate(profilesProvider),
-      ),
+      loading: () => collapsed
+          ? const _CollapsedHint(icon: Icons.more_horiz)
+          : const _CenteredHint(text: 'Loading…'),
+      error: (error, _) => collapsed
+          ? const _CollapsedHint(icon: Icons.error_outline)
+          : _CenteredHint(
+              text: 'Could not load folders:\n$error',
+              actionLabel: 'Retry',
+              onAction: () => ref.invalidate(profilesProvider),
+            ),
       data: (profiles) {
         if (profiles.isEmpty) {
-          return const _CenteredHint(
-            text: 'No folders yet.\nCreate one with the + button above.',
+          return collapsed
+              ? const _CollapsedHint(icon: Icons.folder_off_outlined)
+              : const _CenteredHint(
+                  text: 'No folders yet.\nCreate one with the + button above.',
+                );
+        }
+        if (collapsed) {
+          return ListView.builder(
+            padding: EdgeInsets.zero,
+            itemCount:
+                profiles.length + (currentConversationId == null ? 0 : 1),
+            itemBuilder: (context, index) {
+              if (currentConversationId != null && index == 0) {
+                return _CollapsedTreeRow(
+                  icon: Icons.chat_bubble_outline,
+                  tooltip: '当前对话',
+                  active: true,
+                  onTap: () => onNavigate('/c/${currentConversationId!}'),
+                );
+              }
+              final profile =
+                  profiles[currentConversationId == null ? index : index - 1];
+              return _CollapsedTreeRow(
+                icon: Icons.folder_outlined,
+                tooltip: profile.name,
+                onTap: onExpand,
+              );
+            },
           );
         }
         return ListView.builder(
@@ -548,6 +586,76 @@ class _CenteredHint extends StatelessWidget {
               TextButton(onPressed: onAction, child: Text(actionLabel!)),
             ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A compact placeholder that keeps the collapsed rail free of text.
+class _CollapsedHint extends StatelessWidget {
+  const _CollapsedHint({required this.icon});
+
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<ParloColors>()!;
+    return Center(child: Icon(icon, size: 16, color: colors.ashen));
+  }
+}
+
+/// One icon-only profile/conversation row in the compact sidebar.
+class _CollapsedTreeRow extends StatefulWidget {
+  const _CollapsedTreeRow({
+    required this.icon,
+    required this.tooltip,
+    this.active = false,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final bool active;
+  final VoidCallback? onTap;
+
+  @override
+  State<_CollapsedTreeRow> createState() => _CollapsedTreeRowState();
+}
+
+class _CollapsedTreeRowState extends State<_CollapsedTreeRow> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<ParloColors>()!;
+    return Tooltip(
+      message: widget.tooltip,
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        cursor: widget.onTap == null
+            ? SystemMouseCursors.basic
+            : SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: widget.onTap,
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            height: 36,
+            margin: const EdgeInsets.only(bottom: 4),
+            decoration: BoxDecoration(
+              color: widget.active || _hovered
+                  ? (widget.active ? colors.paperWhite : colors.chalk)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            alignment: Alignment.center,
+            child: Icon(
+              widget.icon,
+              size: 16,
+              color: widget.active ? colors.carbonInk : colors.ashen,
+            ),
+          ),
         ),
       ),
     );

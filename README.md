@@ -1,7 +1,6 @@
 # 开发计划
 
-- 更新 frontend\design.pen `Chat - Token Auth Modal` `Chat - Settings Panel`
-- 按照 frontend\design.pen 优化 UI
+- 优化 UI
 - 前端工程化、容器化
 - 后端容器化
 - 优化 `frontend/README.md` `backend/README.md`

@@ -6,24 +6,19 @@
 /// between conversations. The main area shows whatever the matched child
 /// route builds.
 ///
-/// Phase 6 adds responsive behavior (product.md §5.4):
-/// - On wide screens the sidebar is always visible next to the main area.
-/// - On narrow screens the sidebar collapses; a hamburger button at the top
-///   of the main area opens it as an overlay drawer with a scrim, so the
-///   main area is not squeezed. Tapping the scrim or a conversation closes
-///   the drawer.
+/// The sidebar stays visible at every window width. It uses the full 280px
+/// layout on wide screens and automatically switches to the 80px icon rail
+/// below the responsive breakpoint, matching the collapsed-sidebar design.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../theme/colors.dart';
 import '../../features/settings/token_dialog_host.dart';
 import '../../features/sidebar/sidebar_screen.dart';
 
-/// The width above which the sidebar is always visible. Below this width the
-/// sidebar collapses into an overlay drawer.
+/// The width above which the full sidebar is shown by default.
 const double _kWideBreakpoint = 800;
 
 /// The root layout for the Parlo single-page app.
@@ -47,22 +42,26 @@ class AppShell extends ConsumerStatefulWidget {
 }
 
 class _AppShellState extends ConsumerState<AppShell> {
-  /// Whether the narrow-screen overlay drawer is currently open.
-  bool _isDrawerOpen = false;
+  /// Whether the wide-screen sidebar is shown in its compact icon-only form.
+  bool _isSidebarCollapsed = false;
 
-  void _closeDrawer() => setState(() => _isDrawerOpen = false);
+  /// Whether a narrow-screen user has explicitly expanded the sidebar.
+  bool _isNarrowSidebarExpanded = false;
 
-  void _openDrawer() => setState(() => _isDrawerOpen = true);
-
-  void _navigate(String path) {
-    _closeDrawer();
-    context.go(path);
+  void _toggleSidebar(bool isWide) {
+    setState(() {
+      if (isWide) {
+        _isSidebarCollapsed = !_isSidebarCollapsed;
+      } else {
+        _isNarrowSidebarExpanded = !_isNarrowSidebarExpanded;
+      }
+    });
   }
+
+  void _navigate(String path) => context.go(path);
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
-
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -70,95 +69,23 @@ class _AppShellState extends ConsumerState<AppShell> {
           final sidebar = SidebarScreen(
             currentConversationId: widget.currentConversationId,
             onNavigate: _navigate,
+            collapsed: isWide ? _isSidebarCollapsed : !_isNarrowSidebarExpanded,
+            onToggle: () => _toggleSidebar(isWide),
           );
 
-          if (isWide) {
-            return Stack(
-              children: [
-                Row(
-                  children: [
-                    sidebar,
-                    Expanded(child: widget.child),
-                  ],
-                ),
-                const TokenDialogHost(),
-              ],
-            );
-          }
-
-          // Narrow layout: the main area takes the full width; the sidebar
-          // is an overlay drawer opened by the hamburger button.
           return Stack(
             children: [
-              Column(
+              Row(
                 children: [
-                  _NarrowTopBar(onMenu: _openDrawer),
+                  sidebar,
                   Expanded(child: widget.child),
                 ],
               ),
-              if (_isDrawerOpen) _DrawerScrim(onTap: _closeDrawer),
-              if (_isDrawerOpen)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Material(
-                    color: colors.boneParchment,
-                    elevation: 4,
-                    child: sidebar,
-                  ),
-                ),
               const TokenDialogHost(),
             ],
           );
         },
       ),
-    );
-  }
-}
-
-/// The slim top bar shown on narrow screens, carrying the hamburger button.
-class _NarrowTopBar extends StatelessWidget {
-  const _NarrowTopBar({required this.onMenu});
-
-  final VoidCallback onMenu;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
-    return Container(
-      height: 48,
-      decoration: BoxDecoration(
-        color: colors.boneParchment,
-        border: Border(bottom: BorderSide(color: colors.mist, width: 1)),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Row(
-        children: [
-          IconButton(
-            tooltip: 'Menu',
-            icon: const Icon(Icons.menu),
-            onPressed: onMenu,
-          ),
-          const SizedBox(width: 8),
-          Text('Parlo', style: Theme.of(context).textTheme.titleMedium),
-        ],
-      ),
-    );
-  }
-}
-
-/// The semi-transparent scrim behind the narrow-screen drawer. Tapping it
-/// closes the drawer.
-class _DrawerScrim extends StatelessWidget {
-  const _DrawerScrim({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(color: Colors.black.withValues(alpha: 0.32)),
     );
   }
 }

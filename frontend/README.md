@@ -19,9 +19,9 @@ Parlo 的 Flutter 客户端。Parlo 是一款自托管、单用户的 BYOK（自
 | 3 — 聊天基础 | 空状态页面（模型选择器 + 居中大输入框）、聊天页面（顶栏 + 消息列表 + 输入框）、消息气泡、`CurrentConversationNotifier` 的完整状态机以及 `stop()` |
 | 4 — 聊天进阶 | 思考小条（可折叠，流式时显示脉冲指示器）、`< n/m >` 分支切换器、悬停操作条（复制 + 重新生成）、断流/停止后的「连接中断，重试」按钮、`regenerate()` 与 `switchBranch()` 状态机动作 |
 | 5 — 鉴权与多模态 | 首次使用/401 专用 token 弹窗（同时询问后端地址）、`BaseUrlStore`（持久化后端地址）、图片附件（点击选择 + 拖拽，base64 data URL 转换，非 vision 模型禁用入口）、移动端平台能力与入口 |
-| 6 — 错误边界与响应式 | 统一的 `ErrorBanner`（带重试按钮）替换会话与模型加载的裸文本错误、窄屏侧栏改为带遮罩的浮层抽屉（汉堡按钮切换） |
+| 6 — 错误边界与响应式 | 统一的 `ErrorBanner`（带重试按钮）替换会话与模型加载的裸文本错误、窄屏侧栏自动收起为保留功能的 80px 图标栏 |
 | 7 — 测试 | 在原有 12 个测试基础上新增 11 个：`regenerate`、`switchBranch` 状态机测试，`imageDataUrlFromBytes` 的 MIME 检测测试，token 弹窗的首用、保存关闭、已有 token 不弹出测试 |
-| 8 — 移动端 | `MobilePlatformCapabilities`（`canDragImage=false`、`messageActions=always`）与 `main_mobile.dart` 入口。响应式侧栏抽屉复用第 6 阶段的实现。后端地址入口在所有平台一致，由 token 弹窗与设置面板统一收集 |
+| 8 — 移动端 | `MobilePlatformCapabilities`（`canDragImage=false`、`messageActions=always`）与 `main_mobile.dart` 入口。响应式侧栏图标栏复用第 6 阶段的实现。后端地址入口在所有平台一致，由 token 弹窗与设置面板统一收集 |
 
 ### 第 9 阶段（深色主题）的推迟原因
 
@@ -96,7 +96,7 @@ python3 -m venv /tmp/fontenv && /tmp/fontenv/bin/pip install fonttools
 以下是本次交付中已知的、有意不做或推迟的项，列出以便后续工作跟进：
 
 - **图片粘贴**：第 5 阶段实现了点击选择与拖拽两种图片来源。产品文档列出的第三种方式——键盘粘贴图片——尚未实现。跨平台粘贴图片需要读取剪贴板中的二进制数据，在 Web 上需要 `dart:html` 的剪贴板互操作，在移动端则不是标准交互。为了避免交付一个无法可靠测试且可能在某些平台失效的实现，粘贴暂缓，仅保留点击选择与拖拽。
-- **移动端真机构建验证**：第 8 阶段交付了 `MobilePlatformCapabilities` 与 `main_mobile.dart` 入口，代码通过 `flutter analyze` 静态检查。但 Android APK 与 iOS IPA 的真机构建与运行验证需要连接设备或模拟器，本次会话未执行。响应式侧栏抽屉（第 6 阶段）已经在窄屏布局上覆盖了移动端的侧栏交互需求。
+- **移动端真机构建验证**：第 8 阶段交付了 `MobilePlatformCapabilities` 与 `main_mobile.dart` 入口，代码通过 `flutter analyze` 静态检查。但 Android APK 与 iOS IPA 的真机构建与运行验证需要连接设备或模拟器，本次会话未执行。响应式侧栏图标栏（第 6 阶段）已经在窄屏布局上覆盖了移动端的侧栏交互需求。
 - **深色主题**：见上节「第 9 阶段的推迟原因」。需要等待设计师在 `design.md` 中补充深色令牌后落地。
 
 ## 实现说明
