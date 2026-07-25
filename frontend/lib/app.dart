@@ -1,9 +1,8 @@
-/// The root widget for the Parlo app.
+/// Parlo 应用的根 widget。
 ///
-/// This is a [MaterialApp.router] that mounts the go_router from
-/// `appRouterProvider`. The router builds an [AppShell] (sidebar + main
-/// area) and swaps the main area between the empty state and the conversation
-/// screen as the URL changes.
+/// 这是一个挂载 `appRouterProvider` 提供的 go_router 的 [MaterialApp.router]。Router 会
+/// 构建 [AppShell]（sidebar + main area），并随着 URL 变化在 empty state 和 conversation
+/// screen 之间切换 main area。
 library;
 
 import 'package:flutter/material.dart';
@@ -12,9 +11,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 
-/// The top-level widget for the Parlo application.
+/// Parlo 应用的顶层 widget。
 class ParloApp extends ConsumerWidget {
-  /// Creates the root widget.
+  /// 创建根 widget。
   const ParloApp({super.key});
 
   @override

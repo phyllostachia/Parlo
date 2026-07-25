@@ -1,8 +1,7 @@
-"""End-to-end tests for the HTTP API.
+"""HTTP API 的端到端测试。
 
-Covers profile and conversation CRUD, the message-tree operations (create,
-path walk, regenerate, switch, delete), and the SSE chat stream with a fake
-provider so no network call is made.
+覆盖 profile 和 conversation CRUD、message-tree operation（create、path walk、regenerate、
+switch、delete），以及使用 fake provider 的 SSE chat stream，因此不会发起 network call。
 """
 
 from __future__ import annotations
@@ -15,7 +14,7 @@ from app.providers.base import StreamEvent
 
 
 class _FakeProvider:
-    """A provider that replays a canned list of events for testing."""
+    """用于测试、重放预设 event list 的 provider。"""
 
     def __init__(self, events: list[StreamEvent]) -> None:
         self._events = events
@@ -28,7 +27,7 @@ class _FakeProvider:
 
 
 def _parse_sse(lines: list[str]) -> list[tuple[str, str]]:
-    """Parse SSE lines into ``(event_type, data)`` pairs."""
+    """将 SSE line 解析为 ``(event_type, data)`` pair。"""
     events: list[tuple[str, str]] = []
     current_event: str | None = None
     current_data: list[str] = []
@@ -63,20 +62,20 @@ async def _create_conversation(
 
 
 async def test_health_is_unauthenticated(client_unauth) -> None:
-    """The health endpoint responds without a bearer token."""
+    """health endpoint 无需 bearer token 即可响应。"""
     response = await client_unauth.get("/api/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
 
 
 async def test_missing_token_is_rejected(client_unauth) -> None:
-    """A request without a token gets a 401."""
+    """没有 token 的 request 会得到 401。"""
     response = await client_unauth.get("/api/profiles")
     assert response.status_code == 401
 
 
 async def test_profile_crud(client) -> None:
-    """Profiles can be listed, created, renamed, and deleted."""
+    """Profile 可以被列出、创建、重命名和删除。"""
     assert (await client.get("/api/profiles")).json() == []
     pid = await _create_profile(client, "Learning")
     profiles = (await client.get("/api/profiles")).json()
@@ -89,7 +88,7 @@ async def test_profile_crud(client) -> None:
 
 
 async def test_conversation_crud(client) -> None:
-    """Conversations are scoped under a profile."""
+    """Conversation 的 scope 位于 profile 下。"""
     pid = await _create_profile(client)
     cid = await _create_conversation(client, pid, "First chat")
     response = await client.get(f"/api/profiles/{pid}/conversations")
@@ -102,8 +101,7 @@ async def test_conversation_crud(client) -> None:
 
 
 async def test_create_user_message_adds_assistant_placeholder(client) -> None:
-    """Creating a user message also creates an assistant placeholder and
-    moves the conversation leaf to the placeholder."""
+    """创建 user message 也会创建 assistant placeholder，并将 conversation leaf 移动到该 placeholder。"""
     pid = await _create_profile(client)
     cid = await _create_conversation(client, pid)
     response = await client.post(
@@ -116,13 +114,13 @@ async def test_create_user_message_adds_assistant_placeholder(client) -> None:
     assert body["user_message"]["content"] == "What is 2+2?"
     assert body["assistant_message"]["role"] == "assistant"
     assert body["assistant_message"]["is_complete"] is False
-    # The conversation leaf now points at the placeholder.
+    # conversation leaf 现在指向 placeholder。
     conv = (await client.get(f"/api/conversations/{cid}")).json()
     assert conv["current_leaf_id"] == body["assistant_message"]["id"]
 
 
 async def test_conversation_path_lists_visible_messages(client) -> None:
-    """The path endpoint returns both the user message and the placeholder."""
+    """path endpoint 同时返回 user message 和 placeholder。"""
     pid = await _create_profile(client)
     cid = await _create_conversation(client, pid)
     create = await client.post(
@@ -135,8 +133,7 @@ async def test_conversation_path_lists_visible_messages(client) -> None:
 
 
 async def test_list_models_returns_registry_and_default(client) -> None:
-    """``GET /api/models`` returns the default model and the full registry
-    without leaking ``api_key`` or ``base_url``."""
+    """``GET /api/models`` 返回 default model 和完整 registry，但不会泄露 ``api_key`` 或 ``base_url``。"""
     response = await client.get("/api/models")
     assert response.status_code == 200
     body = response.json()
@@ -148,13 +145,13 @@ async def test_list_models_returns_registry_and_default(client) -> None:
     assert openai["protocol"] == "openai-response"
     assert openai["vision"] is True
     assert openai["thinking_effort"] == ["medium", "low", "high", "xhigh"]
-    # Secrets are never exposed.
+    # secret 永远不会暴露。
     assert "api_key" not in openai
     assert "base_url" not in openai
 
 
 async def test_create_conversation_defaults_effort_to_first(client) -> None:
-    """Omitting ``thinking_effort`` uses the model's first listed level."""
+    """省略 ``thinking_effort`` 时使用 model 列出的第一个 level。"""
     pid = await _create_profile(client)
     response = await client.post(
         f"/api/profiles/{pid}/conversations",
@@ -166,7 +163,7 @@ async def test_create_conversation_defaults_effort_to_first(client) -> None:
 
 
 async def test_create_conversation_rejects_unknown_model(client) -> None:
-    """A model id not in the registry is rejected with a 400."""
+    """不在 registry 中的 model id 会被拒绝并返回 400。"""
     pid = await _create_profile(client)
     response = await client.post(
         f"/api/profiles/{pid}/conversations",
@@ -176,7 +173,7 @@ async def test_create_conversation_rejects_unknown_model(client) -> None:
 
 
 async def test_create_conversation_rejects_unsupported_effort(client) -> None:
-    """An effort level not listed for the model is rejected with a 400."""
+    """model 未列出的 effort level 会被拒绝并返回 400。"""
     pid = await _create_profile(client)
     response = await client.post(
         f"/api/profiles/{pid}/conversations",
@@ -186,7 +183,7 @@ async def test_create_conversation_rejects_unsupported_effort(client) -> None:
 
 
 async def test_patch_conversation_changes_effort(client) -> None:
-    """``thinking_effort`` can be changed after creation; ``model_id`` cannot."""
+    """创建后可以修改 ``thinking_effort``，但不能修改 ``model_id``。"""
     pid = await _create_profile(client)
     cid = await _create_conversation(client, pid)
     response = await client.patch(
@@ -197,7 +194,7 @@ async def test_patch_conversation_changes_effort(client) -> None:
 
 
 async def test_patch_conversation_rejects_unsupported_effort(client) -> None:
-    """Patching to a level the model does not support is a 400."""
+    """将 conversation patch 为 model 不支持的 level 会返回 400。"""
     pid = await _create_profile(client)
     cid = await _create_conversation(client, pid)
     response = await client.patch(
@@ -209,8 +206,7 @@ async def test_patch_conversation_rejects_unsupported_effort(client) -> None:
 async def test_chat_stream_writes_tokens_to_placeholder(
     client, monkeypatch
 ) -> None:
-    """The SSE stream writes accumulated content into the assistant message
-    and marks it complete on ``done``."""
+    """SSE stream 会将累计内容写入 assistant message，并在 ``done`` 时将其标记为完成。"""
     events = [
         StreamEvent(kind="text_delta", content="Hello"),
         StreamEvent(kind="text_delta", content=" world"),
@@ -237,7 +233,7 @@ async def test_chat_stream_writes_tokens_to_placeholder(
     assert types.count("text_delta") == 2
     assert types[-1] == "done"
 
-    # The assistant message now contains the streamed text and is complete.
+    # assistant message 现在包含 streamed text，并且已完成。
     path = (await client.get(f"/api/conversations/{cid}/messages")).json()
     assistant = path["path"][-1]["message"]
     assert assistant["content"] == "Hello world"
@@ -247,7 +243,7 @@ async def test_chat_stream_writes_tokens_to_placeholder(
 async def test_chat_stream_persists_reasoning_and_signature(
     client, monkeypatch
 ) -> None:
-    """Reasoning deltas and the signature event are stored on the message."""
+    """Reasoning delta 和 signature event 会存储在 message 上。"""
     events = [
         StreamEvent(kind="reasoning_delta", content="thinking"),
         StreamEvent(kind="reasoning_signature", content="sig-123"),
@@ -273,16 +269,16 @@ async def test_chat_stream_persists_reasoning_and_signature(
     assert "reasoning_delta" in types
     assert "reasoning_signature" in types
 
-    # The fake provider received the user message in the request history.
+    # fake provider 在 request history 中收到了 user message。
     assert fake.last_request is not None
     assert fake.last_request.messages[-1].role == "user"
     assert fake.last_request.messages[-1].text == "hi"
-    # The thinking-effort level was forwarded from the conversation.
+    # thinking-effort level 已从 conversation 转发。
     assert fake.last_request.thinking_effort == "medium"
 
 
 async def test_regenerate_creates_sibling_placeholder(client, monkeypatch) -> None:
-    """Regenerating creates a new assistant placeholder under the same parent."""
+    """Regenerate 会在相同 parent 下创建新的 assistant placeholder。"""
     monkeypatch.setattr(
         "app.api.chat.get_provider",
         lambda model, settings: _FakeProvider([StreamEvent(kind="done")]),
@@ -301,7 +297,7 @@ async def test_regenerate_creates_sibling_placeholder(client, monkeypatch) -> No
     new_placeholder = regen.json()
     assert new_placeholder["parent_id"] == user_id
     assert new_placeholder["is_complete"] is False
-    # The conversation leaf moved to the new placeholder.
+    # conversation leaf 已移动到新的 placeholder。
     conv = (await client.get(f"/api/conversations/{cid}")).json()
     assert conv["current_leaf_id"] == new_placeholder["id"]
 
@@ -309,7 +305,7 @@ async def test_regenerate_creates_sibling_placeholder(client, monkeypatch) -> No
 async def test_switch_leaf_changes_visible_path(
     client, monkeypatch
 ) -> None:
-    """Switching the leaf changes which sibling the visible path descends."""
+    """切换 leaf 会改变可见 path 进入的 sibling。"""
     monkeypatch.setattr(
         "app.api.chat.get_provider",
         lambda model, settings: _FakeProvider([StreamEvent(kind="done")]),
@@ -322,28 +318,28 @@ async def test_switch_leaf_changes_visible_path(
     user_id = create.json()["user_message"]["id"]
     first_assistant = create.json()["assistant_message"]["id"]
 
-    # Stream into the first placeholder so it has content.
+    # 向第一个 placeholder stream，使它拥有 content。
     async with client.stream(
         "GET", f"/api/chat/stream?message_id={first_assistant}"
     ) as response:
         _ = [line async for line in response.aiter_lines()]
 
-    # Regenerate to get a second sibling.
+    # Regenerate 以获得第二个 sibling。
     regen = await client.post(
         f"/api/conversations/{cid}/messages/{user_id}/regenerate"
     )
     second_assistant = regen.json()["id"]
 
-    # The current path ends at the second assistant.
+    # 当前 path 以第二个 assistant 结尾。
     path = (await client.get(f"/api/conversations/{cid}/messages")).json()
     assert path["path"][-1]["message"]["id"] == second_assistant
 
-    # The assistant node's siblings include both versions.
+    # assistant node 的 sibling 包含两个 version。
     assistant_node = path["path"][-1]
     assert set(assistant_node["siblings"]["siblings"]) == {first_assistant, second_assistant}
     assert assistant_node["siblings"]["active_id"] == second_assistant
 
-    # Switch back to the first assistant.
+    # 切回第一个 assistant。
     switched = await client.post(
         f"/api/conversations/{cid}/messages/{first_assistant}/switch"
     )
@@ -351,7 +347,7 @@ async def test_switch_leaf_changes_visible_path(
 
 
 async def test_delete_message_reparents_leaf(client, monkeypatch) -> None:
-    """Deleting the current leaf moves the conversation leaf to its parent."""
+    """删除 current leaf 会将 conversation leaf 移动到其 parent。"""
     monkeypatch.setattr(
         "app.api.chat.get_provider",
         lambda model, settings: _FakeProvider([StreamEvent(kind="done")]),
@@ -364,7 +360,7 @@ async def test_delete_message_reparents_leaf(client, monkeypatch) -> None:
     user_id = create.json()["user_message"]["id"]
     assistant_id = create.json()["assistant_message"]["id"]
 
-    # Delete the assistant placeholder; the leaf should become the user msg.
+    # 删除 assistant placeholder；leaf 应变为 user message。
     response = await client.delete(
         f"/api/conversations/{cid}/messages/{assistant_id}"
     )
@@ -372,15 +368,14 @@ async def test_delete_message_reparents_leaf(client, monkeypatch) -> None:
     conv = (await client.get(f"/api/conversations/{cid}")).json()
     assert conv["current_leaf_id"] == user_id
 
-    # The path now contains only the user message.
+    # path 现在只包含 user message。
     path = (await client.get(f"/api/conversations/{cid}/messages")).json()
     assert len(path["path"]) == 1
     assert path["path"][0]["message"]["role"] == "user"
 
 
 async def test_consecutive_user_messages_rejected(client) -> None:
-    """Attaching a user message under another user message is rejected so
-    Anthropic's role-alternation rule is not violated."""
+    """将 user message 挂到另一个 user message 下会被拒绝，以免违反 Anthropic 的 role-alternation rule。"""
     pid = await _create_profile(client)
     cid = await _create_conversation(client, pid)
     create = await client.post(

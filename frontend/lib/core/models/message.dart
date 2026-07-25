@@ -1,14 +1,12 @@
-/// Message tree data models.
+/// Message tree data model。
 ///
-/// Messages form a tree inside a conversation (architecture decision D18). The
-/// visible path is the chain from the root to the conversation's current leaf.
-/// Sibling messages under the same parent are alternative replies; switching
-/// between them is done by moving the conversation's `current_leaf_id`.
+/// Message 会在 conversation 中组成一棵 tree（架构决策 D18）。可见 path 是从 root 到
+/// conversation current leaf 的 chain。同一 parent 下的 sibling message 是 alternative
+/// reply；在它们之间切换就是移动 conversation 的 `current_leaf_id`。
 ///
-/// This file also defines `SendMessageResponse` — the body returned by
-/// `POST /api/conversations/{id}/messages`, which bundles the new user message
-/// with the freshly-created assistant placeholder that the client then streams
-/// tokens into via `GET /api/chat/stream`.
+/// 此文件还定义 `SendMessageResponse`，即 `POST /api/conversations/{id}/messages` 返回的
+/// body。它将新的 user message 与刚创建的 assistant placeholder 组合起来，客户端随后
+/// 通过 `GET /api/chat/stream` 将 token stream 到其中。
 library;
 
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -18,25 +16,23 @@ import 'conversation.dart';
 part 'message.freezed.dart';
 part 'message.g.dart';
 
-/// The role a message plays in a conversation.
+/// Message 在 conversation 中扮演的 role。
 ///
-/// The frontend renders messages differently by role (user messages get a
-/// bubble, assistant messages get the markdown block, system is rare). The
-/// exhaustiveness check in a `switch` over this enum is real protection, so the
-/// role is the one field the architecture chose to make an enum (D4.3).
+/// Frontend 会按 role 使用不同方式渲染 message（user message 使用 bubble，assistant message
+/// 使用 markdown block，system 很少出现）。此 enum 上 `switch` 的 exhaustiveness check
+/// 提供真实保护，因此架构选择将 role 作为 enum field（D4.3）。
 enum MessageRole {
-  /// A message typed by the user.
+  /// User 输入的 message。
   user,
 
-  /// A reply produced by the model.
+  /// Model 生成的 reply。
   assistant,
 
-  /// A system-level message. Rare in the UI; included for completeness.
-  system,
-  ;
+  /// System-level message。UI 中很少出现；为完整性而包含。
+  system;
 
-  /// Parses the role from the backend string. Falls back to [system] for an
-  /// unknown value so the UI never crashes on a future role addition.
+  /// 从 backend string 解析 role。未知 value 回退到 [system]，使 UI 不会因未来增加 role
+  /// 而崩溃。
   static MessageRole fromString(String value) {
     switch (value) {
       case 'user':
@@ -49,131 +45,125 @@ enum MessageRole {
   }
 }
 
-/// A single message node in a conversation tree.
+/// Conversation tree 中的单个 message node。
 ///
-/// `parentId` is `null` for a root message. `isComplete` is `false` while the
-/// server is still streaming tokens into the message, so the UI can show a
-/// loading state. `imageUrl` is the path the client can fetch the attached
-/// image from, if any.
+/// Root message 的 `parentId` 为 `null`。Server 仍在向 message streaming token 时，
+/// `isComplete` 为 `false`，因此 UI 可以显示 loading state。`imageUrl` 是客户端获取附加
+/// image 的 path（如果存在）。
 @freezed
 class Message with _$Message {
-  /// Creates a message.
+  /// 创建 message。
   const factory Message({
-    /// The server-assigned identifier.
+    /// Server 分配的 identifier。
     required int id,
 
-    /// The conversation this message belongs to.
+    /// 此 message 所属的 conversation。
     required int conversationId,
 
-    /// The parent message id, or `null` for a root message.
+    /// Parent message id；root message 为 `null`。
     required int? parentId,
 
-    /// Who produced this message.
+    /// 生成此 message 的 role。
     required MessageRole role,
 
-    /// The text body. Empty while the assistant is still streaming.
+    /// Text body。Assistant 仍在 streaming 时为空。
     required String content,
 
-    /// The model's reasoning (the "thinking" trace), if any. `null` for user
-    /// messages and for assistant messages whose model produced none.
+    /// Model 的 reasoning（“thinking” trace，如果有）。User message 以及 model 未生成
+    /// reasoning 的 assistant message 为 `null`。
     required String? reasoning,
 
-    /// The URL the client can fetch the attached image from, if any. `null`
-    /// means no image.
+    /// Client 可以获取附加 image 的 URL（如果有）。`null` 表示没有 image。
     required String? imageUrl,
 
-    /// `false` while the server is still streaming tokens into this message.
-    /// Note: the backend sets this to `true` in its `finally` block, so a
-    /// broken stream also ends with `is_complete = true`. The frontend keeps
-    /// its own [StreamState] to tell the difference (architecture §5.4).
+    /// Server 仍向此 message streaming token 时为 `false`。注意：backend 在 `finally` block
+    /// 中将其设为 `true`，因此 broken stream 也会以 `is_complete = true` 结束。Frontend
+    /// 维护自己的 [StreamState] 来区分二者（架构 §5.4）。
     required bool isComplete,
 
-    /// When the message was created.
+    /// Message 创建时间。
     required DateTime createdAt,
   }) = _Message;
 
-  /// Rebuilds a message from the JSON returned by the backend.
+  /// 根据 backend 返回的 JSON 重建 message。
   factory Message.fromJson(Map<String, dynamic> json) =>
       _$MessageFromJson(json);
 }
 
-/// Metadata about the sibling messages of a node on the visible path.
+/// 可见 path 上某个 node 的 sibling message metadata。
 ///
-/// Lets the client render a `< n / m >` version switcher without fetching the
-/// whole tree. `siblings` lists every message sharing this node's `parent_id`
-/// (including this node itself); `activeId` is the one the visible path
-/// currently descends into.
+/// 使客户端无需获取整棵 tree 就能渲染 `< n / m >` version switcher。`siblings` 列出与该
+/// node 共享 `parent_id` 的所有 message（包括该 node）；`activeId` 是当前可见 path 进入的
+/// message。
 @freezed
 class SiblingInfo with _$SiblingInfo {
-  /// Creates sibling metadata.
+  /// 创建 sibling metadata。
   const factory SiblingInfo({
-    /// All message ids that share this node's parent, including this node.
+    /// 与该 node 的 parent 共享的所有 message id，包括该 node。
     @Default(<int>[]) List<int> siblings,
 
-    /// The id of the sibling the visible path currently goes through.
+    /// 当前可见 path 经过的 sibling id。
     required int activeId,
   }) = _SiblingInfo;
 
-  /// Rebuilds sibling metadata from JSON.
+  /// 根据 JSON 重建 sibling metadata。
   factory SiblingInfo.fromJson(Map<String, dynamic> json) =>
       _$SiblingInfoFromJson(json);
 }
 
-/// A message on the visible path paired with its sibling metadata.
+/// 可见 path 上的一条 message 及其 sibling metadata。
 @freezed
 class MessageTreeNode with _$MessageTreeNode {
-  /// Creates a tree node.
+  /// 创建 tree node。
   const factory MessageTreeNode({
-    /// The message at this position on the path.
+    /// Path 此位置上的 message。
     required Message message,
 
-    /// The sibling metadata used to render the version switcher.
+    /// 用于渲染 version switcher 的 sibling metadata。
     required SiblingInfo siblings,
   }) = _MessageTreeNode;
 
-  /// Rebuilds a tree node from JSON.
+  /// 根据 JSON 重建 tree node。
   factory MessageTreeNode.fromJson(Map<String, dynamic> json) =>
       _$MessageTreeNodeFromJson(json);
 }
 
-/// The visible message path of a conversation, ordered root → current leaf.
+/// conversation 的可见 message path，按 root → current leaf 排序。
 ///
-/// This is the single source of truth the chat screen renders from. Every
-/// entry is a [MessageTreeNode] so a version switcher can appear at any level
-/// of the path, not just at the leaf.
+/// 这是 chat screen 用于渲染的 single source of truth。每个 entry 都是 [MessageTreeNode]，
+/// 因此 version switcher 可以出现在 path 的任意 level，而不只是 leaf。
 @freezed
 class ConversationPath with _$ConversationPath {
-  /// Creates a conversation path.
+  /// 创建 conversation path。
   const factory ConversationPath({
-    /// The conversation this path belongs to.
+    /// 此 path 所属的 conversation。
     required Conversation conversation,
 
-    /// The visible messages, from root to the current leaf.
+    /// 从 root 到 current leaf 的可见 message。
     @Default(<MessageTreeNode>[]) List<MessageTreeNode> path,
   }) = _ConversationPath;
 
-  /// Rebuilds a path from JSON returned by the backend.
+  /// 根据 backend 返回的 JSON 重建 path。
   factory ConversationPath.fromJson(Map<String, dynamic> json) =>
       _$ConversationPathFromJson(json);
 }
 
-/// The response of `POST /api/conversations/{id}/messages`.
+/// `POST /api/conversations/{id}/messages` 的 response。
 ///
-/// Bundles the newly-created user message together with the freshly-created
-/// assistant placeholder that the client should stream tokens into via
-/// `GET /api/chat/stream?message_id=...`.
+/// 将刚创建的 user message 与刚创建的 assistant placeholder 组合起来，客户端应通过
+/// `GET /api/chat/stream?message_id=...` 将 token stream 到 placeholder。
 @freezed
 class SendMessageResponse with _$SendMessageResponse {
-  /// Creates the response wrapper.
+  /// 创建 response wrapper。
   const factory SendMessageResponse({
-    /// The user message that was just persisted.
+    /// 刚持久化的 user message。
     required Message userMessage,
 
-    /// The empty assistant placeholder to stream tokens into.
+    /// 用于接收 token stream 的空 assistant placeholder。
     required Message assistantMessage,
   }) = _SendMessageResponse;
 
-  /// Rebuilds the response wrapper from JSON.
+  /// 根据 JSON 重建 response wrapper。
   factory SendMessageResponse.fromJson(Map<String, dynamic> json) =>
       _$SendMessageResponseFromJson(json);
 }

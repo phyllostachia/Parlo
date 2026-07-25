@@ -1,14 +1,12 @@
-"""Conversation endpoints.
+"""会话 endpoint。
 
-Conversations belong to a profile and own a message tree. Each conversation
-is bound to a single model (decision D03): the ``model_id`` and
-``thinking_effort`` are set at creation and only ``thinking_effort`` (and the
-``title``) may be changed afterwards (decision D09).
+会话属于一个 profile，并拥有一棵 message tree。每个会话只绑定一个 model（决策 D03）：
+创建时设置 ``model_id`` 和 ``thinking_effort``，之后只能修改 ``thinking_effort`` 和
+``title``（决策 D09）。
 
-List and create are scoped under ``/profiles/{profile_id}/conversations`;
-single-conversation read, update, and delete are under
-``/conversations/{conversation_id}``. All endpoints require the shared bearer
-token.
+列表和创建操作位于 ``/profiles/{profile_id}/conversations`` 下；单个会话的读取、更新
+和删除位于 ``/conversations/{conversation_id}`` 下。所有 endpoint 都要求共享 bearer
+token。
 """
 
 from __future__ import annotations
@@ -29,12 +27,10 @@ router = APIRouter(dependencies=[Depends(verify_token)])
 def _resolve_thinking_effort(
     model_id: str, requested: str | None, settings
 ) -> str:
-    """Return the thinking-effort level to use for a new or patched
-    conversation.
+    """返回新建或 patch 会话要使用的 thinking-effort 级别。
 
-    If ``requested`` is ``None``, the model's first listed level is used as
-    the default (decision D05). If given, it must be one of the model's
-    listed levels; otherwise a 400 is raised.
+    如果 ``requested`` 为 ``None``，则使用模型列表中的第一个级别作为默认值（决策
+    D05）。如果提供了值，则它必须属于模型支持的级别，否则会抛出 400。
     """
     model = settings.app_config.get_model(model_id)
     if model is None:
@@ -60,7 +56,7 @@ def _resolve_thinking_effort(
 async def list_conversations(
     profile_id: int, session=Depends(get_session)
 ) -> list[Conversation]:
-    """Return the conversations in a profile, newest first."""
+    """按最新更新时间优先返回 profile 中的会话。"""
     profile = await session.get(Profile, profile_id)
     if profile is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "profile not found")
@@ -84,10 +80,10 @@ async def create_conversation(
     session=Depends(get_session),
     settings=Depends(get_settings),
 ) -> Conversation:
-    """Create a conversation in the given profile bound to the given model.
+    """在给定 profile 中创建并绑定到指定 model 的会话。
 
-    ``thinking_effort`` defaults to the model's first listed level when
-    omitted. The model is fixed for the lifetime of the conversation.
+    如果省略 ``thinking_effort``，则使用模型列表中的第一个级别。会话存续期间不会
+    更换其绑定的 model。
     """
     profile = await session.get(Profile, profile_id)
     if profile is None:
@@ -114,7 +110,7 @@ async def create_conversation(
 async def get_conversation(
     conversation_id: int, session=Depends(get_session)
 ) -> Conversation:
-    """Return a single conversation by id."""
+    """按 id 返回单个会话。"""
     conversation = await session.get(Conversation, conversation_id)
     if conversation is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "conversation not found")
@@ -128,11 +124,10 @@ async def update_conversation(
     session=Depends(get_session),
     settings=Depends(get_settings),
 ) -> Conversation:
-    """Update a conversation's title and/or thinking_effort.
+    """更新会话的 title 和/或 thinking_effort。
 
-    ``model_id`` is not changeable here (decision D09); to use a different
-    model, create a new conversation. ``thinking_effort`` is validated against
-    the model's supported levels.
+    这里不能修改 ``model_id``（决策 D09）；如果要使用其他 model，请创建新会话。
+    ``thinking_effort`` 会根据模型支持的级别进行校验。
     """
     conversation = await session.get(Conversation, conversation_id)
     if conversation is None:
@@ -156,8 +151,7 @@ async def update_conversation(
 async def delete_conversation(
     conversation_id: int, session=Depends(get_session)
 ) -> None:
-    """Delete a conversation. Messages are removed by the ``ON DELETE
-    CASCADE`` rule on ``message.conversation_id``."""
+    """删除会话。``message.conversation_id`` 上的 ``ON DELETE CASCADE`` rule 会删除消息。"""
     conversation = await session.get(Conversation, conversation_id)
     if conversation is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "conversation not found")

@@ -1,10 +1,9 @@
-# Parlo Flutter frontend.
+# Parlo Flutter 前端。
 #
-# This is the single-page AI chatbot described in `frontend/design.md` and the
-# architecture document. Web first; mobile platforms will be added in a later
-# phase (see the development plan).
+# 这是 `frontend/design.md` 和架构文档中描述的单页 AI chatbot。当前优先支持 Web；
+# 移动端平台将在后续阶段加入（参见开发计划）。
 name: parlo
-description: "Parlo AI Chatbot"
+description: "Parlo AI 聊天应用"
 publish_to: "none"
 version: 1.0.0+1
 
@@ -15,100 +14,90 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # State management. We use the manual Riverpod API (Provider, NotifierProvider,
-  # AsyncNotifierProvider) instead of the riverpod_generator codegen style. The
-  # architecture document chose codegen for consistency; this implementation uses
-  # the manual style to keep the build simple and avoid an extra code-generation
-  # step for providers. The freezed models below still use code generation.
+  # 状态管理。这里使用手动 Riverpod API（Provider、NotifierProvider、
+  # AsyncNotifierProvider），而不是 riverpod_generator codegen 风格。架构文档为
+  # 保持一致选择了 codegen；当前实现使用手动风格，以简化构建并避免 provider 的
+  # 额外代码生成步骤。下方的 freezed 模型仍然使用代码生成。
   flutter_riverpod: ^2.5.1
 
-  # Networking. dio is required (not package:http) because dio on Flutter Web
-  # uses fetch + ReadableStream, which is the only way to get true streaming
-  # Server-Sent Events in the browser.
+  # 网络。这里必须使用 dio（而不是 package:http），因为 Flutter Web 上的 dio 使用
+  # fetch + ReadableStream，这是在浏览器中实现真正流式 Server-Sent Events 的唯一方式。
   dio: ^5.7.0
 
-  # Routing. go_router with a ShellRoute keeps the sidebar mounted while the
-  # main area swaps between conversations, so sidebar state survives navigation.
+  # 路由。go_router 配合 ShellRoute 可以让侧栏保持挂载，同时切换主区域中的会话，
+  # 因此侧栏状态会在导航时保留。
   go_router: ^14.6.2
 
-  # Data models. freezed + json_serializable generate immutable value types and
-  # JSON converters. field_rename: snake is set in build.yaml so the generated
-  # fromJson maps snake_case API fields to camelCase Dart fields automatically.
+  # 数据模型。freezed + json_serializable 会生成不可变 value type 和 JSON converter。
+  # build.yaml 中设置了 field_rename: snake，因此生成的 fromJson 会自动将 snake_case
+  # API 字段映射到 camelCase Dart 字段。
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0
 
-  # Local preferences for the bearer token, the mobile base URL, and the theme
-  # choice. Web maps this to localStorage, mobile maps to native prefs.
+  # 用于保存 bearer token、移动端 base URL 和主题选择的本地偏好设置。Web 会将其映射
+  # 到 localStorage，移动端会将其映射到原生 prefs。
   shared_preferences: ^2.3.3
 
-  # Markdown renderer that is friendly to streaming (it can re-parse partial
-  # text on every token without flicker). Used for assistant message bodies.
-  # v1.x exposes the widget as `GptMarkdown` and has better streaming support
-  # than the 0.1.x line (which used `TexMarkdown`).
+  # 适合流式渲染的 Markdown renderer（可以在每个 token 到达时重新解析部分文本而不
+  # 闪烁）。用于 assistant 消息正文。v1.x 将 widget 暴露为 `GptMarkdown`，流式支持
+  # 优于使用 `TexMarkdown` 的 0.1.x 系列。
   gpt_markdown: ^1.1.8
 
-  # Optional code highlighter wired into gpt_markdown's custom code builder.
-  # Wired up in a later phase; declared here so the dependency is ready.
+  # 接入 gpt_markdown custom code builder 的可选 code highlighter。后续阶段再接入；
+  # 这里先声明依赖，使依赖已准备好。
   flutter_highlight: ^0.7.0
 
-  # File picker used by the image attachment feature (Phase 5). Supports the
-  # web (HTML file input), Android, iOS, and desktop, so one call site works
-  # across every platform the app targets.
+  # 图片附件功能（阶段 5）使用的 file picker。支持 Web（HTML file input）、Android、
+  # iOS 和 desktop，因此所有目标平台都可以使用同一个调用位置。
   file_picker: ^8.1.4
 
-  # Drag-and-drop used by the image attachment feature (Phase 5). On the web
-  # it hooks the HTML drop event; on desktop it uses platform channels. The
-  # app uses it to accept images dragged onto the chat input.
+  # 图片附件功能（阶段 5）使用的 drag-and-drop。Web 上接入 HTML drop event，desktop
+  # 上使用 platform channels。应用用它接收拖到聊天输入框上的图片。
   desktop_drop: ^0.4.4
 
-  # Cross-platform `XFile` abstraction used by `file_picker` and
-  # `desktop_drop`. Declared as a direct dependency because the image
-  # attachment helpers import `XFile` in their public signatures.
+  # `file_picker` 和 `desktop_drop` 使用的跨平台 `XFile` abstraction。由于图片附件
+  # helper 在 public signature 中导入 `XFile`，因此将其声明为直接依赖。
   cross_file: ^0.3.4+1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  # Code generation runner for freezed and json_serializable.
+  # freezed 和 json_serializable 的代码生成 runner。
   build_runner: ^2.4.13
 
-  # Generates immutable value classes (==, hashCode, copyWith, sealed unions).
+  # 生成不可变 value class（==、hashCode、copyWith、sealed union）。
   freezed: ^2.5.7
 
-  # Generates fromJson / toJson for the freezed models.
+  # 为 freezed 模型生成 fromJson / toJson。
   json_serializable: ^6.8.0
 
-  # Mocking library used by unit and widget tests for dio and other dependencies.
+  # unit test 和 widget test 用于 mock dio 及其他依赖的 mocking library。
   mocktail: ^1.0.4
 
-  # Recommended lint set for Flutter apps. Stricter rules are added in
-  # analysis_options.yaml.
+  # Flutter 应用推荐的 lint 集合。analysis_options.yaml 中会增加更严格的规则。
   flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true
 
-  # Self-hosted font files (see architecture section 9). We ship the TTFs in
-  # the app bundle so the app never has to fetch fonts from the network at run
-  # time, which matters for users on networks where fonts.gstatic.com is slow.
+  # 自托管字体文件（参见架构文档第 9 节）。将 TTF 放入应用 bundle，使应用运行时
+  # 不需要从网络获取字体，这对访问 fonts.gstatic.com 较慢的用户很重要。
   assets:
     - assets/fonts/
 
   fonts:
-    # Source Serif 4 stands in for the private Anthropic Serif. Used only for
-    # display headlines (the rare serif in the UI).
+    # Source Serif 4 作为私有 Anthropic Serif 的替代字体。仅用于 display headline
+    # （UI 中少量使用的衬线文字）。
     - family: SourceSerif4
       fonts:
         - asset: assets/fonts/SourceSerif4-Regular.ttf
           weight: 400
 
-    # Inter stands in for the private Anthropic Sans. It carries all other UI
-    # text. The design uses weights 400, 500, 550, 580, and 600, where 580 is
-    # the heaviest weight the design ever uses. Flutter's pubspec only accepts
-    # standard 100-step weights, so the 580-weight file is exposed at the 600
-    # slot. The app never uses FontWeight.w700+, so the visual heaviest stays
-    # faithful to the design.
+    # Inter 作为私有 Anthropic Sans 的替代字体，承载其他所有 UI 文本。设计使用 400、
+    # 500、550、580 和 600 字重，其中 580 是设计使用的最大字重。Flutter 的 pubspec
+    # 只接受标准的 100 步进字重，因此将 580 字重文件放在 600 插槽中。应用不会使用
+    # FontWeight.w700 及以上字重，因此视觉上的最大字重仍符合设计。
     - family: Inter
       fonts:
         - asset: assets/fonts/Inter-Regular.ttf

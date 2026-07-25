@@ -21,39 +21,35 @@ Conversation _$ConversationFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Conversation {
-  /// The server-assigned identifier, used in the `/c/{id}` URL.
+  /// Server 分配的 identifier，用于 `/c/{id}` URL。
   int get id => throw _privateConstructorUsedError;
 
-  /// The profile this conversation belongs to.
+  /// 此 conversation 所属的 profile。
   int get profileId => throw _privateConstructorUsedError;
 
-  /// The human-readable title. Empty until the first message is sent.
+  /// 可读的 title。发送第一条 message 前为空。
   String get title => throw _privateConstructorUsedError;
 
-  /// The model id from `config.yaml`. Fixed at creation; to use another
-  /// model, create a new conversation.
+  /// `config.yaml` 中的 model id。创建时固定；如需使用其他 model，请创建新 conversation。
   String get modelId => throw _privateConstructorUsedError;
 
-  /// The thinking-effort level for this conversation. One of the levels
-  /// listed in the bound model's `thinking_effort` field. Changeable via
-  /// `PATCH`.
+  /// 此 conversation 的 thinking-effort level。必须是绑定 model 的 `thinking_effort` field
+  /// 中列出的 level 之一。可以通过 `PATCH` 修改。
   String get thinkingEffort => throw _privateConstructorUsedError;
 
-  /// The id of the last message on the visible path, or `null` if the
-  /// conversation has no messages yet.
+  /// 可见 path 上最后一条 message 的 id；conversation 尚无 message 时为 `null`。
   int? get currentLeafId => throw _privateConstructorUsedError;
 
-  /// When the conversation was created.
+  /// Conversation 创建时间。
   DateTime get createdAt => throw _privateConstructorUsedError;
 
-  /// When the conversation was last updated. Used for sidebar sorting.
+  /// Conversation 最近更新时间。用于 sidebar sorting。
   DateTime get updatedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this Conversation to a JSON map.
+  /// 将此 Conversation serialize 为 JSON map。
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of Conversation
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 Conversation 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   $ConversationCopyWith<Conversation> get copyWith =>
       throw _privateConstructorUsedError;
@@ -88,8 +84,7 @@ class _$ConversationCopyWithImpl<$Res, $Val extends Conversation>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of Conversation
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 Conversation 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -172,8 +167,7 @@ class __$$ConversationImplCopyWithImpl<$Res>
     $Res Function(_$ConversationImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of Conversation
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 Conversation 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -242,39 +236,36 @@ class _$ConversationImpl implements _Conversation {
   factory _$ConversationImpl.fromJson(Map<String, dynamic> json) =>
       _$$ConversationImplFromJson(json);
 
-  /// The server-assigned identifier, used in the `/c/{id}` URL.
+  /// Server 分配的 identifier，用于 `/c/{id}` URL。
   @override
   final int id;
 
-  /// The profile this conversation belongs to.
+  /// 此 conversation 所属的 profile。
   @override
   final int profileId;
 
-  /// The human-readable title. Empty until the first message is sent.
+  /// 可读的 title。发送第一条 message 前为空。
   @override
   final String title;
 
-  /// The model id from `config.yaml`. Fixed at creation; to use another
-  /// model, create a new conversation.
+  /// `config.yaml` 中的 model id。创建时固定；如需使用其他 model，请创建新 conversation。
   @override
   final String modelId;
 
-  /// The thinking-effort level for this conversation. One of the levels
-  /// listed in the bound model's `thinking_effort` field. Changeable via
-  /// `PATCH`.
+  /// 此 conversation 的 thinking-effort level。必须是绑定 model 的 `thinking_effort` field
+  /// 中列出的 level 之一。可以通过 `PATCH` 修改。
   @override
   final String thinkingEffort;
 
-  /// The id of the last message on the visible path, or `null` if the
-  /// conversation has no messages yet.
+  /// 可见 path 上最后一条 message 的 id；conversation 尚无 message 时为 `null`。
   @override
   final int? currentLeafId;
 
-  /// When the conversation was created.
+  /// Conversation 创建时间。
   @override
   final DateTime createdAt;
 
-  /// When the conversation was last updated. Used for sidebar sorting.
+  /// Conversation 最近更新时间。用于 sidebar sorting。
   @override
   final DateTime updatedAt;
 
@@ -317,8 +308,7 @@ class _$ConversationImpl implements _Conversation {
     updatedAt,
   );
 
-  /// Create a copy of Conversation
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 Conversation 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
@@ -346,44 +336,40 @@ abstract class _Conversation implements Conversation {
   factory _Conversation.fromJson(Map<String, dynamic> json) =
       _$ConversationImpl.fromJson;
 
-  /// The server-assigned identifier, used in the `/c/{id}` URL.
+  /// Server 分配的 identifier，用于 `/c/{id}` URL。
   @override
   int get id;
 
-  /// The profile this conversation belongs to.
+  /// 此 conversation 所属的 profile。
   @override
   int get profileId;
 
-  /// The human-readable title. Empty until the first message is sent.
+  /// 可读的 title。发送第一条 message 前为空。
   @override
   String get title;
 
-  /// The model id from `config.yaml`. Fixed at creation; to use another
-  /// model, create a new conversation.
+  /// `config.yaml` 中的 model id。创建时固定；如需使用其他 model，请创建新 conversation。
   @override
   String get modelId;
 
-  /// The thinking-effort level for this conversation. One of the levels
-  /// listed in the bound model's `thinking_effort` field. Changeable via
-  /// `PATCH`.
+  /// 此 conversation 的 thinking-effort level。必须是绑定 model 的 `thinking_effort` field
+  /// 中列出的 level 之一。可以通过 `PATCH` 修改。
   @override
   String get thinkingEffort;
 
-  /// The id of the last message on the visible path, or `null` if the
-  /// conversation has no messages yet.
+  /// Visible path 上最后一条 message 的 id；conversation 尚无 message 时为 `null`。
   @override
   int? get currentLeafId;
 
-  /// When the conversation was created.
+  /// Conversation 创建时间。
   @override
   DateTime get createdAt;
 
-  /// When the conversation was last updated. Used for sidebar sorting.
+  /// Conversation 最近更新时间。用于 sidebar sorting。
   @override
   DateTime get updatedAt;
 
-  /// Create a copy of Conversation
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 Conversation 的副本，并用非 null parameter value 替换给定 field。
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ConversationImplCopyWith<_$ConversationImpl> get copyWith =>
@@ -396,21 +382,20 @@ ConversationCreate _$ConversationCreateFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$ConversationCreate {
-  /// The model id to bind to this conversation.
+  /// 要绑定到此 conversation 的 model id。
   String get modelId => throw _privateConstructorUsedError;
 
-  /// An optional starting title. Usually left empty until the first turn.
+  /// 可选的初始 title。通常在第一个 turn 前保持为空。
   String get title => throw _privateConstructorUsedError;
 
-  /// An optional thinking-effort level. Must be one of the model's listed
-  /// levels; `null` means "use the model's default".
+  /// 可选的 thinking-effort level。必须是 model 列出的 level 之一；`null` 表示“使用
+  /// model default”。
   String? get thinkingEffort => throw _privateConstructorUsedError;
 
-  /// Serializes this ConversationCreate to a JSON map.
+  /// 将此 ConversationCreate serialize 为 JSON map。
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of ConversationCreate
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ConversationCreate 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   $ConversationCreateCopyWith<ConversationCreate> get copyWith =>
       throw _privateConstructorUsedError;
@@ -436,8 +421,7 @@ class _$ConversationCreateCopyWithImpl<$Res, $Val extends ConversationCreate>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of ConversationCreate
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ConversationCreate 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -486,8 +470,7 @@ class __$$ConversationCreateImplCopyWithImpl<$Res>
     $Res Function(_$ConversationCreateImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of ConversationCreate
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ConversationCreate 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -526,17 +509,17 @@ class _$ConversationCreateImpl implements _ConversationCreate {
   factory _$ConversationCreateImpl.fromJson(Map<String, dynamic> json) =>
       _$$ConversationCreateImplFromJson(json);
 
-  /// The model id to bind to this conversation.
+  /// 要绑定到此 conversation 的 model id。
   @override
   final String modelId;
 
-  /// An optional starting title. Usually left empty until the first turn.
+  /// 可选的初始 title。通常在第一个 turn 前保持为空。
   @override
   @JsonKey()
   final String title;
 
-  /// An optional thinking-effort level. Must be one of the model's listed
-  /// levels; `null` means "use the model's default".
+  /// 可选的 thinking-effort level。必须是 model 列出的 level 之一；`null` 表示“使用
+  /// model default”。
   @override
   final String? thinkingEffort;
 
@@ -560,8 +543,7 @@ class _$ConversationCreateImpl implements _ConversationCreate {
   @override
   int get hashCode => Object.hash(runtimeType, modelId, title, thinkingEffort);
 
-  /// Create a copy of ConversationCreate
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ConversationCreate 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
@@ -587,21 +569,20 @@ abstract class _ConversationCreate implements ConversationCreate {
   factory _ConversationCreate.fromJson(Map<String, dynamic> json) =
       _$ConversationCreateImpl.fromJson;
 
-  /// The model id to bind to this conversation.
+  /// 要绑定到此 conversation 的 model id。
   @override
   String get modelId;
 
-  /// An optional starting title. Usually left empty until the first turn.
+  /// 可选的初始 title。通常在第一个 turn 前保持为空。
   @override
   String get title;
 
-  /// An optional thinking-effort level. Must be one of the model's listed
-  /// levels; `null` means "use the model's default".
+  /// 可选的 thinking-effort level。必须是 model 列出的 level 之一；`null` 表示“使用
+  /// model default”。
   @override
   String? get thinkingEffort;
 
-  /// Create a copy of ConversationCreate
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ConversationCreate 的副本，并用非 null parameter value 替换给定 field。
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ConversationCreateImplCopyWith<_$ConversationCreateImpl> get copyWith =>
@@ -614,18 +595,16 @@ ConversationUpdate _$ConversationUpdateFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$ConversationUpdate {
-  /// The new title, if changing it.
+  /// 要修改的新 title。
   String? get title => throw _privateConstructorUsedError;
 
-  /// The new thinking-effort level, if changing it. Must be one of the
-  /// model's supported levels.
+  /// 要修改的新 thinking-effort level。必须是 model 支持的 level 之一。
   String? get thinkingEffort => throw _privateConstructorUsedError;
 
-  /// Serializes this ConversationUpdate to a JSON map.
+  /// 将此 ConversationUpdate serialize 为 JSON map。
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of ConversationUpdate
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ConversationUpdate 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   $ConversationUpdateCopyWith<ConversationUpdate> get copyWith =>
       throw _privateConstructorUsedError;
@@ -651,8 +630,7 @@ class _$ConversationUpdateCopyWithImpl<$Res, $Val extends ConversationUpdate>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of ConversationUpdate
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ConversationUpdate 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({Object? title = freezed, Object? thinkingEffort = freezed}) {
@@ -693,8 +671,7 @@ class __$$ConversationUpdateImplCopyWithImpl<$Res>
     $Res Function(_$ConversationUpdateImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of ConversationUpdate
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ConversationUpdate 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({Object? title = freezed, Object? thinkingEffort = freezed}) {
@@ -721,12 +698,11 @@ class _$ConversationUpdateImpl implements _ConversationUpdate {
   factory _$ConversationUpdateImpl.fromJson(Map<String, dynamic> json) =>
       _$$ConversationUpdateImplFromJson(json);
 
-  /// The new title, if changing it.
+  /// 要修改的新 title。
   @override
   final String? title;
 
-  /// The new thinking-effort level, if changing it. Must be one of the
-  /// model's supported levels.
+  /// 要修改的新 thinking-effort level。必须是 model 支持的 level 之一。
   @override
   final String? thinkingEffort;
 
@@ -749,8 +725,7 @@ class _$ConversationUpdateImpl implements _ConversationUpdate {
   @override
   int get hashCode => Object.hash(runtimeType, title, thinkingEffort);
 
-  /// Create a copy of ConversationUpdate
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ConversationUpdate 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
@@ -775,17 +750,15 @@ abstract class _ConversationUpdate implements ConversationUpdate {
   factory _ConversationUpdate.fromJson(Map<String, dynamic> json) =
       _$ConversationUpdateImpl.fromJson;
 
-  /// The new title, if changing it.
+  /// 要修改的新 title。
   @override
   String? get title;
 
-  /// The new thinking-effort level, if changing it. Must be one of the
-  /// model's supported levels.
+  /// 要修改的新 thinking-effort level。必须是 model 支持的 level 之一。
   @override
   String? get thinkingEffort;
 
-  /// Create a copy of ConversationUpdate
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ConversationUpdate 的副本，并用非 null parameter value 替换给定 field。
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ConversationUpdateImplCopyWith<_$ConversationUpdateImpl> get copyWith =>

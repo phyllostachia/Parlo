@@ -1,15 +1,13 @@
-"""Tests for the provider adapters' event translation.
+"""Provider adapter event translation 的测试。
 
-The upstream HTTP layer is mocked with ``respx`` so the tests exercise only the
-protocol-to-unified-event mapping without network calls. Each test feeds a
-canned SSE response and asserts the adapter yields the expected sequence of
-:class:`StreamEvent` objects.
+上游 HTTP layer 使用 ``respx`` mock，因此测试只验证 protocol-to-unified-event mapping，
+不会发起 network call。每个 test 提供预设 SSE response，并断言 adapter 生成预期顺序的
+:class:`StreamEvent` object。
 
-Adapters are constructed from a :class:`ModelConfig` (base URL, protocol,
-max_tokens, and the env-var name for the API key) plus the process-wide
-:class:`Settings` (which carries the image upload directory). The shared
-conftest sets ``OPENAI_API_KEY`` / ``ANTHROPIC_API_KEY`` and a throwaway
-``config.yaml``, so the constructed models just have to reference those names.
+Adapter 根据 :class:`ModelConfig`（base URL、protocol、max_tokens 和 API key 的 env-var
+name）以及 process-wide :class:`Settings`（携带 image upload directory）构造。共享的
+conftest 设置 ``OPENAI_API_KEY`` / ``ANTHROPIC_API_KEY`` 和临时 ``config.yaml``，因此
+构造的 model 只需要引用这些 name。
 """
 
 from __future__ import annotations
@@ -52,13 +50,13 @@ def _anthropic_model() -> ModelConfig:
 
 
 def _settings() -> Settings:
-    # Reuse the shared test config so image upload dir etc. are consistent.
+    # 复用共享 test config，使 image upload dir 等配置保持一致。
     return get_settings()
 
 
 @respx.mock
 async def test_openai_translates_text_and_done() -> None:
-    """OpenAI text deltas concatenate and the stream ends with ``done``."""
+    """OpenAI text delta 会拼接，stream 以 ``done`` 结束。"""
     sse = (
         'event: response.output_text.delta\n'
         'data: {"type":"response.output_text.delta","delta":"Hello"}\n\n'
@@ -82,7 +80,7 @@ async def test_openai_translates_text_and_done() -> None:
 
 @respx.mock
 async def test_openai_translates_reasoning_delta() -> None:
-    """Reasoning delta events are surfaced as ``reasoning_delta``."""
+    """Reasoning delta event 会作为 ``reasoning_delta`` 暴露。"""
     sse = (
         'event: response.reasoning_summary_text.delta\n'
         'data: {"type":"response.reasoning_summary_text.delta","delta":"thinking"}\n\n'
@@ -111,7 +109,7 @@ async def test_openai_translates_reasoning_delta() -> None:
 
 @respx.mock
 async def test_openai_surfaces_upstream_error() -> None:
-    """A non-200 response becomes a single ``error`` event."""
+    """非 200 response 会变成单个 ``error`` event。"""
     respx.post("https://api.openai.com/v1/responses").mock(
         return_value=httpx.Response(
             401, json={"error": {"message": "invalid api key"}}
@@ -127,8 +125,7 @@ async def test_openai_surfaces_upstream_error() -> None:
 
 @respx.mock
 async def test_openai_body_carries_effort_and_max_tokens() -> None:
-    """The request body includes ``reasoning.effort`` and
-    ``max_output_tokens`` when thinking is requested."""
+    """请求 body 在请求 thinking 时包含 ``reasoning.effort`` 和 ``max_output_tokens``。"""
     captured: dict = {}
 
     def _capture(request: httpx.Request) -> httpx.Response:
@@ -156,7 +153,7 @@ async def test_openai_body_carries_effort_and_max_tokens() -> None:
 
 @respx.mock
 async def test_anthropic_translates_text_and_done() -> None:
-    """Anthropic text deltas and message_stop map to text_delta + done."""
+    """Anthropic text delta 和 message_stop 会映射为 text_delta + done。"""
     sse = (
         'event: message_start\n'
         'data: {"type":"message_start","message":{"id":"msg_1"}}\n\n'
@@ -186,8 +183,7 @@ async def test_anthropic_translates_text_and_done() -> None:
 
 @respx.mock
 async def test_anthropic_body_carries_adaptive_thinking_and_max_tokens() -> None:
-    """The request body uses adaptive thinking with the selected effort and
-    the model's ``max_tokens`` (replacing the old hardcoded 8192)."""
+    """请求 body 使用选定 effort 的 adaptive thinking，以及 model 的 ``max_tokens``（替代旧的 hardcoded 8192）。"""
     captured: dict = {}
 
     def _capture(request: httpx.Request) -> httpx.Response:
@@ -219,7 +215,7 @@ async def test_anthropic_body_carries_adaptive_thinking_and_max_tokens() -> None
 
 @respx.mock
 async def test_anthropic_translates_thinking_and_signature() -> None:
-    """A thinking block yields reasoning deltas and a signature event."""
+    """Thinking block 会生成 reasoning delta 和 signature event。"""
     sse = (
         'event: content_block_start\n'
         'data: {"type":"content_block_start","index":0,"content_block":{"type":"thinking","thinking":"","signature":""}}\n\n'

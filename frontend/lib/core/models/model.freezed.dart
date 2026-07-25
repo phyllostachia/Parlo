@@ -21,33 +21,31 @@ ModelRead _$ModelReadFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$ModelRead {
-  /// The model id, used when creating a conversation.
+  /// 创建 conversation 时使用的 model id。
   String get id => throw _privateConstructorUsedError;
 
-  /// The human-readable name shown in the model selector and the model badge
-  /// under assistant messages.
+  /// Model selector 和 assistant message 下方 model badge 中显示的可读名称。
   String get displayName => throw _privateConstructorUsedError;
 
-  /// The model family, e.g. "gpt" or "claude". Shown for context only; the
-  /// frontend never branches on it (decision D4.3).
+  /// Model family，例如 "gpt" 或 "claude"。仅用于提供上下文；frontend 不会根据它
+  /// 分支处理（decision D4.3）。
   String get family => throw _privateConstructorUsedError;
 
-  /// The upstream protocol, e.g. "openai-response" or "anthropic-message".
-  /// Kept as a string; the frontend never branches on it.
+  /// Upstream protocol，例如 "openai-response" 或 "anthropic-message"。
+  /// 保持为 string；frontend 不会根据它分支处理。
   String get protocol => throw _privateConstructorUsedError;
 
-  /// Whether this model can accept image attachments.
+  /// 此 model 是否可以接收 image attachment。
   bool get vision => throw _privateConstructorUsedError;
 
-  /// The supported thinking-effort levels, in the order the UI should show
-  /// them. The first entry is the default for new conversations.
+  /// 支持的 thinking-effort level，按 UI 应显示的顺序排列。第一项是新 conversation
+  /// 的默认值。
   List<String> get thinkingEffort => throw _privateConstructorUsedError;
 
-  /// Serializes this ModelRead to a JSON map.
+  /// 将此 ModelRead serialize 为 JSON map。
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of ModelRead
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ModelRead 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   $ModelReadCopyWith<ModelRead> get copyWith =>
       throw _privateConstructorUsedError;
@@ -78,8 +76,7 @@ class _$ModelReadCopyWithImpl<$Res, $Val extends ModelRead>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of ModelRead
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ModelRead 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -150,8 +147,7 @@ class __$$ModelReadImplCopyWithImpl<$Res>
     $Res Function(_$ModelReadImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of ModelRead
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ModelRead 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -208,35 +204,34 @@ class _$ModelReadImpl implements _ModelRead {
   factory _$ModelReadImpl.fromJson(Map<String, dynamic> json) =>
       _$$ModelReadImplFromJson(json);
 
-  /// The model id, used when creating a conversation.
+  /// 创建 conversation 时使用的 model id。
   @override
   final String id;
 
-  /// The human-readable name shown in the model selector and the model badge
-  /// under assistant messages.
+  /// Model selector 和 assistant message 下方 model badge 中显示的可读名称。
   @override
   final String displayName;
 
-  /// The model family, e.g. "gpt" or "claude". Shown for context only; the
-  /// frontend never branches on it (decision D4.3).
+  /// Model family，例如 "gpt" 或 "claude"。仅用于提供上下文；frontend 不会根据它
+  /// 分支处理（decision D4.3）。
   @override
   final String family;
 
-  /// The upstream protocol, e.g. "openai-response" or "anthropic-message".
-  /// Kept as a string; the frontend never branches on it.
+  /// Upstream protocol，例如 "openai-response" 或 "anthropic-message"。
+  /// 保持为 string；frontend 不会根据它分支处理。
   @override
   final String protocol;
 
-  /// Whether this model can accept image attachments.
+  /// 此 model 是否可以接收 image attachment。
   @override
   final bool vision;
 
-  /// The supported thinking-effort levels, in the order the UI should show
-  /// them. The first entry is the default for new conversations.
+  /// 支持的 thinking-effort level，按 UI 应显示的顺序排列。第一项是新 conversation
+  /// 的默认值。
   final List<String> _thinkingEffort;
 
-  /// The supported thinking-effort levels, in the order the UI should show
-  /// them. The first entry is the default for new conversations.
+  /// 支持的 thinking-effort level，按 UI 应显示的顺序排列。第一项是新 conversation
+  /// 的默认值。
   @override
   @JsonKey()
   List<String> get thinkingEffort {
@@ -280,8 +275,7 @@ class _$ModelReadImpl implements _ModelRead {
     const DeepCollectionEquality().hash(_thinkingEffort),
   );
 
-  /// Create a copy of ModelRead
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ModelRead 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
@@ -307,36 +301,34 @@ abstract class _ModelRead implements ModelRead {
   factory _ModelRead.fromJson(Map<String, dynamic> json) =
       _$ModelReadImpl.fromJson;
 
-  /// The model id, used when creating a conversation.
+  /// 创建 conversation 时使用的 model id。
   @override
   String get id;
 
-  /// The human-readable name shown in the model selector and the model badge
-  /// under assistant messages.
+  /// Model selector 和 assistant message 下方 model badge 中显示的可读名称。
   @override
   String get displayName;
 
-  /// The model family, e.g. "gpt" or "claude". Shown for context only; the
-  /// frontend never branches on it (decision D4.3).
+  /// Model family，例如 "gpt" 或 "claude"。仅用于提供上下文；frontend 不会根据它
+  /// 分支处理（decision D4.3）。
   @override
   String get family;
 
-  /// The upstream protocol, e.g. "openai-response" or "anthropic-message".
-  /// Kept as a string; the frontend never branches on it.
+  /// Upstream protocol，例如 "openai-response" 或 "anthropic-message"。
+  /// 保持为 string；frontend 不会根据它分支处理。
   @override
   String get protocol;
 
-  /// Whether this model can accept image attachments.
+  /// 此 model 是否可以接收 image attachment。
   @override
   bool get vision;
 
-  /// The supported thinking-effort levels, in the order the UI should show
-  /// them. The first entry is the default for new conversations.
+  /// 支持的 thinking-effort level，按 UI 应显示的顺序排列。第一项是新 conversation
+  /// 的默认值。
   @override
   List<String> get thinkingEffort;
 
-  /// Create a copy of ModelRead
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ModelRead 的副本，并用非 null parameter value 替换给定 field。
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ModelReadImplCopyWith<_$ModelReadImpl> get copyWith =>
@@ -349,18 +341,16 @@ ModelsResponse _$ModelsResponseFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$ModelsResponse {
-  /// The configured default model id. Used as the initial selection in the
-  /// empty state's model picker.
+  /// 配置的默认 model id。用于 empty state 的 model picker 初始选择。
   String get defaultModel => throw _privateConstructorUsedError;
 
-  /// All models declared in the backend config.
+  /// backend config 中声明的所有 model。
   List<ModelRead> get models => throw _privateConstructorUsedError;
 
-  /// Serializes this ModelsResponse to a JSON map.
+  /// 将此 ModelsResponse serialize 为 JSON map。
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of ModelsResponse
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ModelsResponse 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   $ModelsResponseCopyWith<ModelsResponse> get copyWith =>
       throw _privateConstructorUsedError;
@@ -386,8 +376,7 @@ class _$ModelsResponseCopyWithImpl<$Res, $Val extends ModelsResponse>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of ModelsResponse
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ModelsResponse 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({Object? defaultModel = null, Object? models = null}) {
@@ -428,8 +417,7 @@ class __$$ModelsResponseImplCopyWithImpl<$Res>
     $Res Function(_$ModelsResponseImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of ModelsResponse
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ModelsResponse 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({Object? defaultModel = null, Object? models = null}) {
@@ -459,15 +447,14 @@ class _$ModelsResponseImpl implements _ModelsResponse {
   factory _$ModelsResponseImpl.fromJson(Map<String, dynamic> json) =>
       _$$ModelsResponseImplFromJson(json);
 
-  /// The configured default model id. Used as the initial selection in the
-  /// empty state's model picker.
+  /// 配置的默认 model id。用于 empty state 的 model picker 初始选择。
   @override
   final String defaultModel;
 
-  /// All models declared in the backend config.
+  /// backend config 中声明的所有 model。
   final List<ModelRead> _models;
 
-  /// All models declared in the backend config.
+  /// backend config 中声明的所有 model。
   @override
   @JsonKey()
   List<ModelRead> get models {
@@ -499,8 +486,7 @@ class _$ModelsResponseImpl implements _ModelsResponse {
     const DeepCollectionEquality().hash(_models),
   );
 
-  /// Create a copy of ModelsResponse
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ModelsResponse 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
@@ -525,17 +511,15 @@ abstract class _ModelsResponse implements ModelsResponse {
   factory _ModelsResponse.fromJson(Map<String, dynamic> json) =
       _$ModelsResponseImpl.fromJson;
 
-  /// The configured default model id. Used as the initial selection in the
-  /// empty state's model picker.
+  /// 配置的默认 model id。用于 empty state 的 model picker 初始选择。
   @override
   String get defaultModel;
 
-  /// All models declared in the backend config.
+  /// backend config 中声明的所有 model。
   @override
   List<ModelRead> get models;
 
-  /// Create a copy of ModelsResponse
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ModelsResponse 的副本，并用非 null parameter value 替换给定 field。
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ModelsResponseImplCopyWith<_$ModelsResponseImpl> get copyWith =>

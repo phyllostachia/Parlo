@@ -1,9 +1,8 @@
-"""FastAPI application factory and wiring.
+"""FastAPI application factory 和 wiring。
 
-The application owns the SQLite database, proxies streaming chat requests to
-the selected upstream provider, serves uploaded images, and exposes the REST
-API consumed by the Flutter client. The frontend is deployed as a separate
-origin, so CORS is configured from ``settings.cors_origins``.
+应用负责 SQLite database，将流式聊天请求代理到选定的上游 provider，提供上传的图片，
+并暴露 Flutter 客户端使用的 REST API。由于前端部署在独立 origin，CORS 会根据
+``settings.cors_origins`` 配置。
 """
 
 from __future__ import annotations
@@ -33,11 +32,10 @@ _MEDIA_TYPES = {
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Create data directories and the database schema on startup.
+    """在启动时创建 data directory 和 database schema。
 
-    Running ``init_db`` here means a fresh checkout works with no manual
-    migration step. The image directory is also created eagerly so the first
-    upload does not race a lazy ``makedirs``.
+    在这里运行 ``init_db`` 后，全新 checkout 无需手动 migration step 即可工作。图片
+    directory 也会提前创建，避免第一次 upload 与 lazy ``makedirs`` 发生竞争。
     """
     settings = get_settings()
     image_upload_dir = settings.app_config.images.upload_dir
@@ -52,7 +50,7 @@ async def lifespan(app: FastAPI):
 
 
 def create_app() -> FastAPI:
-    """Build the configured FastAPI application instance."""
+    """构建已配置的 FastAPI application instance。"""
     settings = get_settings()
     app = FastAPI(
         title="Parlo Backend",
@@ -76,7 +74,7 @@ def create_app() -> FastAPI:
 
     @app.get("/api/health", tags=["meta"])
     async def health() -> dict[str, str]:
-        """Unauthenticated liveness probe used by the client setup screen."""
+        """供客户端 setup screen 使用的免鉴权 liveness probe。"""
         return {"status": "ok"}
 
     @app.get(
@@ -85,11 +83,10 @@ def create_app() -> FastAPI:
         tags=["images"],
     )
     async def get_image(filename: str) -> FileResponse:
-        """Serve an uploaded image to an authenticated client.
+        """向已鉴权客户端提供上传的图片。
 
-        Auth is enforced so a guessed URL alone is not enough to read images;
-        the filename still has to be a server-generated UUID name, which
-        :func:`safe_filename` checks for path-traversal safety.
+        这里强制执行 auth，因此仅猜到 URL 也不足以读取图片；filename 仍必须是服务器
+        生成的 UUID name，:func:`safe_filename` 会检查其 path-traversal safety。
         """
         safe_filename(filename)
         path = os.path.join(get_settings().app_config.images.upload_dir, filename)

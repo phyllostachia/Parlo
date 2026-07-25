@@ -1,8 +1,7 @@
-/// The `Conversation` data model and its create/update request bodies.
+/// `Conversation` data model 及其 create/update request body。
 ///
-/// A conversation is a chat thread that belongs to one profile and is bound to
-/// a single model for its whole lifetime (architecture decision D03). Only the
-/// title and the thinking-effort level can be changed after creation.
+/// Conversation 是属于一个 profile、并在整个生命周期内绑定单个 model 的 chat thread
+///（架构决策 D03）。创建后只能修改 title 和 thinking-effort level。
 library;
 
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -10,91 +9,85 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'conversation.freezed.dart';
 part 'conversation.g.dart';
 
-/// A chat thread inside a profile, bound to a single model.
+/// Profile 内绑定单个 model 的 chat thread。
 ///
-/// `currentLeafId` points at the last message on the visible path; the path is
-/// reconstructed on the server by walking `parent_id` from this leaf back to the
-/// root. `null` means the conversation has no messages yet.
+/// `currentLeafId` 指向可见 path 上的最后一条 message；server 从该 leaf 沿 `parent_id`
+/// 回溯到 root 来重建 path。`null` 表示 conversation 还没有 message。
 @freezed
 class Conversation with _$Conversation {
-  /// Creates a conversation.
+  /// 创建 conversation。
   const factory Conversation({
-    /// The server-assigned identifier, used in the `/c/{id}` URL.
+    /// Server 分配的 identifier，用于 `/c/{id}` URL。
     required int id,
 
-    /// The profile this conversation belongs to.
+    /// 此 conversation 所属的 profile。
     required int profileId,
 
-    /// The human-readable title. Empty until the first message is sent.
+    /// 可读的 title。发送第一条 message 前为空。
     required String title,
 
-    /// The model id from `config.yaml`. Fixed at creation; to use another
-    /// model, create a new conversation.
+    /// `config.yaml` 中的 model id。创建时固定；如需使用其他 model，请创建新 conversation。
     required String modelId,
 
-    /// The thinking-effort level for this conversation. One of the levels
-    /// listed in the bound model's `thinking_effort` field. Changeable via
-    /// `PATCH`.
+    /// 此 conversation 的 thinking-effort level。必须是绑定 model 的 `thinking_effort` field
+    /// 中列出的 level 之一。可以通过 `PATCH` 修改。
     required String thinkingEffort,
 
-    /// The id of the last message on the visible path, or `null` if the
-    /// conversation has no messages yet.
+    /// 可见 path 上最后一条 message 的 id；conversation 尚无 message 时为 `null`。
     required int? currentLeafId,
 
-    /// When the conversation was created.
+    /// Conversation 创建时间。
     required DateTime createdAt,
 
-    /// When the conversation was last updated. Used for sidebar sorting.
+    /// Conversation 最近更新时间。用于 sidebar sorting。
     required DateTime updatedAt,
   }) = _Conversation;
 
-  /// Rebuilds a conversation from the JSON returned by the backend.
+  /// 根据 backend 返回的 JSON 重建 conversation。
   factory Conversation.fromJson(Map<String, dynamic> json) =>
       _$ConversationFromJson(json);
 }
 
-/// The body of a `POST /api/profiles/{id}/conversations` request.
+/// `POST /api/profiles/{id}/conversations` request 的 body。
 ///
-/// `thinkingEffort` is optional; when omitted, the backend defaults to the
-/// first level in the model's `thinking_effort` list (decision D05).
+/// `thinkingEffort` 是 optional；省略时 backend 使用 model 的 `thinking_effort` list 中的
+/// 第一个 level（决策 D05）。
 @freezed
 class ConversationCreate with _$ConversationCreate {
-  /// Creates a request body.
+  /// 创建 request body。
   const factory ConversationCreate({
-    /// The model id to bind to this conversation.
+    /// 要绑定到此 conversation 的 model id。
     required String modelId,
 
-    /// An optional starting title. Usually left empty until the first turn.
+    /// 可选的初始 title。通常在第一个 turn 前保持为空。
     @Default('') String title,
 
-    /// An optional thinking-effort level. Must be one of the model's listed
-    /// levels; `null` means "use the model's default".
+    /// 可选的 thinking-effort level。必须是 model 列出的 level 之一；`null` 表示“使用
+    /// model default”。
     String? thinkingEffort,
   }) = _ConversationCreate;
 
-  /// Rebuilds a request body from JSON (mostly useful in tests).
+  /// 根据 JSON 重建 request body（主要用于 test）。
   factory ConversationCreate.fromJson(Map<String, dynamic> json) =>
       _$ConversationCreateFromJson(json);
 }
 
-/// The body of a `PATCH /api/conversations/{id}` request.
+/// `PATCH /api/conversations/{id}` request 的 body。
 ///
-/// Both fields are optional. Only the provided ones are applied on the server.
-/// `modelId` is intentionally absent: the model is fixed for the conversation's
-/// lifetime (decision D09).
+/// 两个 field 都是 optional。Server 只应用实际提供的 field。这里有意不包含 `modelId`，
+/// 因为 model 在 conversation 生命周期内固定（决策 D09）。
 @freezed
 class ConversationUpdate with _$ConversationUpdate {
-  /// Creates a request body.
+  /// 创建 request body。
   const factory ConversationUpdate({
-    /// The new title, if changing it.
+    /// 要修改的新 title。
     String? title,
 
-    /// The new thinking-effort level, if changing it. Must be one of the
-    /// model's supported levels.
+    /// 要修改的新 thinking-effort level。必须是 model 支持的 level 之一。
     String? thinkingEffort,
   }) = _ConversationUpdate;
 
-  /// Rebuilds a request body from JSON (mostly useful in tests).
+  /// 根据 JSON 重建 request body（主要用于 test）。
   factory ConversationUpdate.fromJson(Map<String, dynamic> json) =>
       _$ConversationUpdateFromJson(json);
 }

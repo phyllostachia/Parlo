@@ -1,41 +1,34 @@
-/// The platform differences the app cares about, expressed as one abstract
-/// interface.
+/// 应用关心的平台差异，以一个 abstract interface 表达。
 ///
-/// The architecture (section 8) calls this `PlatformCapabilities`. It lets the
-/// rest of the app ask "can this platform drag images?" or "should the message
-/// actions appear on hover or always?" without checking `Platform.isWeb` itself.
-/// The web implementation lives in `web_capabilities.dart`; a mobile
-/// implementation will be added in Phase 8.
+/// 架构文档（第 8 节）将其称为 `PlatformCapabilities`。它让应用其余部分能够询问“该
+/// platform 是否可以 drag image？”或“message action 应在 hover 时还是始终显示？”，而
+/// 不需要直接检查 `Platform.isWeb`。Web 实现在 `web_capabilities.dart` 中，mobile 实现
+/// 会在阶段 8 加入。
 library;
 
-/// How the message action bar (copy / regenerate) is shown.
+/// 如何显示 message action bar（copy / regenerate）。
 enum MessageActionsMode {
-  /// Actions appear only while the pointer hovers over the message. Used on
-  /// the web, where a precise pointer is always available.
+  /// 只有 pointer hover 在 message 上时才显示 action。用于始终有精确 pointer 的 Web。
   hover,
 
-  /// Actions are always visible at the end of the message. Used on mobile,
-  /// where there is no hover and a long-press is less discoverable than a
-  /// always-there button row.
+  /// Action 始终显示在 message 末尾。用于没有 hover 的 mobile，因为长按不如始终存在的
+  /// button row 容易发现。
   always,
 }
 
-/// The platform-dependent knobs the UI reads to stay portable.
+/// UI 读取的 platform-dependent knob，使应用保持可移植。
 ///
-/// Each property answers one concrete question the UI asks. New platform
-/// differences should be added here rather than scattered as `Platform.isXxx`
-/// checks, so the surface stays small and obvious.
+/// 每个 property 都回答 UI 的一个具体问题。新的 platform difference 应添加到这里，而不
+/// 是分散为 `Platform.isXxx` check，使 abstraction surface 保持小而清晰。
 abstract class PlatformCapabilities {
-  /// Whether the chat input should accept images dragged onto it.
+  /// chat input 是否接受拖到其上的图片。
   ///
-  /// `true` on the web (a mouse can drag files). `false` on mobile (touch
-  /// drag is for reordering, not file drop); mobile uses paste + file picker
-  /// instead.
+  /// Web 上为 `true`（mouse 可以拖动 file）。Mobile 上为 `false`（touch drag 用于排序，
+  /// 而不是 file drop）；mobile 改用 paste + file picker。
   bool get canDragImage;
 
-  /// How the message action bar (copy / regenerate) is shown.
+  /// 如何显示 message action bar（copy / regenerate）。
   ///
-  /// [MessageActionsMode.hover] on the web, [MessageActionsMode.always] on
-  /// mobile.
+  /// Web 上为 [MessageActionsMode.hover]，mobile 上为 [MessageActionsMode.always]。
   MessageActionsMode get messageActions;
 }

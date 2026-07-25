@@ -1,13 +1,11 @@
-"""Message tree endpoints.
+"""消息树 endpoint。
 
-Messages form a tree inside a conversation (decision D18). These endpoints
-create user messages, regenerate assistant replies, switch the visible path
-between sibling replies, list the visible path with sibling metadata, and
-delete subtrees. All require the shared bearer token.
+消息会在会话中组成一棵树（决策 D18）。这些 endpoint 负责创建 user message、重新生成
+assistant reply、在 sibling reply 之间切换可见路径、带 sibling metadata 列出可见路径，
+以及删除 subtree。所有 endpoint 都要求共享 bearer token。
 
-The streaming itself lives in :mod:`app.api.chat`; these endpoints only
-create the messages that the stream writes into, so the write path stays
-simple and testable without a live upstream provider.
+实际的 streaming 位于 :mod:`app.api.chat`；这些 endpoint 只创建 stream 要写入的 message，
+因此 write path 保持简单，并且无需 live upstream provider 就能测试。
 """
 
 from __future__ import annotations
@@ -37,7 +35,7 @@ router = APIRouter(dependencies=[Depends(verify_token)])
 
 
 def _to_message_read(message: Message) -> MessageRead:
-    """Convert a :class:`Message` row into the client-facing read model."""
+    """将 :class:`Message` row 转换为面向客户端的 read model。"""
     return MessageRead(
         id=message.id,
         conversation_id=message.conversation_id,
@@ -52,7 +50,7 @@ def _to_message_read(message: Message) -> MessageRead:
 
 
 async def _load_message(session, conversation_id: int, message_id: int) -> Message:
-    """Fetch a message and confirm it belongs to the given conversation."""
+    """获取 message，并确认它属于给定的 conversation。"""
     message = await session.get(Message, message_id)
     if message is None or message.conversation_id != conversation_id:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "message not found")
@@ -60,10 +58,9 @@ async def _load_message(session, conversation_id: int, message_id: int) -> Messa
 
 
 async def _path_from_leaf(session, conversation: Conversation) -> list[Message]:
-    """Walk ``parent_id`` from the current leaf to the root.
+    """从当前 leaf 沿 ``parent_id`` 回溯到 root。
 
-    Returns the messages in root-to-leaf order. An empty list means the
-    conversation has no messages yet.
+    返回 root-to-leaf 顺序的 message。空列表表示 conversation 还没有 message。
     """
     if conversation.current_leaf_id is None:
         return []
@@ -72,7 +69,7 @@ async def _path_from_leaf(session, conversation: Conversation) -> list[Message]:
     seen: set[int] = set()
     while current_id is not None:
         if current_id in seen:
-            # Defensive: a cycle would hang the loop, so break on repeat.
+            # 防御性处理：cycle 会使循环卡住，因此重复时退出。
             break
         seen.add(current_id)
         message = await session.get(Message, current_id)
@@ -85,10 +82,9 @@ async def _path_from_leaf(session, conversation: Conversation) -> list[Message]:
 
 
 async def _siblings_of(session, message: Message) -> SiblingInfo:
-    """Find all messages that share ``message``'s parent, including itself.
+    """查找与 ``message`` 共享 parent 的所有 message，包括它自身。
 
-    The active sibling is ``message`` itself; the client uses ``siblings``
-    to render a ``< n / m >`` switcher.
+    active sibling 就是 ``message``；客户端使用 ``siblings`` 渲染 ``< n / m >`` switcher。
     """
     statement = select(Message.id).where(
         Message.conversation_id == message.conversation_id,
@@ -106,7 +102,7 @@ async def _siblings_of(session, message: Message) -> SiblingInfo:
 async def get_conversation_path(
     conversation_id: int, session=Depends(get_session)
 ) -> ConversationPath:
-    """Return the visible message path with per-node sibling metadata."""
+    """返回带有每个 node 的 sibling metadata 的可见 message path。"""
     conversation = await session.get(Conversation, conversation_id)
     if conversation is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "conversation not found")
@@ -129,17 +125,15 @@ async def create_user_message(
     session=Depends(get_session),
     settings: Settings = Depends(get_settings),
 ) -> SendMessageResponse:
-    """Create a user message and an assistant placeholder to stream into.
+    """创建 user message 和用于 streaming 的 assistant placeholder。
 
-    If ``parent_id`` is omitted it defaults to the conversation's current
-    leaf, so the common case of "append a question" needs no parent id at
-    all. An optional image, given as a base64 data URL, is validated and
-    written to disk; only the server-generated filename is stored.
+    如果省略 ``parent_id``，它默认为 conversation 的 current leaf，因此常见的“追加问题”
+    不需要 parent id。可选图片以 base64 data URL 提供，经过校验后写入磁盘，数据库只保存
+    服务器生成的 filename。
 
-    The assistant placeholder is created with ``is_complete=False`` so the
-    client can show a loading state until the stream finishes. The
-    conversation's ``current_leaf_id`` is moved to the placeholder so the
-    path immediately reflects the new turn.
+    assistant placeholder 的 ``is_complete=False`` 让客户端可以在 stream 完成前显示
+    loading state。conversation 的 ``current_leaf_id`` 会移动到 placeholder，使 path
+    立即反映新的 turn。
     """
     conversation = await session.get(Conversation, conversation_id)
     if conversation is None:
@@ -148,8 +142,8 @@ async def create_user_message(
     if parent_id is not None:
         parent = await _load_message(session, conversation_id, parent_id)
         if parent.role == "user":
-            # Two consecutive user messages break Anthropic's alternation
-            # rule; reject early so the client gets a clear error.
+            # 连续的两个 user message 会违反 Anthropic 的 alternation rule；提前拒绝，
+            # 让客户端获得清晰的错误。
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
                 "parent message must be an assistant or root; consecutive user "
@@ -201,13 +195,11 @@ async def regenerate_assistant(
     parent_id: int,
     session=Depends(get_session),
 ) -> MessageRead:
-    """Create a new assistant placeholder as a sibling reply to an existing
-    assistant message's parent.
+    """在已有 assistant message 的 parent 下创建一个 sibling reply 的 assistant placeholder。
 
-    The client points ``parent_id`` at the user message whose assistant reply
-    it wants re-generated. A new placeholder is added under that parent and
-    becomes the current leaf, so the streamed reply replaces the visible
-    one without deleting the old version.
+    客户端将 ``parent_id`` 指向要重新生成 assistant reply 的 user message。新 placeholder
+    会添加到该 parent 下并成为 current leaf，因此 streamed reply 会替换可见版本，而不会
+    删除旧版本。
     """
     conversation = await session.get(Conversation, conversation_id)
     if conversation is None:
@@ -244,10 +236,9 @@ async def switch_leaf(
     leaf_id: int,
     session=Depends(get_session),
 ) -> ConversationPath:
-    """Move the conversation's visible path to end at ``leaf_id``.
+    """将 conversation 的可见 path 移动到以 ``leaf_id`` 结尾。
 
-    ``leaf_id`` must be a message in the conversation. After the switch the
-    returned path reflects the new visible branch.
+    ``leaf_id`` 必须是该 conversation 中的 message。切换后，返回的 path 会反映新的可见 branch。
     """
     conversation = await session.get(Conversation, conversation_id)
     if conversation is None:
@@ -275,18 +266,17 @@ async def delete_message(
     message_id: int,
     session=Depends(get_session),
 ) -> None:
-    """Delete a message and its subtree.
+    """删除 message 及其 subtree。
 
-    If the conversation's current leaf is inside the deleted subtree, the
-    leaf is moved up to the deleted message's parent so the path still ends
-    at a valid node. The ``ON DELETE CASCADE`` on ``parent_id`` removes
-    descendants at the database level.
+    如果 conversation 的 current leaf 位于被删除的 subtree 中，leaf 会上移到被删除
+    message 的 parent，使 path 仍然以有效 node 结尾。``parent_id`` 上的 ``ON DELETE
+    CASCADE`` 会在 database level 删除 descendants。
     """
     conversation = await session.get(Conversation, conversation_id)
     if conversation is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "conversation not found")
     message = await _load_message(session, conversation_id, message_id)
-    # Detect whether the visible path passes through the doomed message.
+    # 检查可见 path 是否经过待删除的 message。
     path_ids: set[int] = set()
     current_id = conversation.current_leaf_id
     while current_id is not None:
@@ -297,8 +287,8 @@ async def delete_message(
         if node is None:
             break
         if node.id == message_id:
-            # The deleted message is on the path; reparent the leaf to the
-            # deleted message's parent so the path still resolves.
+            # 被删除的 message 位于 path 上；将 leaf 重新挂到被删除 message 的 parent，
+            # 使 path 仍能解析。
             conversation.current_leaf_id = message.parent_id
             session.add(conversation)
             break

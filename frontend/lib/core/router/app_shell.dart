@@ -1,14 +1,11 @@
-/// The app shell — the persistent layout that hosts the sidebar and the main
-/// content area across all routes.
+/// 应用 shell：在所有 route 中承载 sidebar 和 main content area 的持久布局。
 ///
-/// The sidebar lives here (not on individual routes) so its state (expand /
-/// collapse, scroll position, unsaved inline-edit text) survives navigation
-/// between conversations. The main area shows whatever the matched child
-/// route builds.
+/// Sidebar 位于这里（而不是各个 route 中），因此其 state（expand/collapse、scroll position、
+/// 未保存的 inline-edit text）会在 conversation 之间的 navigation 中保留。Main area 显示
+/// matched child route 构建的内容。
 ///
-/// The sidebar stays visible at every window width. It uses the full 280px
-/// layout on wide screens and automatically switches to the 80px icon rail
-/// below the responsive breakpoint, matching the collapsed-sidebar design.
+/// Sidebar 在所有 window width 下都可见。Wide screen 使用完整的 280px layout，低于
+/// responsive breakpoint 时自动切换为 80px icon rail，以匹配 collapsed-sidebar design。
 library;
 
 import 'package:flutter/material.dart';
@@ -18,23 +15,22 @@ import 'package:go_router/go_router.dart';
 import '../../features/settings/token_dialog_host.dart';
 import '../../features/sidebar/sidebar_screen.dart';
 
-/// The width above which the full sidebar is shown by default.
+/// 默认显示完整 sidebar 的宽度阈值。
 const double _kWideBreakpoint = 800;
 
-/// The root layout for the Parlo single-page app.
+/// Parlo single-page app 的根 layout。
 ///
-/// `child` is the widget built by the matched route under the [ShellRoute].
-/// `currentConversationId` is the conversation id from the route (or `null`
-/// when the user is on the empty state) so the sidebar can highlight the
-/// active conversation.
+/// `child` 是 [ShellRoute] 下 matched route 构建的 widget。`currentConversationId` 是 route
+/// 中的 conversation id（用户处于 empty state 时为 `null`），使 sidebar 可以高亮 active
+/// conversation。
 class AppShell extends ConsumerStatefulWidget {
-  /// Creates the shell.
+  /// 创建 shell。
   const AppShell({required this.child, this.currentConversationId, super.key});
 
-  /// The widget built by the matched child route, shown in the main area.
+  /// matched child route 构建并显示在 main area 中的 widget。
   final Widget child;
 
-  /// The conversation id from the current route, or `null` when on `/`.
+  /// 当前 route 的 conversation id；位于 `/` 时为 `null`。
   final int? currentConversationId;
 
   @override
@@ -42,10 +38,10 @@ class AppShell extends ConsumerStatefulWidget {
 }
 
 class _AppShellState extends ConsumerState<AppShell> {
-  /// Whether the wide-screen sidebar is shown in its compact icon-only form.
+  /// wide-screen sidebar 是否以 compact icon-only form 显示。
   bool _isSidebarCollapsed = false;
 
-  /// Whether a narrow-screen user has explicitly expanded the sidebar.
+  /// narrow-screen 用户是否显式展开了 sidebar。
   bool _isNarrowSidebarExpanded = false;
 
   void _toggleSidebar(bool isWide) {

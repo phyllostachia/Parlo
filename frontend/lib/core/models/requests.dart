@@ -1,7 +1,6 @@
-/// Request bodies for the chat endpoints.
+/// Chat endpoint 的 request body。
 ///
-/// Kept in its own file so the model files stay focused on the wire shapes the
-/// frontend reads, rather than the shapes it writes.
+/// 单独放在此 file 中，使 model file 专注于 frontend 读取的 wire shape，而不是写入的 shape。
 library;
 
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -9,29 +8,27 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'requests.freezed.dart';
 part 'requests.g.dart';
 
-/// The body of `POST /api/conversations/{id}/messages`.
+/// `POST /api/conversations/{id}/messages` 的 body。
 ///
-/// `parentId` defaults to the conversation's current leaf on the server when
-/// omitted, which is the common case for appending a new question to the
-/// visible path. `imageData` is a base64 data URL; the server decodes and
-/// stores it, returning a fetchable URL on the message.
+/// 省略 `parentId` 时，server 将其默认为 conversation current leaf，这是向可见 path 追加
+/// 新问题的常见情况。`imageData` 是 base64 data URL；server 会 decode 并存储它，然后在
+/// message 上返回可获取的 URL。
 @freezed
 class UserMessageCreate with _$UserMessageCreate {
-  /// Creates a request body.
+  /// 创建 request body。
   const factory UserMessageCreate({
-    /// The parent message id. `null` means "use the conversation's current
-    /// leaf".
+    /// Parent message id。`null` 表示“使用 conversation current leaf”。
     int? parentId,
 
-    /// The user's text. Required even if an image is attached.
+    /// User 的 text。即使附加了 image 也必须提供。
     required String text,
 
-    /// An optional base64 data URL for an attached image. The frontend builds
-    /// this from the picked/pasted/dropped file before sending.
+    /// 附加 image 的可选 base64 data URL。Frontend 在发送前根据 picked/pasted/dropped file
+    /// 构建它。
     String? imageData,
   }) = _UserMessageCreate;
 
-  /// Rebuilds a request body from JSON (mostly useful in tests).
+  /// 根据 JSON 重建 request body（主要用于 test）。
   factory UserMessageCreate.fromJson(Map<String, dynamic> json) =>
       _$UserMessageCreateFromJson(json);
 }

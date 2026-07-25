@@ -1,27 +1,23 @@
-"""Adapter for the OpenAI Responses API.
+"""OpenAI Responses API 的 adapter。
 
-The Responses API replaces the older Chat Completions protocol for new OpenAI
-models (decision D12). Its request shape is:
+Responses API 替代了新 OpenAI model 使用的旧 Chat Completions protocol（决策 D12）。
+Request shape 如下：
 
-* ``model`` — the model id.
-* ``instructions`` — an optional system prompt string.
-* ``input`` — an array of message items, each with a ``role`` and a ``content``
-  array whose item types distinguish user input (``input_text``,
-  ``input_image``) from assistant output (``output_text``).
-* ``stream`` — set to ``true`` for SSE token streaming.
+* ``model`` — model id。
+* ``instructions`` — 可选的 system prompt string。
+* ``input`` — message item array。每个 item 有 ``role`` 和 ``content`` array，其 item
+    type 区分 user input（``input_text``、``input_image``）与 assistant output（``output_text``）。
+* ``stream`` — 设置为 ``true`` 以启用 SSE token streaming。
 
-Streaming events of interest (every event also carries a ``type`` field that
-mirrors the ``event:`` name):
+需要关注的 streaming event（每个 event 也携带一个与 ``event:`` name 对应的 ``type`` field）：
 
-* ``response.output_text.delta`` — a visible-text chunk; payload
-  ``{"delta": "..."}``.
-* ``response.reasoning_summary_text.delta`` and other ``response.reasoning*``
-  delta events — a reasoning-text chunk; same payload shape.
-* ``response.completed`` — clean end of stream.
-* ``response.failed`` — upstream error with an ``error`` object.
+* ``response.output_text.delta`` — 一段 visible text；payload 为 ``{"delta": "..."}``。
+* ``response.reasoning_summary_text.delta`` 及其他 ``response.reasoning*`` delta event
+    — 一段 reasoning text；payload shape 相同。
+* ``response.completed`` — stream 正常结束。
+* ``response.failed`` — 带有 ``error`` object 的上游 error。
 
-Unknown event types are ignored so the adapter keeps working when OpenAI adds
-new intermediate events.
+未知 event type 会被忽略，使 adapter 在 OpenAI 添加新的 intermediate event 后仍能继续工作。
 """
 
 from __future__ import annotations
@@ -38,7 +34,7 @@ from .base import ChatMessage, ChatRequest, Provider, StreamEvent, parse_sse_str
 
 
 class OpenAIResponseProvider:
-    """Streaming adapter for the OpenAI Responses API."""
+    """OpenAI Responses API 的 streaming adapter。"""
 
     def __init__(self, model: ModelConfig, settings: Settings) -> None:
         self._model = model
@@ -46,8 +42,7 @@ class OpenAIResponseProvider:
         self._client = httpx.AsyncClient(timeout=httpx.Timeout(60.0, read=None))
 
     async def stream(self, request: ChatRequest) -> AsyncIterator[StreamEvent]:
-        """Translate :class:`ChatRequest` into a Responses API call and yield
-        unified :class:`StreamEvent` objects."""
+        """将 :class:`ChatRequest` 转换为 Responses API call，并生成统一的 :class:`StreamEvent`。"""
         body = await self._build_body(request)
         url = f"{self._model.base_url}/responses"
         headers = {
@@ -70,17 +65,15 @@ class OpenAIResponseProvider:
             yield StreamEvent(kind="error", content=f"upstream transport error: {exc}")
 
     async def _build_body(self, request: ChatRequest) -> dict[str, Any]:
-        """Convert the unified message list into the Responses API payload.
+        """将统一的 message list 转换为 Responses API payload。
 
-        System messages are folded into ``instructions`` (the Responses API
-        does not accept a ``system`` role inside ``input``). Assistant turns
-        are emitted as ``output_text`` items; OpenAI reasoning is not replayed
-        from history, so ``reasoning`` on history messages is ignored.
+        System message 会合并到 ``instructions``（Responses API 不接受 ``input`` 内的
+        ``system`` role）。Assistant turn 会作为 ``output_text`` item 发送；OpenAI reasoning
+        不会从 history replay，因此会忽略 history message 上的 ``reasoning``。
 
-        ``reasoning.effort`` is set when the conversation selected a thinking
-        level; ``max_output_tokens`` caps thinking + visible output (decision
-        D08). The Responses API applies reasoning adaptively within the
-        chosen effort level.
+        conversation 选择 thinking level 时设置 ``reasoning.effort``；
+        ``max_output_tokens`` 限制 thinking + visible output（决策 D08）。Responses API 会
+        在选择的 effort level 内自适应处理 reasoning。
         """
         instructions_parts: list[str] = []
         input_items: list[dict[str, Any]] = []
@@ -112,14 +105,14 @@ class OpenAIResponseProvider:
         return body
 
     async def _image_data_url(self, filename: str) -> str:
-        """Return a ``data:<media>;base64,<...>`` URL for a stored image."""
+        """为已存储的图片返回 ``data:<media>;base64,<...>`` URL。"""
         media_type, encoded = await read_image_base64(self._settings, filename)
         return f"data:{media_type};base64,{encoded}"
 
     async def _translate_event(
         self, event_type: str, data: dict[str, Any]
     ) -> AsyncIterator[StreamEvent]:
-        """Map one upstream SSE event onto zero or more unified events."""
+        """将一个上游 SSE event 映射为零个或多个统一 event。"""
         if event_type == "response.output_text.delta":
             yield StreamEvent(kind="text_delta", content=str(data.get("delta", "")))
             return
@@ -135,7 +128,7 @@ class OpenAIResponseProvider:
 
 
 def _extract_error(body: bytes) -> str:
-    """Best-effort extraction of a human-readable message from an error body."""
+    """尽力从 error body 中提取可读的 message。"""
     try:
         parsed = json.loads(body)
     except json.JSONDecodeError:

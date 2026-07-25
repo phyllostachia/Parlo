@@ -1,4 +1,4 @@
-# Miscellaneous
+# 其他文件
 *.class
 *.log
 *.pyc
@@ -12,18 +12,17 @@
 .swiftpm/
 migrate_working_dir/
 
-# IntelliJ related
+# IntelliJ 相关文件
 *.iml
 *.ipr
 *.iws
 .idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
+# .vscode 文件夹包含你在 VS Code 中配置的启动配置和任务，你可能希望将其纳入版本控制，
+# 因此默认将下面这一行保留为注释。
 #.vscode/
 
-# Flutter/Dart/Pub related
+# Flutter/Dart/Pub 相关文件
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
@@ -33,13 +32,13 @@ migrate_working_dir/
 /build/
 /coverage/
 
-# Symbolication related
+# Symbolication 相关文件
 app.*.symbols
 
-# Obfuscation related
+# Obfuscation 相关文件
 app.*.map.json
 
-# Android Studio will place build artifacts here
+# Android Studio 会将构建产物放在这里
 /android/app/debug
 /android/app/profile
 /android/app/release

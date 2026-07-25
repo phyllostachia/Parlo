@@ -1,9 +1,8 @@
-"""Profile CRUD endpoints.
+"""Profile CRUD endpoint。
 
-A profile is a named group of conversations (decision D22). Endpoints are
-mounted under ``/api/profiles`` and all require the shared bearer token.
-Profile deletion cascades to its conversations and their messages through
-the ``ondelete`` rules declared on the foreign keys in :mod:`app.models`.
+Profile 是一组有名称的会话（决策 D22）。Endpoint 挂载在 ``/api/profiles`` 下，且都
+要求共享 bearer token。删除 profile 会根据 :mod:`app.models` 中 foreign key 声明的
+``ondelete`` rule，级联删除其中的会话和消息。
 """
 
 from __future__ import annotations
@@ -22,7 +21,7 @@ router = APIRouter(prefix="/profiles", dependencies=[Depends(verify_token)])
 
 @router.get("", response_model=list[ProfileRead])
 async def list_profiles(session=Depends(get_session)) -> list[Profile]:
-    """Return every profile ordered by most-recently-updated first."""
+    """按最近更新时间优先返回所有 profile。"""
     statement = select(Profile).order_by(Profile.updated_at.desc())
     result = await session.execute(statement)
     return list(result.scalars())
@@ -30,11 +29,10 @@ async def list_profiles(session=Depends(get_session)) -> list[Profile]:
 
 @router.post("", response_model=ProfileRead, status_code=status.HTTP_201_CREATED)
 async def create_profile(name: str, session=Depends(get_session)) -> Profile:
-    """Create a profile with the given name.
+    """使用给定名称创建 profile。
 
-    The name is sent as a plain request body string for simplicity; the
-    client only ever creates a named group, so a JSON object with a single
-    field would be ceremony.
+    为保持简单，name 会作为 plain request body string 发送；客户端只创建一个命名组，
+    因此使用只包含一个字段的 JSON object 没有必要。
     """
     profile = Profile(name=name.strip())
     session.add(profile)
@@ -47,7 +45,7 @@ async def create_profile(name: str, session=Depends(get_session)) -> Profile:
 async def rename_profile(
     profile_id: int, name: str, session=Depends(get_session)
 ) -> Profile:
-    """Rename a profile. Uses a plain body string like the create endpoint."""
+    """重命名 profile。与 create endpoint 一样使用 plain body string。"""
     profile = await session.get(Profile, profile_id)
     if profile is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "profile not found")
@@ -61,8 +59,7 @@ async def rename_profile(
 
 @router.delete("/{profile_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_profile(profile_id: int, session=Depends(get_session)) -> None:
-    """Delete a profile. Conversations and messages are removed by the
-    database's ``ON DELETE CASCADE`` foreign-key rules."""
+    """删除 profile。数据库的 ``ON DELETE CASCADE`` foreign-key rule 会删除会话和消息。"""
     profile = await session.get(Profile, profile_id)
     if profile is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "profile not found")

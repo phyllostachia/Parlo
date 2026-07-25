@@ -1,14 +1,12 @@
-"""Authentication dependency.
+"""Authentication dependency。
 
-The backend is single-user (decision D2) and does not run an account system.
-Instead, every request must present a shared bearer token that the operator
-configures in ``.env`` (decision D7). The token is compared in constant time
-to avoid timing side channels.
+后端是单用户应用（决策 D2），不运行 account system。相反，每个 request 都必须提供
+operator 在 ``.env`` 中配置的共享 bearer token（决策 D7）。token 使用 constant-time
+比较，以避免 timing side channel。
 
-Because the streaming endpoint is consumed from the browser's
-``EventSource`` API, which cannot set custom headers, the dependency also
-accepts the token as a ``token`` query parameter. Non-streaming endpoints
-should use the ``Authorization: Bearer ...`` header.
+由于 streaming endpoint 使用浏览器的 ``EventSource`` API，而该 API 无法设置 custom
+header，因此 dependency 也接受 ``token`` query parameter。非 streaming endpoint 应
+使用 ``Authorization: Bearer ...`` header。
 """
 
 from __future__ import annotations
@@ -21,7 +19,7 @@ from .config import Settings, get_settings
 
 
 def _extract_token(request: Request) -> str | None:
-    """Pull the bearer token out of either the header or the query string."""
+    """从 header 或 query string 中提取 bearer token。"""
     auth_header = request.headers.get("Authorization")
     if auth_header:
         parts = auth_header.split()
@@ -34,10 +32,10 @@ async def verify_token(
     request: Request,
     settings: Settings = Depends(get_settings),
 ) -> None:
-    """Reject the request unless a valid shared token is presented.
+    """除非提供有效的共享 token，否则拒绝 request。
 
-    Raises a 401 response on failure; returns ``None`` on success so the
-    dependency can be used as a guard without injecting any value.
+    失败时返回 401；成功时返回 ``None``，因此该 dependency 可以作为 guard 使用，而
+    不需要注入任何值。
     """
     token = _extract_token(request)
     if token is None or not secrets.compare_digest(token, settings.auth_token):

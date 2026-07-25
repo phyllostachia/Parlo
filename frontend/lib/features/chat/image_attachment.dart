@@ -1,18 +1,14 @@
-/// The image attachment UI for the chat input.
+/// Chat input 的 image attachment UI。
 ///
-/// Per `product.md` §6.4 the input accepts images from three sources: a
-/// click-to-pick button, a drag-and-drop zone, and paste. This file
-/// provides:
-/// - [ImageAttachmentBar], a small preview row shown above the input when an
-///   image is attached, with a remove button.
-/// - [pickImageAttachment], a helper that opens the file picker and returns
-///   an [ImageDataUrl] ready to send.
-/// - [imageDataUrlFromXFile], a helper that reads an `XFile` (from the file
-///   picker or the drop zone) and converts it to an [ImageDataUrl].
+/// 根据 `product.md` §6.4，input 接受三种 image source：click-to-pick button、drag-and-drop
+/// zone 和 paste。此 file 提供：
+/// - [ImageAttachmentBar]：附加 image 时显示在 input 上方的小型 preview row，带 remove button。
+/// - [pickImageAttachment]：打开 file picker，并返回可发送的 [ImageDataUrl] 的 helper。
+/// - [imageDataUrlFromXFile]：读取 `XFile`（来自 file picker 或 drop zone）并将其转换为
+///   [ImageDataUrl] 的 helper。
 ///
-/// Paste of images is handled in the input widgets themselves via a keyboard
-/// listener; the actual paste-to-image conversion on the web uses the same
-/// [imageDataUrlFromBytes] helper once the bytes are read.
+/// Image paste 由 input widget 自身通过 keyboard listener 处理；Web 上实际的 paste-to-image
+/// conversion 在读取 bytes 后使用同一个 [imageDataUrlFromBytes] helper。
 library;
 
 import 'dart:convert';
@@ -25,24 +21,22 @@ import 'package:flutter/material.dart';
 import '../../core/theme/colors.dart';
 import '../../core/util/image_data_url.dart';
 
-/// A preview row shown above the input when an image is attached.
+/// 附加 image 时显示在 input 上方的 preview row。
 ///
-/// Shows a small thumbnail of the attached image and a remove button. The
-/// thumbnail is built from the data URL so it works on every platform
-/// without a separate fetch.
+/// 显示附加 image 的小 thumbnail 和 remove button。Thumbnail 根据 data URL 构建，因此无需
+/// separate fetch 就能在所有 platform 上工作。
 class ImageAttachmentBar extends StatelessWidget {
-  /// Creates the bar.
+  /// 创建 bar。
   const ImageAttachmentBar({
     required this.attachment,
     required this.onRemove,
     super.key,
   });
 
-  /// The currently attached image, or `null` when nothing is attached. The
-  /// caller hides this bar when `null`.
+  /// 当前附加的 image；没有 attachment 时为 `null`。调用方在 `null` 时隐藏此 bar。
   final ImageDataUrl attachment;
 
-  /// Called when the user clicks the remove button.
+  /// User 点击 remove button 时调用。
   final VoidCallback onRemove;
 
   @override
@@ -85,17 +79,16 @@ class ImageAttachmentBar extends StatelessWidget {
   }
 }
 
-/// Decodes a base64 data URL into bytes for the thumbnail. Kept here so the
-/// [ImageAttachmentBar] does not depend on the raw `Uint8List` (the data URL
-/// is what the backend receives).
+/// 将 base64 data URL 解码为 thumbnail 使用的 bytes。保留在这里，使 [ImageAttachmentBar]
+/// 不依赖 raw `Uint8List`（backend 接收的是 data URL）。
 Uint8List _bytesFromDataUrl(String dataUrl) {
   final commaIndex = dataUrl.indexOf(',');
   final base64Body = dataUrl.substring(commaIndex + 1);
   return base64Decode(base64Body);
 }
 
-/// Opens the platform file picker for images and returns the picked file as
-/// an [ImageDataUrl], or `null` when the user cancels.
+/// 打开 platform file picker 选择 image，并将 picked file 作为 [ImageDataUrl] 返回；User
+/// cancel 时返回 `null`。
 Future<ImageDataUrl?> pickImageAttachment() async {
   final result = await FilePicker.platform.pickFiles(
     type: FileType.image,
@@ -105,9 +98,8 @@ Future<ImageDataUrl?> pickImageAttachment() async {
   return imageDataUrlFromXFile(result.files.first.xFile);
 }
 
-/// Reads an `XFile` (returned by the file picker and the drop zone) and
-/// converts its bytes into an [ImageDataUrl]. Returns `null` when the file
-/// is empty or the image type is not recognized.
+/// 读取 `XFile`（由 file picker 或 drop zone 返回），并将其 bytes 转换为 [ImageDataUrl]。
+/// File 为空或 image type 无法识别时返回 `null`。
 Future<ImageDataUrl?> imageDataUrlFromXFile(XFile file) async {
   final bytes = await file.readAsBytes();
   return imageDataUrlFromBytes(Uint8List.fromList(bytes));

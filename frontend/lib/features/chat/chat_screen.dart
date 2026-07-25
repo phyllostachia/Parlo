@@ -1,11 +1,10 @@
-/// The chat screen for one conversation.
+/// 一个 conversation 的 chat screen。
 ///
-/// Composes a top bar (title + model badge; thinking-effort switcher is
-/// Phase 4), the scrollable message list, and the bottom input. This is the
-/// widget the router returns for `/c/:id`.
+/// 由 top bar（title + model badge；thinking-effort switcher 在阶段 4 加入）、可滚动 message
+/// list 和底部 input 组成。这是 router 为 `/c/:id` 返回的 widget。
 ///
-/// The chat screen is mounted inside the `AppShell`'s main area; it does not
-/// render its own `Scaffold` so the sidebar shell owns the page chrome.
+/// Chat screen 挂载在 `AppShell` 的 main area 内；它不渲染自己的 `Scaffold`，因此 sidebar
+/// shell 负责 page chrome。
 library;
 
 import 'package:flutter/material.dart';
@@ -20,12 +19,12 @@ import 'chat_input.dart';
 import 'chat_providers.dart';
 import 'message_list.dart';
 
-/// The conversation page widget.
+/// Conversation page widget。
 class ChatScreen extends ConsumerWidget {
-  /// Creates the chat screen.
+  /// 创建 chat screen。
   const ChatScreen({required this.conversationId, super.key});
 
-  /// The conversation id from the route.
+  /// Route 中的 conversation id。
   final int conversationId;
 
   @override
@@ -46,11 +45,10 @@ class ChatScreen extends ConsumerWidget {
   }
 }
 
-/// The top bar of the chat screen.
+/// Chat screen 的 top bar。
 ///
-/// Follows the design's "Top Bar": the conversation title with a small
-/// rename pencil on the left; a soft-stone model badge and an outlined
-/// thinking-effort dropdown on the right.
+/// 遵循 design 的“Top Bar”：左侧是带小型 rename pencil 的 conversation title；右侧是
+/// soft-stone model badge 和 outlined thinking-effort dropdown。
 class _ChatTopBar extends ConsumerWidget {
   const _ChatTopBar({required this.conversationId});
 
@@ -74,16 +72,14 @@ class _ChatTopBar extends ConsumerWidget {
     );
 
     return Container(
-      // Design "Top Bar": 12px vertical, 24px horizontal padding. No fixed
-      // height — the padding plus content sets the bar height.
+      // Design “Top Bar”：垂直 12px、水平 24px padding。没有 fixed height；padding 加
+      // content 决定 bar height。
       padding: EdgeInsets.symmetric(horizontal: spacing.s24, vertical: 12),
       child: Row(
         children: [
-          // Design "Title Group": 15px semibold title plus a 13px pencil
-          // icon in pebble, 10px apart. The pencil renames the conversation.
-          // `Expanded` makes the title group take the remaining width so the
-          // badges on the right are pushed flush to the trailing edge (the
-          // design's `space_between` alignment).
+          // Design “Title Group”：15px semibold title 加上 pebble 色 13px pencil icon，二者
+          // 间隔 10px。Pencil 用于重命名 conversation。`Expanded` 让 title group 占据剩余
+          // width，使右侧 badge 推到 trailing edge（design 的 `space_between` alignment）。
           Expanded(
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -111,8 +107,8 @@ class _ChatTopBar extends ConsumerWidget {
           ),
           if (modelName != null) ...[
             const SizedBox(width: 12),
-            // Design "Model Badge": soft-stone fill, 8px radius, sparkles
-            // icon plus the model name in graphite.
+            // Design “Model Badge”：soft-stone fill、8px radius、sparkles icon，以及
+            // graphite 色 model name。
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
@@ -149,7 +145,7 @@ class _ChatTopBar extends ConsumerWidget {
     );
   }
 
-  /// Finds the display name for the given model id, or `null`.
+  /// 查找给定 model id 的 display name；找不到时为 `null`。
   String? _resolveModelName(List<ModelRead> models, String modelId) {
     if (modelId.isEmpty) return null;
     for (final model in models) {
@@ -158,8 +154,8 @@ class _ChatTopBar extends ConsumerWidget {
     return null;
   }
 
-  /// Finds the thinking-effort levels the bound model supports. Empty when
-  /// the model has no thinking levels (the badge then hides itself).
+  /// 查找绑定 model 支持的 thinking-effort level。Model 没有 thinking level 时为空（badge
+  /// 随后隐藏）。
   List<String> _resolveThinkingLevels(List<ModelRead> models, String modelId) {
     if (modelId.isEmpty) return const <String>[];
     for (final model in models) {
@@ -189,8 +185,7 @@ class _ChatTopBar extends ConsumerWidget {
   }
 }
 
-/// The small pencil button next to the conversation title. Opens a rename
-/// dialog and submits through [onSubmit].
+/// Conversation title 旁的小型 pencil button。打开 rename dialog，并通过 [onSubmit] 提交。
 class _RenameButton extends StatelessWidget {
   const _RenameButton({required this.initialTitle, required this.onSubmit});
 
@@ -240,11 +235,10 @@ class _RenameButton extends StatelessWidget {
   }
 }
 
-/// The outlined thinking-effort badge in the top bar.
+/// Top bar 中 outlined thinking-effort badge。
 ///
-/// Matches the design's "Thinking Badge": a mist-bordered capsule with a
-/// brain icon, the current level label, and a chevron. Tapping opens a small
-/// popup menu with the model's supported levels.
+/// 匹配 design 的“Thinking Badge”：带 mist border 的 capsule、brain icon、当前 level label
+/// 和 chevron。点击后打开包含 model 支持 level 的小型 popup menu。
 class _ThinkingEffortBadge extends StatelessWidget {
   const _ThinkingEffortBadge({
     required this.levels,

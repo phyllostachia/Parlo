@@ -3,7 +3,7 @@ prompts.md
 backend/config.yaml
 .vscode/
 
-# Python
+# Python 文件
 __pycache__/
 *.py[cod]
 *.egg-info/
@@ -13,7 +13,7 @@ dist/
 build/
 .pytest_cache/
 
-# Backend runtime data
+# 后端运行时数据
 backend/data/
 backend/.env
 

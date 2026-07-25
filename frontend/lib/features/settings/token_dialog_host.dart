@@ -1,19 +1,15 @@
-/// A host widget that shows the [TokenDialog] whenever the auth store needs
-/// a token or the base URL store is empty.
+/// 当 auth store 需要 token 或 base URL store 为空时显示 [TokenDialog] 的 host widget。
 ///
-/// This widget renders nothing itself; it only listens to the auth store and
-/// the base URL store and opens the [TokenDialog] as a modal when:
-/// - the user has no token yet (first use), or
-/// - the backend has flagged the current token as a 401, or
-/// - the user has not entered a backend address yet.
+/// 此 widget 自身不渲染内容；它只监听 auth store 和 base URL store，并在以下情况将
+/// [TokenDialog] 作为 modal 打开：
+/// - user 尚无 token（first use）；
+/// - backend 将当前 token 标记为 401；
+/// - user 尚未输入 backend address。
 ///
-/// The dialog is non-dismissable, so the user must enter both values to
-/// proceed. Saving clears the unauthorized flag and closes the dialog; the
-/// stores then notify listeners, which would re-evaluate this host and find
-/// no reason to show the dialog again.
+/// Dialog 不可 dismiss，因此 user 必须输入两个 value 才能继续。Save 会清除 unauthorized
+/// flag 并关闭 dialog；随后 store 通知 listener，host 会重新计算并发现无需再次显示 dialog。
 ///
-/// Place this widget anywhere inside a widget tree that has a `Navigator`
-/// above it (the [AppShell] satisfies this).
+/// 将此 widget 放在上方具有 `Navigator` 的 widget tree 中（[AppShell] 满足此条件）。
 library;
 
 import 'package:flutter/material.dart';
@@ -23,9 +19,9 @@ import '../../core/auth/auth_providers.dart';
 import '../../core/network/base_url_providers.dart';
 import 'token_dialog.dart';
 
-/// The invisible host that opens the token dialog when needed.
+/// 必要时打开 token dialog 的 invisible host。
 class TokenDialogHost extends ConsumerStatefulWidget {
-  /// Creates the host.
+  /// 创建 host。
   const TokenDialogHost({super.key});
 
   @override
@@ -33,31 +29,28 @@ class TokenDialogHost extends ConsumerStatefulWidget {
 }
 
 class _TokenDialogHostState extends ConsumerState<TokenDialogHost> {
-  /// Whether the dialog is currently open. Tracked so the listener does not
-  /// open a second dialog on top of the first.
+  /// Dialog 当前是否打开。记录此状态，避免 listener 在第一个 dialog 上再打开第二个。
   bool _isDialogOpen = false;
 
   @override
   void initState() {
     super.initState();
-    // Check on startup, before any `notifyListeners` has fired. A post-frame
-    // callback is needed because `showDialog` requires a `Navigator` that is
-    // not yet available during `initState`.
+    // 在任何 `notifyListeners` 触发前检查 startup。由于 `showDialog` 需要 Navigator，而
+    // Navigator 在 `initState` 时还不可用，因此需要 post-frame callback。
     WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowDialog());
   }
 
   @override
   Widget build(BuildContext context) {
-    // Re-evaluate whenever the auth store or the base URL store changes
-    // (token written, token cleared, 401 flagged, 401 cleared, base URL
-    // written, base URL cleared).
+    // Auth store 或 base URL store 变化时重新计算（token written、token cleared、401 flagged、
+    // 401 cleared、base URL written、base URL cleared）。
     ref.listen<ChangeNotifier>(authStoreProvider, (_, _) {
       _maybeShowDialog();
     });
     ref.listen<ChangeNotifier>(baseUrlStoreProvider, (_, _) {
       _maybeShowDialog();
     });
-    // The host renders nothing; it only triggers the dialog.
+    // Host 不渲染内容；它只触发 dialog。
     return const SizedBox.shrink();
   }
 
@@ -65,24 +58,23 @@ class _TokenDialogHostState extends ConsumerState<TokenDialogHost> {
     if (!mounted) return;
     final authStore = ref.read(authStoreProvider);
     final baseUrlStore = ref.read(baseUrlStoreProvider);
-    final needsInput = !authStore.hasToken
-        || authStore.isUnauthorized
-        || !baseUrlStore.hasValue;
+    final needsInput =
+        !authStore.hasToken ||
+        authStore.isUnauthorized ||
+        !baseUrlStore.hasValue;
     if (!needsInput || _isDialogOpen) return;
 
     _isDialogOpen = true;
     showDialog<void>(
       context: context,
-      // Non-dismissable: the user must enter both values. The router already
-      // forces every route to `/` while there is no valid token or base URL,
-      // so there is nothing useful to dismiss to.
+      // Non-dismissable：user 必须输入两个 value。没有有效 token 或 base URL 时，router 已
+      // 将所有 route 强制到 `/`，因此没有可供 dismiss 后返回的有用页面。
       barrierDismissible: false,
       builder: (_) => const TokenDialog(),
     ).then((_) {
       _isDialogOpen = false;
-      // Re-check after the dialog closes. If the user dismissed without
-      // saving (should not happen since the dialog is non-dismissable, but
-      // a back button could still close it on mobile), reopen it.
+      // Dialog 关闭后重新检查。如果 user 没有 save 就 dismiss（dialog 不可 dismiss，本不应
+      // 发生，但 mobile 上 back button 仍可能关闭），则重新打开。
       WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowDialog());
     });
   }

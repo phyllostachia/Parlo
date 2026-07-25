@@ -1,4 +1,4 @@
-/// Widget tests for the settings panel.
+/// Settings panel 的 widget test。
 library;
 
 import 'package:flutter/material.dart';

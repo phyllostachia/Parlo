@@ -21,43 +21,41 @@ Message _$MessageFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Message {
-  /// The server-assigned identifier.
+  /// Server 分配的 identifier。
   int get id => throw _privateConstructorUsedError;
 
-  /// The conversation this message belongs to.
+  /// 此 message 所属的 conversation。
   int get conversationId => throw _privateConstructorUsedError;
 
-  /// The parent message id, or `null` for a root message.
+  /// Parent message id；root message 为 `null`。
   int? get parentId => throw _privateConstructorUsedError;
 
-  /// Who produced this message.
+  /// 生成此 message 的角色。
   MessageRole get role => throw _privateConstructorUsedError;
 
-  /// The text body. Empty while the assistant is still streaming.
+  /// Text body。Assistant 仍在 streaming 时为空。
   String get content => throw _privateConstructorUsedError;
 
-  /// The model's reasoning (the "thinking" trace), if any. `null` for user
-  /// messages and for assistant messages whose model produced none.
+  /// Model 的 reasoning（“thinking” trace，如果有）。User message 以及 model 未生成
+  /// reasoning 的 assistant message 为 `null`。
   String? get reasoning => throw _privateConstructorUsedError;
 
-  /// The URL the client can fetch the attached image from, if any. `null`
-  /// means no image.
+  /// Client 可以获取附加 image 的 URL（如果有）。`null` 表示没有 image。
   String? get imageUrl => throw _privateConstructorUsedError;
 
-  /// `false` while the server is still streaming tokens into this message.
-  /// Note: the backend sets this to `true` in its `finally` block, so a
-  /// broken stream also ends with `is_complete = true`. The frontend keeps
-  /// its own [StreamState] to tell the difference (architecture §5.4).
+  /// Server 仍在向此 message streaming token 时为 `false`。
+  /// 注意：backend 在 `finally` block 中将其设为 `true`，因此中断的 stream 最终也会
+  /// 得到 `is_complete = true`。Frontend 使用自己的 [StreamState] 区分这两种情况
+  /// （architecture §5.4）。
   bool get isComplete => throw _privateConstructorUsedError;
 
-  /// When the message was created.
+  /// Message 创建时间。
   DateTime get createdAt => throw _privateConstructorUsedError;
 
-  /// Serializes this Message to a JSON map.
+  /// 将此 Message serialize 为 JSON map。
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of Message
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 Message 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   $MessageCopyWith<Message> get copyWith => throw _privateConstructorUsedError;
 }
@@ -90,8 +88,7 @@ class _$MessageCopyWithImpl<$Res, $Val extends Message>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of Message
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 Message 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -179,8 +176,7 @@ class __$$MessageImplCopyWithImpl<$Res>
     $Res Function(_$MessageImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of Message
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 Message 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -255,44 +251,43 @@ class _$MessageImpl implements _Message {
   factory _$MessageImpl.fromJson(Map<String, dynamic> json) =>
       _$$MessageImplFromJson(json);
 
-  /// The server-assigned identifier.
+  /// Server 分配的 identifier。
   @override
   final int id;
 
-  /// The conversation this message belongs to.
+  /// 此 message 所属的 conversation。
   @override
   final int conversationId;
 
-  /// The parent message id, or `null` for a root message.
+  /// Parent message id；root message 为 `null`。
   @override
   final int? parentId;
 
-  /// Who produced this message.
+  /// 生成此 message 的角色。
   @override
   final MessageRole role;
 
-  /// The text body. Empty while the assistant is still streaming.
+  /// Text body。Assistant 仍在 streaming 时为空。
   @override
   final String content;
 
-  /// The model's reasoning (the "thinking" trace), if any. `null` for user
-  /// messages and for assistant messages whose model produced none.
+  /// Model 的 reasoning（“thinking” trace，如果有）。User message 以及 model 未生成
+  /// reasoning 的 assistant message 为 `null`。
   @override
   final String? reasoning;
 
-  /// The URL the client can fetch the attached image from, if any. `null`
-  /// means no image.
+  /// Client 可以获取附加 image 的 URL（如果有）。`null` 表示没有 image。
   @override
   final String? imageUrl;
 
-  /// `false` while the server is still streaming tokens into this message.
-  /// Note: the backend sets this to `true` in its `finally` block, so a
-  /// broken stream also ends with `is_complete = true`. The frontend keeps
-  /// its own [StreamState] to tell the difference (architecture §5.4).
+  /// Server 仍在向此 message streaming token 时为 `false`。
+  /// 注意：backend 在 `finally` block 中将其设为 `true`，因此中断的 stream 最终也会
+  /// 得到 `is_complete = true`。Frontend 使用自己的 [StreamState] 区分这两种情况
+  /// （architecture §5.4）。
   @override
   final bool isComplete;
 
-  /// When the message was created.
+  /// Message 创建时间。
   @override
   final DateTime createdAt;
 
@@ -338,8 +333,7 @@ class _$MessageImpl implements _Message {
     createdAt,
   );
 
-  /// Create a copy of Message
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 Message 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
@@ -367,49 +361,47 @@ abstract class _Message implements Message {
 
   factory _Message.fromJson(Map<String, dynamic> json) = _$MessageImpl.fromJson;
 
-  /// The server-assigned identifier.
+  /// Server 分配的 identifier。
   @override
   int get id;
 
-  /// The conversation this message belongs to.
+  /// 此 message 所属的 conversation。
   @override
   int get conversationId;
 
-  /// The parent message id, or `null` for a root message.
+  /// Parent message id；root message 为 `null`。
   @override
   int? get parentId;
 
-  /// Who produced this message.
+  /// 生成此 message 的角色。
   @override
   MessageRole get role;
 
-  /// The text body. Empty while the assistant is still streaming.
+  /// Text body。Assistant 仍在 streaming 时为空。
   @override
   String get content;
 
-  /// The model's reasoning (the "thinking" trace), if any. `null` for user
-  /// messages and for assistant messages whose model produced none.
+  /// Model 的 reasoning（“thinking” trace，如果有）。User message 以及 model 未生成
+  /// reasoning 的 assistant message 为 `null`。
   @override
   String? get reasoning;
 
-  /// The URL the client can fetch the attached image from, if any. `null`
-  /// means no image.
+  /// Client 可以获取附加 image 的 URL（如果有）。`null` 表示没有 image。
   @override
   String? get imageUrl;
 
-  /// `false` while the server is still streaming tokens into this message.
-  /// Note: the backend sets this to `true` in its `finally` block, so a
-  /// broken stream also ends with `is_complete = true`. The frontend keeps
-  /// its own [StreamState] to tell the difference (architecture §5.4).
+  /// Server 仍在向此 message streaming token 时为 `false`。
+  /// 注意：backend 在 `finally` block 中将其设为 `true`，因此中断的 stream 最终也会
+  /// 得到 `is_complete = true`。Frontend 使用自己的 [StreamState] 区分这两种情况
+  /// （architecture §5.4）。
   @override
   bool get isComplete;
 
-  /// When the message was created.
+  /// Message 创建时间。
   @override
   DateTime get createdAt;
 
-  /// Create a copy of Message
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 Message 的副本，并用非 null parameter value 替换给定 field。
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$MessageImplCopyWith<_$MessageImpl> get copyWith =>
@@ -422,17 +414,16 @@ SiblingInfo _$SiblingInfoFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$SiblingInfo {
-  /// All message ids that share this node's parent, including this node.
+  /// 与此 node 共享 parent 的所有 message id，包括此 node。
   List<int> get siblings => throw _privateConstructorUsedError;
 
-  /// The id of the sibling the visible path currently goes through.
+  /// Visible path 当前经过的 sibling id。
   int get activeId => throw _privateConstructorUsedError;
 
-  /// Serializes this SiblingInfo to a JSON map.
+  /// 将此 SiblingInfo serialize 为 JSON map。
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of SiblingInfo
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 SiblingInfo 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   $SiblingInfoCopyWith<SiblingInfo> get copyWith =>
       throw _privateConstructorUsedError;
@@ -458,8 +449,7 @@ class _$SiblingInfoCopyWithImpl<$Res, $Val extends SiblingInfo>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of SiblingInfo
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 SiblingInfo 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({Object? siblings = null, Object? activeId = null}) {
@@ -500,8 +490,7 @@ class __$$SiblingInfoImplCopyWithImpl<$Res>
     $Res Function(_$SiblingInfoImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of SiblingInfo
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 SiblingInfo 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({Object? siblings = null, Object? activeId = null}) {
@@ -531,10 +520,10 @@ class _$SiblingInfoImpl implements _SiblingInfo {
   factory _$SiblingInfoImpl.fromJson(Map<String, dynamic> json) =>
       _$$SiblingInfoImplFromJson(json);
 
-  /// All message ids that share this node's parent, including this node.
+  /// 与此 node 共享 parent 的所有 message id，包括此 node。
   final List<int> _siblings;
 
-  /// All message ids that share this node's parent, including this node.
+  /// 与此 node 共享 parent 的所有 message id，包括此 node。
   @override
   @JsonKey()
   List<int> get siblings {
@@ -543,7 +532,7 @@ class _$SiblingInfoImpl implements _SiblingInfo {
     return EqualUnmodifiableListView(_siblings);
   }
 
-  /// The id of the sibling the visible path currently goes through.
+  /// Visible path 当前经过的 sibling id。
   @override
   final int activeId;
 
@@ -570,8 +559,7 @@ class _$SiblingInfoImpl implements _SiblingInfo {
     activeId,
   );
 
-  /// Create a copy of SiblingInfo
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 SiblingInfo 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
@@ -593,16 +581,15 @@ abstract class _SiblingInfo implements SiblingInfo {
   factory _SiblingInfo.fromJson(Map<String, dynamic> json) =
       _$SiblingInfoImpl.fromJson;
 
-  /// All message ids that share this node's parent, including this node.
+  /// 与此 node 共享 parent 的所有 message id，包括此 node。
   @override
   List<int> get siblings;
 
-  /// The id of the sibling the visible path currently goes through.
+  /// Visible path 当前经过的 sibling id。
   @override
   int get activeId;
 
-  /// Create a copy of SiblingInfo
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 SiblingInfo 的副本，并用非 null parameter value 替换给定 field。
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$SiblingInfoImplCopyWith<_$SiblingInfoImpl> get copyWith =>
@@ -615,17 +602,16 @@ MessageTreeNode _$MessageTreeNodeFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$MessageTreeNode {
-  /// The message at this position on the path.
+  /// Path 在此位置上的 message。
   Message get message => throw _privateConstructorUsedError;
 
-  /// The sibling metadata used to render the version switcher.
+  /// 用于渲染 version switcher 的 sibling metadata。
   SiblingInfo get siblings => throw _privateConstructorUsedError;
 
-  /// Serializes this MessageTreeNode to a JSON map.
+  /// 将此 MessageTreeNode serialize 为 JSON map。
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of MessageTreeNode
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 MessageTreeNode 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   $MessageTreeNodeCopyWith<MessageTreeNode> get copyWith =>
       throw _privateConstructorUsedError;
@@ -654,8 +640,7 @@ class _$MessageTreeNodeCopyWithImpl<$Res, $Val extends MessageTreeNode>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of MessageTreeNode
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 MessageTreeNode 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({Object? message = null, Object? siblings = null}) {
@@ -674,8 +659,7 @@ class _$MessageTreeNodeCopyWithImpl<$Res, $Val extends MessageTreeNode>
     );
   }
 
-  /// Create a copy of MessageTreeNode
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 MessageTreeNode 的副本，并用非 null parameter value 替换给定 field。
   @override
   @pragma('vm:prefer-inline')
   $MessageCopyWith<$Res> get message {
@@ -684,8 +668,7 @@ class _$MessageTreeNodeCopyWithImpl<$Res, $Val extends MessageTreeNode>
     });
   }
 
-  /// Create a copy of MessageTreeNode
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 MessageTreeNode 的副本，并用非 null parameter value 替换给定 field。
   @override
   @pragma('vm:prefer-inline')
   $SiblingInfoCopyWith<$Res> get siblings {
@@ -721,8 +704,7 @@ class __$$MessageTreeNodeImplCopyWithImpl<$Res>
     $Res Function(_$MessageTreeNodeImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of MessageTreeNode
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 MessageTreeNode 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({Object? message = null, Object? siblings = null}) {
@@ -749,11 +731,11 @@ class _$MessageTreeNodeImpl implements _MessageTreeNode {
   factory _$MessageTreeNodeImpl.fromJson(Map<String, dynamic> json) =>
       _$$MessageTreeNodeImplFromJson(json);
 
-  /// The message at this position on the path.
+  /// Path 在此位置上的 message。
   @override
   final Message message;
 
-  /// The sibling metadata used to render the version switcher.
+  /// 用于渲染 version switcher 的 sibling metadata。
   @override
   final SiblingInfo siblings;
 
@@ -776,8 +758,7 @@ class _$MessageTreeNodeImpl implements _MessageTreeNode {
   @override
   int get hashCode => Object.hash(runtimeType, message, siblings);
 
-  /// Create a copy of MessageTreeNode
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 MessageTreeNode 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
@@ -802,16 +783,15 @@ abstract class _MessageTreeNode implements MessageTreeNode {
   factory _MessageTreeNode.fromJson(Map<String, dynamic> json) =
       _$MessageTreeNodeImpl.fromJson;
 
-  /// The message at this position on the path.
+  /// Path 在此位置上的 message。
   @override
   Message get message;
 
-  /// The sibling metadata used to render the version switcher.
+  /// 用于渲染 version switcher 的 sibling metadata。
   @override
   SiblingInfo get siblings;
 
-  /// Create a copy of MessageTreeNode
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 MessageTreeNode 的副本，并用非 null parameter value 替换给定 field。
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$MessageTreeNodeImplCopyWith<_$MessageTreeNodeImpl> get copyWith =>
@@ -824,17 +804,16 @@ ConversationPath _$ConversationPathFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$ConversationPath {
-  /// The conversation this path belongs to.
+  /// 此 path 所属的 conversation。
   Conversation get conversation => throw _privateConstructorUsedError;
 
-  /// The visible messages, from root to the current leaf.
+  /// 从 root 到当前 leaf 的 visible message。
   List<MessageTreeNode> get path => throw _privateConstructorUsedError;
 
-  /// Serializes this ConversationPath to a JSON map.
+  /// 将此 ConversationPath serialize 为 JSON map。
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of ConversationPath
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ConversationPath 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   $ConversationPathCopyWith<ConversationPath> get copyWith =>
       throw _privateConstructorUsedError;
@@ -862,8 +841,7 @@ class _$ConversationPathCopyWithImpl<$Res, $Val extends ConversationPath>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of ConversationPath
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ConversationPath 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({Object? conversation = null, Object? path = null}) {
@@ -882,8 +860,7 @@ class _$ConversationPathCopyWithImpl<$Res, $Val extends ConversationPath>
     );
   }
 
-  /// Create a copy of ConversationPath
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ConversationPath 的副本，并用非 null parameter value 替换给定 field。
   @override
   @pragma('vm:prefer-inline')
   $ConversationCopyWith<$Res> get conversation {
@@ -917,8 +894,7 @@ class __$$ConversationPathImplCopyWithImpl<$Res>
     $Res Function(_$ConversationPathImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of ConversationPath
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ConversationPath 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({Object? conversation = null, Object? path = null}) {
@@ -948,14 +924,14 @@ class _$ConversationPathImpl implements _ConversationPath {
   factory _$ConversationPathImpl.fromJson(Map<String, dynamic> json) =>
       _$$ConversationPathImplFromJson(json);
 
-  /// The conversation this path belongs to.
+  /// 此 path 所属的 conversation。
   @override
   final Conversation conversation;
 
-  /// The visible messages, from root to the current leaf.
+  /// 从 root 到当前 leaf 的 visible message。
   final List<MessageTreeNode> _path;
 
-  /// The visible messages, from root to the current leaf.
+  /// 从 root 到当前 leaf 的 visible message。
   @override
   @JsonKey()
   List<MessageTreeNode> get path {
@@ -987,8 +963,7 @@ class _$ConversationPathImpl implements _ConversationPath {
     const DeepCollectionEquality().hash(_path),
   );
 
-  /// Create a copy of ConversationPath
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ConversationPath 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
@@ -1013,16 +988,15 @@ abstract class _ConversationPath implements ConversationPath {
   factory _ConversationPath.fromJson(Map<String, dynamic> json) =
       _$ConversationPathImpl.fromJson;
 
-  /// The conversation this path belongs to.
+  /// 此 path 所属的 conversation。
   @override
   Conversation get conversation;
 
-  /// The visible messages, from root to the current leaf.
+  /// 从 root 到当前 leaf 的 visible message。
   @override
   List<MessageTreeNode> get path;
 
-  /// Create a copy of ConversationPath
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 ConversationPath 的副本，并用非 null parameter value 替换给定 field。
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ConversationPathImplCopyWith<_$ConversationPathImpl> get copyWith =>
@@ -1035,17 +1009,16 @@ SendMessageResponse _$SendMessageResponseFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$SendMessageResponse {
-  /// The user message that was just persisted.
+  /// 刚刚持久化的 user message。
   Message get userMessage => throw _privateConstructorUsedError;
 
-  /// The empty assistant placeholder to stream tokens into.
+  /// 用于 streaming token 的空 assistant placeholder。
   Message get assistantMessage => throw _privateConstructorUsedError;
 
-  /// Serializes this SendMessageResponse to a JSON map.
+  /// 将此 SendMessageResponse serialize 为 JSON map。
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of SendMessageResponse
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 SendMessageResponse 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   $SendMessageResponseCopyWith<SendMessageResponse> get copyWith =>
       throw _privateConstructorUsedError;
@@ -1074,8 +1047,7 @@ class _$SendMessageResponseCopyWithImpl<$Res, $Val extends SendMessageResponse>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of SendMessageResponse
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 SendMessageResponse 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({Object? userMessage = null, Object? assistantMessage = null}) {
@@ -1094,8 +1066,7 @@ class _$SendMessageResponseCopyWithImpl<$Res, $Val extends SendMessageResponse>
     );
   }
 
-  /// Create a copy of SendMessageResponse
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 SendMessageResponse 的副本，并用非 null parameter value 替换给定 field。
   @override
   @pragma('vm:prefer-inline')
   $MessageCopyWith<$Res> get userMessage {
@@ -1104,8 +1075,7 @@ class _$SendMessageResponseCopyWithImpl<$Res, $Val extends SendMessageResponse>
     });
   }
 
-  /// Create a copy of SendMessageResponse
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 SendMessageResponse 的副本，并用非 null parameter value 替换给定 field。
   @override
   @pragma('vm:prefer-inline')
   $MessageCopyWith<$Res> get assistantMessage {
@@ -1141,8 +1111,7 @@ class __$$SendMessageResponseImplCopyWithImpl<$Res>
     $Res Function(_$SendMessageResponseImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of SendMessageResponse
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 SendMessageResponse 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({Object? userMessage = null, Object? assistantMessage = null}) {
@@ -1172,11 +1141,11 @@ class _$SendMessageResponseImpl implements _SendMessageResponse {
   factory _$SendMessageResponseImpl.fromJson(Map<String, dynamic> json) =>
       _$$SendMessageResponseImplFromJson(json);
 
-  /// The user message that was just persisted.
+  /// 刚刚持久化的 user message。
   @override
   final Message userMessage;
 
-  /// The empty assistant placeholder to stream tokens into.
+  /// 用于 streaming token 的空 assistant placeholder。
   @override
   final Message assistantMessage;
 
@@ -1200,8 +1169,7 @@ class _$SendMessageResponseImpl implements _SendMessageResponse {
   @override
   int get hashCode => Object.hash(runtimeType, userMessage, assistantMessage);
 
-  /// Create a copy of SendMessageResponse
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 SendMessageResponse 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
@@ -1226,16 +1194,15 @@ abstract class _SendMessageResponse implements SendMessageResponse {
   factory _SendMessageResponse.fromJson(Map<String, dynamic> json) =
       _$SendMessageResponseImpl.fromJson;
 
-  /// The user message that was just persisted.
+  /// 刚刚持久化的 user message。
   @override
   Message get userMessage;
 
-  /// The empty assistant placeholder to stream tokens into.
+  /// 用于 streaming token 的空 assistant placeholder。
   @override
   Message get assistantMessage;
 
-  /// Create a copy of SendMessageResponse
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 SendMessageResponse 的副本，并用非 null parameter value 替换给定 field。
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$SendMessageResponseImplCopyWith<_$SendMessageResponseImpl> get copyWith =>

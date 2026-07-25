@@ -1,15 +1,11 @@
-/// The dedicated token + backend address dialog shown on first use and after a
-/// 401.
+/// 首次使用和 401 后显示的专用 token + backend address dialog。
 ///
-/// Per `product.md` §7.1 the dialog blocks the empty state until the user
-/// enters a shared bearer token. It is separate from the settings panel's
-/// token section: this dialog is a modal that intercepts the "no token" or
-/// "token rejected" state, while the settings panel is for editing an
-/// already-working token later.
+/// 根据 `product.md` §7.1，此 dialog 会阻塞 empty state，直到 user 输入 shared bearer token。
+/// 它与 settings panel 的 token section 分离：此 dialog 是拦截“no token”或“token rejected”
+/// state 的 modal，而 settings panel 用于之后编辑已经可用的 token。
 ///
-/// The dialog always asks for two things: the shared bearer token and the
-/// backend address (domain + port). Both are required — there is no
-/// same-origin fallback. The same dialog is used on every platform.
+/// Dialog 始终要求两项内容：shared bearer token 和 backend address（domain + port）。二者
+/// 都是 required，不存在 same-origin fallback。所有 platform 使用同一个 dialog。
 library;
 
 import 'package:flutter/material.dart';
@@ -21,11 +17,10 @@ import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import 'backend_url_field.dart';
 
-/// The modal token + backend address dialog. Shown by a host widget that
-/// watches the auth store and the base URL store; this widget itself only
-/// renders the form and forwards the save.
+/// Modal token + backend address dialog。由监听 auth store 和 base URL store 的 host widget
+/// 显示；此 widget 自身只渲染 form 并转发 save。
 class TokenDialog extends ConsumerStatefulWidget {
-  /// Creates the dialog.
+  /// 创建 dialog。
   const TokenDialog({super.key});
 
   @override
@@ -41,16 +36,15 @@ class _TokenDialogState extends ConsumerState<TokenDialog> {
   @override
   void initState() {
     super.initState();
-    // Pre-fill the backend address from the store. If the user already saved
-    // an address (e.g. they are re-entering a token after a 401) they should
-    // not have to type it again.
+    // 从 store 预填 backend address。如果 user 已经保存过 address（例如 401 后重新输入
+    // token），则不需要再次输入。
     final baseUrlStore = ref.read(baseUrlStoreProvider);
     final parsed = parseBackendUrl(baseUrlStore.read());
     if (parsed != null) {
       _domainController.text = parsed.domain;
       _portController.text = parsed.port;
     }
-    // Rebuild when the token field changes so the Save button re-evaluates.
+    // Token field 变化时 rebuild，使 Save button 重新计算。
     _tokenController.addListener(_handleChanged);
   }
 
@@ -71,7 +65,8 @@ class _TokenDialogState extends ConsumerState<TokenDialog> {
   bool get _canSave {
     final token = _tokenController.text.trim();
     if (token.isEmpty) return false;
-    return buildBackendUrl(_domainController.text, _portController.text) != null;
+    return buildBackendUrl(_domainController.text, _portController.text) !=
+        null;
   }
 
   void _save() {
@@ -80,8 +75,7 @@ class _TokenDialogState extends ConsumerState<TokenDialog> {
     final token = _tokenController.text.trim();
     final url = buildBackendUrl(_domainController.text, _portController.text)!;
 
-    // Write the token and clear the unauthorized flag (in case this dialog
-    // appeared because of a 401).
+    // 写入 token 并清除 unauthorized flag（以防 dialog 因 401 而出现）。
     ref.read(authStoreProvider).write(token);
     ref.read(authStoreProvider).markAuthorized();
     ref.read(baseUrlStoreProvider).write(url);
@@ -99,27 +93,29 @@ class _TokenDialogState extends ConsumerState<TokenDialog> {
     final isFirstUse = !authStore.hasToken;
     final needsAddress = !baseUrlStore.hasValue;
 
-    // The headline and helper text change with the reason the dialog opened.
-    // The dialog can appear because the user has no token, the backend rejected
-    // the token, or the backend address is missing. The headline picks the
-    // most specific reason.
+    // Headline 和 helper text 会随 dialog 打开原因变化。Dialog 可能因为 user 没有 token、
+    // backend 拒绝 token 或缺少 backend address 而出现。Headline 选择最具体的原因。
     final String headline;
     final String helper;
     if (isFirstUse) {
       headline = 'Welcome to Parlo';
-      helper = 'Enter the shared bearer token and backend address to connect '
+      helper =
+          'Enter the shared bearer token and backend address to connect '
           'to your Parlo backend.';
     } else if (isUnauthorized) {
       headline = 'Re-enter your token';
-      helper = 'The backend rejected the current token. Enter a valid shared '
+      helper =
+          'The backend rejected the current token. Enter a valid shared '
           'bearer token to continue.';
     } else if (needsAddress) {
       headline = 'Set your backend address';
-      helper = 'No backend address is set. Enter the domain and port of your '
+      helper =
+          'No backend address is set. Enter the domain and port of your '
           'Parlo backend to continue.';
     } else {
       headline = 'Re-enter your details';
-      helper = 'Enter the shared bearer token and backend address to connect '
+      helper =
+          'Enter the shared bearer token and backend address to connect '
           'to your Parlo backend.';
     }
 

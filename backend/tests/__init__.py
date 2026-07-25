@@ -1,1 +1,1 @@
-"""Test package for the Parlo backend."""
+"""Parlo 后端的测试包。"""

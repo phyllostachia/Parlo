@@ -1,14 +1,13 @@
-"""Shared test fixtures and environment setup.
+"""共享测试 fixture 和 environment setup。
 
-Environment variables and a throwaway ``config.yaml`` are set up before the
-application is imported so the module-level database engine in :mod:`app.db`
-binds to a throwaway SQLite file. Each test starts with a clean database via
-the ``_clean_db`` autouse fixture, and the ``client`` fixture provides an
-authenticated async HTTP client wired to the ASGI app.
+在 import application 之前设置 environment variable 和临时 ``config.yaml``，使
+:mod:`app.db` 中的 module-level database engine 绑定到临时 SQLite file。每个 test 通过
+``_clean_db`` autouse fixture 从干净 database 开始，``client`` fixture 提供连接到 ASGI app
+的已鉴权 async HTTP client。
 
-The config file (not just env vars) is needed because model definitions now
-live in ``config.yaml``; the tests point ``PARLO_CONFIG_PATH`` at a temp file
-so the test process never touches the operator's real ``config.yaml``.
+这里需要 config file 而不只是 env var，因为 model definition 现在位于 ``config.yaml``；
+测试将 ``PARLO_CONFIG_PATH`` 指向 temp file，因此 test process 不会触碰 operator 的真实
+``config.yaml``。
 """
 
 from __future__ import annotations
@@ -21,8 +20,8 @@ os.environ.setdefault("AUTH_TOKEN", "test-token")
 os.environ.setdefault("OPENAI_API_KEY", "sk-test")
 os.environ.setdefault("ANTHROPIC_API_KEY", "sk-ant-test")
 
-# Write a throwaway config.yaml for the test process. Two models cover both
-# protocols so the provider and API tests can exercise either family.
+# 为 test process 写入临时 config.yaml。两个 model 覆盖两种 protocol，使 provider 和 API
+# test 可以分别测试两种 family。
 _config_path = os.path.join(_tmp_dir, "config.yaml")
 with open(_config_path, "w", encoding="utf-8") as _handle:
     _handle.write(
@@ -54,7 +53,7 @@ with open(_config_path, "w", encoding="utf-8") as _handle:
     )
 os.environ.setdefault("PARLO_CONFIG_PATH", _config_path)
 
-# Ensure the cached Settings pick up the test environment.
+# 确保缓存的 Settings 使用测试 environment。
 from app.config import get_settings  # noqa: E402
 
 get_settings.cache_clear()
@@ -71,11 +70,10 @@ from app.main import app  # noqa: E402
 
 @pytest.fixture(autouse=True)
 async def _clean_db():
-    """Reset all tables before each test for isolation.
+    """在每个 test 前重置所有 table，以保证隔离。
 
-    Foreign keys are turned off during truncation so the order of deletes
-    does not matter; they are re-enabled on the next connection by the
-    ``connect`` event listener in :mod:`app.db`.
+    清空期间关闭 foreign key，因此删除顺序无关紧要；下一个 connection 会由
+    :mod:`app.db` 中的 ``connect`` event listener 重新启用它们。
     """
     await init_db()
     async with async_session_maker() as session:
@@ -90,7 +88,7 @@ async def _clean_db():
 
 @pytest_asyncio.fixture
 async def client() -> AsyncIterator[AsyncClient]:
-    """An authenticated async HTTP client wired to the ASGI app."""
+    """连接到 ASGI app 的已鉴权 async HTTP client。"""
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as c:
@@ -100,7 +98,7 @@ async def client() -> AsyncIterator[AsyncClient]:
 
 @pytest_asyncio.fixture
 async def client_unauth() -> AsyncIterator[AsyncClient]:
-    """An unauthenticated client used to test auth rejection."""
+    """用于测试 auth rejection 的未鉴权 client。"""
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as c:

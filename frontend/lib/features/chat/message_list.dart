@@ -1,9 +1,8 @@
-/// The scrollable message flow for one conversation.
+/// 一个 conversation 的可滚动 message flow。
 ///
-/// Watches the conversation path from [currentConversationProvider] and
-/// renders each node as a [MessageBubble]. Auto-scrolls to the bottom when
-/// new content arrives, but only if the user is already near the bottom — so
-/// scrolling up to read earlier content is not interrupted.
+/// 监听 [currentConversationProvider] 提供的 conversation path，并将每个 node 渲染为
+/// [MessageBubble]。新 content 到达时自动滚到底部，但只有 user 已经接近底部时才执行，
+/// 因此向上滚动阅读之前内容不会被打断。
 library;
 
 import 'package:flutter/material.dart';
@@ -15,12 +14,12 @@ import '../../core/widgets/error_banner.dart';
 import 'chat_providers.dart';
 import 'message_bubble.dart';
 
-/// The message list widget.
+/// Message list widget。
 class MessageList extends ConsumerStatefulWidget {
-  /// Creates the list.
+  /// 创建 list。
   const MessageList({required this.conversationId, super.key});
 
-  /// The conversation whose path to render.
+  /// 要渲染 path 的 conversation。
   final int conversationId;
 
   @override
@@ -33,8 +32,7 @@ class _MessageListState extends ConsumerState<MessageList> {
   @override
   void initState() {
     super.initState();
-    // Jump to the bottom whenever the path changes (new message, new token),
-    // but only if the user is already near the bottom.
+    // Path 变化时（new message、new token）跳到底部，但只有 user 已经接近底部时才执行。
     ref.listenManual(
       currentConversationProvider(widget.conversationId),
       (_, _) => _jumpToBottomIfNearBottom(),
@@ -52,8 +50,7 @@ class _MessageListState extends ConsumerState<MessageList> {
     final position = _scrollController.position;
     final isNearBottom = position.pixels >= position.maxScrollExtent - 120;
     if (isNearBottom) {
-      // Use a post-frame callback so the new content has been laid out
-      // before we read maxScrollExtent.
+      // 使用 post-frame callback，使 new content layout 完成后再读取 maxScrollExtent。
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!_scrollController.hasClients) return;
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
@@ -81,8 +78,8 @@ class _MessageListState extends ConsumerState<MessageList> {
           return const _EmptyConversation();
         }
         final streamState = ref.watch(streamStateProvider);
-        // Design "Message Flow": the column is 720px wide, centered on the
-        // canvas, with 32px of vertical padding and 32px between messages.
+        // Design “Message Flow”：column 宽 720px，在 canvas 中居中；垂直 padding 32px，
+        // message 之间间隔 32px。
         return Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
@@ -97,9 +94,8 @@ class _MessageListState extends ConsumerState<MessageList> {
               itemBuilder: (context, index) {
                 final node = path.path[index];
                 final isLast = index == path.path.length - 1;
-                // The last assistant message is "streaming" if it is not yet
-                // complete; that drives the loading cursor and the "Thinking…"
-                // placeholder.
+                // 最后一条 assistant message 尚未 complete 时视为“streaming”；它驱动 loading
+                // cursor 和“Thinking…”placeholder。
                 final isStreaming =
                     isLast &&
                     node.message.role == MessageRole.assistant &&
@@ -142,12 +138,11 @@ class _MessageListState extends ConsumerState<MessageList> {
   }
 }
 
-/// The placeholder shown for a conversation with no messages yet.
+/// Conversation 还没有 message 时显示的 placeholder。
 ///
-/// In practice the chat screen reaches this only briefly between the empty
-/// state's "create + post first message" and the path refresh; by the time
-/// the chat screen watches the provider, the path has the user message and
-/// assistant placeholder. The placeholder is a graceful fallback.
+/// 实际上，chat screen 只会在 empty state 的“create + post first message”和 path refresh
+/// 之间短暂到达这里；chat screen 监听 provider 时，path 通常已经包含 user message 和
+/// assistant placeholder。此 placeholder 是 graceful fallback。
 class _EmptyConversation extends StatelessWidget {
   const _EmptyConversation();
 

@@ -1,37 +1,32 @@
-/// A collapsible strip that shows the assistant's reasoning ("thinking"
-/// trace) above the main reply body.
+/// 在主 reply body 上方显示 assistant reasoning（“thinking”trace）的 collapsible strip。
 ///
-/// Per `product.md` §6.3 the strip is:
-/// - Optional: only shown when the message has reasoning text.
-/// - Collapsed by default; the user clicks to expand.
-/// - Live during streaming: while the reasoning tokens arrive, a pulsing
-///   indicator marks the strip as active so the user knows the model is
-///   still thinking, and the user can expand to watch the reasoning scroll.
+/// 根据 `product.md` §6.3，此 strip 具有以下特征：
+/// - Optional：只有 message 有 reasoning text 时显示。
+/// - 默认 collapsed；user 点击后展开。
+/// - Streaming 时 live：reasoning token 到达期间，pulsing indicator 标记 strip 处于 active，
+///   让 user 知道 model 仍在 thinking，并可以展开观看 reasoning scroll。
 ///
-/// The strip does not label the thinking-effort level: that value already
-/// lives in the top bar and would only clutter the message.
+/// Strip 不标注 thinking-effort level：该 value 已位于 top bar，再次显示只会使 message 杂乱。
 library;
 
 import 'package:flutter/material.dart';
 
 import '../../core/theme/colors.dart';
 
-/// A collapsible view of one assistant message's reasoning.
+/// 单条 assistant message reasoning 的 collapsible view。
 class ThinkingStrip extends StatefulWidget {
-  /// Creates the strip.
+  /// 创建 strip。
   const ThinkingStrip({
     required this.reasoning,
     required this.isStreaming,
     super.key,
   });
 
-  /// The reasoning text to show when expanded. Empty reasoning means the
-  /// strip is not shown at all (the parent hides it).
+  /// 展开时显示的 reasoning text。Reasoning 为空表示完全不显示 strip（parent 会隐藏它）。
   final String reasoning;
 
-  /// Whether the reasoning is still being streamed for this message. While
-  /// `true`, the strip header shows a pulsing indicator so the user can tell
-  /// the model is still thinking.
+  /// 此 message 的 reasoning 是否仍在 streaming。为 `true` 时，strip header 显示 pulsing
+  /// indicator，使 user 知道 model 仍在 thinking。
   final bool isStreaming;
 
   @override
@@ -39,7 +34,7 @@ class ThinkingStrip extends StatefulWidget {
 }
 
 class _ThinkingStripState extends State<ThinkingStrip> {
-  /// Whether the user has expanded the strip to read the reasoning.
+  /// User 是否展开 strip 以阅读 reasoning。
   bool _isExpanded = false;
 
   @override
@@ -74,12 +69,11 @@ class _ThinkingStripState extends State<ThinkingStrip> {
   }
 }
 
-/// The clickable header row of the thinking strip.
+/// Thinking strip 可点击的 header row。
 ///
-/// Shows a chevron that rotates between collapsed (right) and expanded
-/// (down), the "Thinking" label, and a small pulsing dot when the reasoning
-/// is still streaming. The whole row is a button so the user can click
-/// anywhere on it to toggle.
+/// 显示在 collapsed（right）和 expanded（down）之间变化的 chevron、“Thinking”label，以及
+/// reasoning 仍在 streaming 时显示的小 pulsing dot。整个 row 都是 button，因此 user 可以
+/// 点击任意位置进行 toggle。
 class _Header extends StatelessWidget {
   const _Header({
     required this.isExpanded,
@@ -108,9 +102,9 @@ class _Header extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               'Thinking',
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: colors.graphite,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(color: colors.graphite),
             ),
             if (isStreaming) ...[
               const SizedBox(width: 8),
@@ -123,16 +117,12 @@ class _Header extends StatelessWidget {
   }
 }
 
-/// The body of the expanded strip, showing the reasoning text.
+/// Expanded strip 的 body，显示 reasoning text。
 ///
-/// When the reasoning is still streaming, the body auto-scrolls to the bottom
-/// so the latest tokens stay visible. When the message is complete, the body
-/// is a static, scrollable view.
+/// Reasoning 仍在 streaming 时，body 自动滚到底部，使最新 token 保持可见。Message complete
+/// 后，body 是静态的可滚动 view。
 class _ReasoningBody extends StatefulWidget {
-  const _ReasoningBody({
-    required this.reasoning,
-    required this.isStreaming,
-  });
+  const _ReasoningBody({required this.reasoning, required this.isStreaming});
 
   final String reasoning;
   final bool isStreaming;
@@ -153,7 +143,7 @@ class _ReasoningBodyState extends State<_ReasoningBody> {
   @override
   void didUpdateWidget(covariant _ReasoningBody oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // When new reasoning tokens arrive, keep the latest text in view.
+    // 新 reasoning token 到达时，保持最新 text 可见。
     if (widget.reasoning != oldWidget.reasoning) {
       _jumpToBottom();
     }
@@ -175,25 +165,24 @@ class _ReasoningBodyState extends State<_ReasoningBody> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<ParloColors>()!;
-    // Cap the height so a long reasoning trace does not push the reply body
-    // off the screen; the user scrolls inside this box instead.
+    // 限制 height，避免较长 reasoning trace 将 reply body 推出 screen；user 改为在此 box
+    // 内滚动。
     return ConstrainedBox(
       constraints: const BoxConstraints(maxHeight: 240),
       child: SingleChildScrollView(
         controller: _scrollController,
         child: SelectableText(
           widget.reasoning,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: colors.graphite,
-                height: 1.5,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: colors.graphite, height: 1.5),
         ),
       ),
     );
   }
 }
 
-/// A small dot that pulses (fades in and out) to mark active streaming.
+/// 通过 pulse（淡入淡出）标记 active streaming 的小 dot。
 class _PulsingDot extends StatefulWidget {
   const _PulsingDot({required this.color});
 
@@ -229,10 +218,7 @@ class _PulsingDotState extends State<_PulsingDot>
       child: Container(
         width: 6,
         height: 6,
-        decoration: BoxDecoration(
-          color: widget.color,
-          shape: BoxShape.circle,
-        ),
+        decoration: BoxDecoration(color: widget.color, shape: BoxShape.circle),
       ),
     );
   }

@@ -21,24 +21,23 @@ Profile _$ProfileFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Profile {
-  /// The server-assigned identifier, used in URL paths and CRUD calls.
+  /// Server 分配的 identifier，用于 URL path 和 CRUD call。
   int get id => throw _privateConstructorUsedError;
 
-  /// The human-readable folder name shown in the sidebar.
+  /// sidebar 中显示的可读 folder name。
   String get name => throw _privateConstructorUsedError;
 
-  /// When the profile was first created.
+  /// Profile 创建时间。
   DateTime get createdAt => throw _privateConstructorUsedError;
 
-  /// When the profile was last renamed or had a conversation added.
-  /// The sidebar sorts by this field, newest first.
+  /// Profile 最近重命名或添加 conversation 的时间。
+  /// Sidebar 按此 field 从新到旧排序。
   DateTime get updatedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this Profile to a JSON map.
+  /// 将此 Profile serialize 为 JSON map。
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of Profile
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 Profile 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   $ProfileCopyWith<Profile> get copyWith => throw _privateConstructorUsedError;
 }
@@ -61,8 +60,7 @@ class _$ProfileCopyWithImpl<$Res, $Val extends Profile>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of Profile
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 Profile 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -115,8 +113,7 @@ class __$$ProfileImplCopyWithImpl<$Res>
     $Res Function(_$ProfileImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of Profile
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 Profile 的副本，并用非 null parameter value 替换给定 field。
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -161,20 +158,20 @@ class _$ProfileImpl implements _Profile {
   factory _$ProfileImpl.fromJson(Map<String, dynamic> json) =>
       _$$ProfileImplFromJson(json);
 
-  /// The server-assigned identifier, used in URL paths and CRUD calls.
+  /// Server 分配的 identifier，用于 URL path 和 CRUD call。
   @override
   final int id;
 
-  /// The human-readable folder name shown in the sidebar.
+  /// sidebar 中显示的可读 folder name。
   @override
   final String name;
 
-  /// When the profile was first created.
+  /// Profile 创建时间。
   @override
   final DateTime createdAt;
 
-  /// When the profile was last renamed or had a conversation added.
-  /// The sidebar sorts by this field, newest first.
+  /// Profile 最近重命名或添加 conversation 的时间。
+  /// Sidebar 按此 field 从新到旧排序。
   @override
   final DateTime updatedAt;
 
@@ -200,8 +197,7 @@ class _$ProfileImpl implements _Profile {
   @override
   int get hashCode => Object.hash(runtimeType, id, name, createdAt, updatedAt);
 
-  /// Create a copy of Profile
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 Profile 的副本，并用非 null parameter value 替换给定 field。
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
@@ -224,25 +220,24 @@ abstract class _Profile implements Profile {
 
   factory _Profile.fromJson(Map<String, dynamic> json) = _$ProfileImpl.fromJson;
 
-  /// The server-assigned identifier, used in URL paths and CRUD calls.
+  /// Server 分配的 identifier，用于 URL path 和 CRUD call。
   @override
   int get id;
 
-  /// The human-readable folder name shown in the sidebar.
+  /// sidebar 中显示的可读 folder name。
   @override
   String get name;
 
-  /// When the profile was first created.
+  /// Profile 创建时间。
   @override
   DateTime get createdAt;
 
-  /// When the profile was last renamed or had a conversation added.
-  /// The sidebar sorts by this field, newest first.
+  /// Profile 最近重命名或添加 conversation 的时间。
+  /// Sidebar 按此 field 从新到旧排序。
   @override
   DateTime get updatedAt;
 
-  /// Create a copy of Profile
-  /// with the given fields replaced by the non-null parameter values.
+  /// 创建 Profile 的副本，并用非 null parameter value 替换给定 field。
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ProfileImplCopyWith<_$ProfileImpl> get copyWith =>

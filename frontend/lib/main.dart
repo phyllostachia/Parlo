@@ -1,13 +1,11 @@
-/// Entry point for the Parlo Flutter frontend.
+/// Parlo Flutter 前端的 entry point。
 ///
-/// The app is wrapped in a [ProviderScope] so every Riverpod provider has a
-/// container to live in. Fonts are declared in `pubspec.yaml` and registered
-/// by Flutter automatically, so there is no manual font registration here.
+/// 应用包裹在 [ProviderScope] 中，使每个 Riverpod provider 都有可用的 container。字体
+/// 在 `pubspec.yaml` 中声明，并由 Flutter 自动注册，因此这里不需要手动注册字体。
 ///
-/// We eagerly load [SharedPreferences] before `runApp` and override the
-/// `sharedPreferencesProvider` with the instance. The auth store reads it
-/// synchronously afterwards, so the token can be restored without an async
-/// wait at first paint.
+/// 在 `runApp` 前主动加载 [SharedPreferences]，并用该 instance override
+/// `sharedPreferencesProvider`。之后 auth store 可以同步读取它，因此首次绘制时无需
+/// async wait 就能恢复 token。
 library;
 
 import 'package:flutter/material.dart';
@@ -17,13 +15,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'app.dart';
 import 'core/auth/auth_providers.dart';
 
-/// Starts the Parlo app.
+/// 启动 Parlo 应用。
 ///
-/// Keeping `main` tiny makes the app easier to test: a test can construct a
-/// [ParloApp] widget directly and pump it without running `main`.
+/// 保持 `main` 简短可以让应用更容易测试：test 可以直接构造 [ParloApp] widget 并 pump，
+/// 而不需要运行 `main`。
 Future<void> main() async {
-  // Required before any async work that touches platform channels, including
-  // `SharedPreferences.getInstance()`.
+  // 在触碰 platform channel 的任何 async work（包括 `SharedPreferences.getInstance()`）
+  // 之前都必须调用。
   WidgetsFlutterBinding.ensureInitialized();
 
   final prefs = await SharedPreferences.getInstance();
@@ -31,9 +29,8 @@ Future<void> main() async {
   runApp(
     ProviderScope(
       overrides: [
-        // Hand the real preferences instance to the rest of the app. The
-        // default factory in `auth_providers.dart` throws, so forgetting this
-        // override fails loudly.
+        // 将真实的 preferences instance 交给应用其余部分。`auth_providers.dart` 中的
+        // default factory 会抛出异常，因此忘记这个 override 会明确失败。
         sharedPreferencesProvider.overrideWithValue(prefs),
       ],
       child: const ParloApp(),

@@ -1,19 +1,16 @@
-"""Application configuration split across ``.env`` (secrets) and ``config.yaml``.
+"""将应用配置拆分到 ``.env``（密钥）和 ``config.yaml``。
 
-Secrets (the shared ``AUTH_TOKEN`` and each provider's ``*_API_KEY``) live in
-``.env`` and are read through pydantic-settings. Everything else — the model
-registry, server CORS, database path, image storage — lives in ``config.yaml``
-and is parsed into a strongly typed :class:`AppConfig` tree by
-:func:`load_config`.
+密钥（共享 ``AUTH_TOKEN`` 和每个 provider 的 ``*_API_KEY``）存放在 ``.env``，并通过
+pydantic-settings 读取。其他配置（model registry、server CORS、database path、image
+storage）位于 ``config.yaml``，由 :func:`load_config` 解析为强类型的 :class:`AppConfig`
+tree。
 
-The two files are separated so ``config.yaml`` can be checked into version
-control while ``.env`` stays git-ignored. Each model in ``config.yaml``
-references its API key by environment-variable name (the ``api_key`` field),
-so the actual secret never appears in the YAML.
+拆分这两个文件后，``config.yaml`` 可以提交到 version control，而 ``.env`` 保持
+git-ignored。``config.yaml`` 中的每个 model 都通过 environment-variable name
+（``api_key`` field）引用自己的 API key，因此实际密钥不会出现在 YAML 中。
 
-A single :class:`Settings` instance bundles the resolved ``auth_token`` and the
-parsed :class:`AppConfig`; it is created at import time by
-:func:`get_settings` and cached for the process lifetime.
+单个 :class:`Settings` instance 会组合解析后的 ``auth_token`` 和 :class:`AppConfig`；
+它由 :func:`get_settings` 在 import time 创建，并在 process lifetime 内缓存。
 """
 
 from __future__ import annotations
@@ -29,72 +26,68 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 ProviderType = Literal["openai-response", "anthropic-message"]
-"""The two upstream protocols supported by the provider abstraction layer."""
+"""provider abstraction layer 支持的两种上游 protocol。"""
 
 FamilyType = Literal["anthropic", "openai"]
-"""The two provider families. Decides which logo the client renders."""
+"""两种 provider family，决定客户端渲染哪个 logo。"""
 
 
 class ModelConfig(BaseModel):
-    """One entry in the ``models`` list of ``config.yaml``.
+    """``config.yaml`` 的 ``models`` list 中的一个 entry。
 
-    The ``api_key`` field is the *name* of an environment variable (for example
-    ``OPENAI_API_KEY``), not the secret itself. :func:`load_config` validates
-    that the named variable is present and non-empty at startup; adapters
-    read the value through :func:`resolve_api_key` when building requests.
+    ``api_key`` field 是 environment variable 的 *name*（例如 ``OPENAI_API_KEY``），而
+    不是 secret 本身。:func:`load_config` 会在启动时校验该变量存在且非空；adapter 构建
+    request 时通过 :func:`resolve_api_key` 读取它的 value。
     """
 
     id: str
-    """Model identifier sent to the upstream provider (e.g. ``gpt-5.6``)."""
+    """发送给上游 provider 的 model identifier（例如 ``gpt-5.6``）。"""
 
     display_name: str
-    """Human-readable name shown in the client."""
+    """客户端显示的可读名称。"""
 
     api_key: str
-    """Name of the environment variable holding the upstream API key."""
+    """保存上游 API key 的 environment variable name。"""
 
     base_url: str
-    """Upstream base URL, without a trailing slash."""
+    """上游 base URL，不带 trailing slash。"""
 
     family: FamilyType
-    """Provider family; decides the client-side logo."""
+    """provider family，决定客户端的 logo。"""
 
     protocol: ProviderType
-    """Upstream protocol; decides the request wire format and the set of
-    thinking-effort levels the client may choose from."""
+    """上游 protocol，决定 request wire format 和客户端可选择的 thinking-effort level 集合。"""
 
     vision: bool
-    """Whether the model accepts image input. The client hides the
-    multimodal upload button when this is ``False``."""
+    """model 是否接受 image input。当值为 ``False`` 时，客户端隐藏 multimodal upload button。"""
 
     thinking_effort: list[str]
-    """Thinking-effort levels this model accepts, in the order the client
-    should offer them. The first entry is used as the default when a new
-    conversation is created (see decision D05)."""
+    """model 接受的 thinking-effort level，按客户端应提供的顺序排列。创建新 conversation
+    时使用第一个 entry 作为默认值（参见决策 D05）。"""
 
     max_tokens: int
-    """Output budget (thinking + visible text) sent to the upstream as the
-    hard cap on generated tokens. Not a thinking-control field."""
+    """发送给上游的 output budget（thinking + visible text），作为 generated token 的硬上限。
+    它不是 thinking-control field。"""
 
     @field_validator("base_url")
     @classmethod
     def _strip_trailing_slash(cls, value: str) -> str:
-        """Remove a trailing slash so URL joining is predictable."""
+        """移除 trailing slash，使 URL joining 结果可预测。"""
         return value.rstrip("/")
 
     @field_validator("thinking_effort")
     @classmethod
     def _non_empty_efforts(cls, value: list[str]) -> list[str]:
-        """A model with no effort levels gives the client nothing to pick."""
+        """没有 effort level 的 model 无法为客户端提供可选项。"""
         if not value:
             raise ValueError("thinking_effort must list at least one level")
         return value
 
     def resolve_api_key(self) -> str:
-        """Return the actual secret this model references from the environment.
+        """从 environment 返回该 model 引用的实际 secret。
 
-        Looked up lazily so that swapping keys in ``.env`` between requests
-        (rare, but possible in tests) is reflected without reloading config.
+        采用 lazy lookup，因此在 request 之间替换 ``.env`` 中的 key（虽然少见，但测试
+        中可能发生）后，不需要重新加载 config 就能生效。
         """
         value = os.environ.get(self.api_key)
         if not value:
@@ -106,39 +99,38 @@ class ModelConfig(BaseModel):
 
 
 class ServerConfig(BaseModel):
-    """Non-secret server runtime parameters."""
+    """不包含 secret 的 server runtime parameter。"""
 
     cors_origins: list[str] = Field(default_factory=list)
-    """Origins permitted by CORS. The Flutter web build runs on a separate
-    origin, so the address users visit must be listed here."""
+    """CORS 允许的 origin。Flutter Web build 运行在独立 origin，因此必须在这里列出用户
+    访问的 address。"""
 
 
 class DatabaseConfig(BaseModel):
-    """Async SQLAlchemy URL for the SQLite database."""
+    """SQLite database 使用的 async SQLAlchemy URL。"""
 
     url: str = "sqlite+aiosqlite:///./data/parlo.db"
 
 
 class ImagesConfig(BaseModel):
-    """Image upload storage parameters."""
+    """Image upload storage parameter。"""
 
     upload_dir: str = "./data/images"
-    """Filesystem directory used to store uploaded images."""
+    """存储上传图片的 filesystem directory。"""
 
     max_bytes: int = 10 * 1024 * 1024
-    """Maximum size of a single uploaded image, in bytes."""
+    """单张上传图片的最大 size，单位为 bytes。"""
 
 
 class AppConfig(BaseModel):
-    """The parsed ``config.yaml`` tree.
+    """解析后的 ``config.yaml`` tree。
 
-    ``default_model`` must reference the ``id`` of one of the entries in
-    ``models``; this is checked by :func:`load_config` after parsing.
+    ``default_model`` 必须引用 ``models`` 中某个 entry 的 ``id``；解析后由
+    :func:`load_config` 检查这一点。
     """
 
     default_model: str
-    """Model id used when a new conversation is created without an explicit
-    choice. Must match one of the ``models`` ids."""
+    """创建新 conversation 且没有明确选择时使用的 model id。必须匹配某个 ``models`` id。"""
 
     server: ServerConfig = Field(default_factory=ServerConfig)
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
@@ -147,7 +139,7 @@ class AppConfig(BaseModel):
 
     @model_validator(mode="after")
     def _validate_default_model(self) -> AppConfig:
-        """Ensure ``default_model`` points at a real entry in ``models``."""
+        """确保 ``default_model`` 指向 ``models`` 中真实存在的 entry。"""
         ids = {m.id for m in self.models}
         if self.default_model not in ids:
             raise ValueError(
@@ -156,7 +148,7 @@ class AppConfig(BaseModel):
         return self
 
     def get_model(self, model_id: str) -> ModelConfig | None:
-        """Return the model with the given id, or ``None`` if not found."""
+        """返回给定 id 对应的 model；找不到时返回 ``None``。"""
         for model in self.models:
             if model.id == model_id:
                 return model
@@ -164,12 +156,10 @@ class AppConfig(BaseModel):
 
 
 class Settings(BaseSettings):
-    """Process-wide settings: the shared secret from ``.env`` plus the parsed
-    ``config.yaml`` tree.
+    """Process-wide settings：``.env`` 中的 shared secret 加上解析后的 ``config.yaml`` tree。
 
-    The model_config keeps ``extra="ignore"`` so an old ``.env`` that still
-    carries deprecated provider keys (``PROVIDER_*``) does not crash startup;
-    they are simply unused.
+    model_config 保持 ``extra="ignore"``，因此仍包含已弃用 provider key（``PROVIDER_*``）
+    的旧 ``.env`` 不会导致启动失败；这些 key 会被直接忽略。
     """
 
     model_config = SettingsConfigDict(
@@ -179,19 +169,18 @@ class Settings(BaseSettings):
     )
 
     auth_token: str
-    """Shared bearer token that clients must send on every API request."""
+    """客户端每次 API request 都必须发送的 shared bearer token。"""
 
     app_config: AppConfig
-    """Parsed ``config.yaml`` tree, injected by :func:`get_settings`."""
+    """由 :func:`get_settings` 注入的已解析 ``config.yaml`` tree。"""
 
 
 def load_config(path: str | Path = "config.yaml") -> AppConfig:
-    """Parse ``config.yaml`` into an :class:`AppConfig` and validate it.
+    """将 ``config.yaml`` 解析为 :class:`AppConfig` 并进行校验。
 
-    Beyond the Pydantic-level validation on :class:`AppConfig`, this function
-    checks that every model's ``api_key`` environment variable is present and
-    non-empty, so a misconfigured deployment fails fast at startup rather than
-    on the first chat request.
+    除了 :class:`AppConfig` 的 Pydantic-level validation，此函数还会检查每个 model 的
+    ``api_key`` environment variable 存在且非空，使配置错误的 deployment 在启动时快速
+    失败，而不是等到第一次 chat request 才失败。
     """
     config_path = Path(path)
     with config_path.open("r", encoding="utf-8") as handle:
@@ -199,8 +188,8 @@ def load_config(path: str | Path = "config.yaml") -> AppConfig:
     app_config = AppConfig.model_validate(raw)
 
     for model in app_config.models:
-        # Touch the environment variable now so startup fails clearly if a
-        # referenced secret is missing. The value is re-read at request time.
+        # 现在读取 environment variable，使引用的 secret 缺失时能够明确地在启动失败。
+        # 该 value 会在 request time 重新读取。
         if not os.environ.get(model.api_key):
             raise RuntimeError(
                 f"environment variable {model.api_key!r} referenced by model "
@@ -211,25 +200,21 @@ def load_config(path: str | Path = "config.yaml") -> AppConfig:
 
 @lru_cache
 def get_settings() -> Settings:
-    """Return the process-wide :class:`Settings` instance.
+    """返回 process-wide :class:`Settings` instance。
 
-    The config path defaults to ``config.yaml`` in the current working
-    directory but can be overridden with the ``PARLO_CONFIG_PATH`` environment
-    variable, which is convenient for tests that want to point at a
-    throwaway file.
+    config path 默认为当前 working directory 中的 ``config.yaml``，也可以通过
+    ``PARLO_CONFIG_PATH`` environment variable 覆盖，这方便测试指向临时文件。
 
-    ``.env`` is loaded into ``os.environ`` explicitly before
-    :func:`load_config` runs, so the startup validation that checks each
-    model's ``api_key`` environment variable can see keys declared in
-    ``.env`` (pydantic-settings only parses ``.env`` into the
-    :class:`Settings` instance itself and does not populate ``os.environ``).
+    在运行 :func:`load_config` 前，``.env`` 会被显式加载到 ``os.environ``，因此检查每个
+    model 的 ``api_key`` environment variable 的 startup validation 可以看到 ``.env``
+    中声明的 key（pydantic-settings 只将 ``.env`` 解析到 :class:`Settings` instance，
+    不会填充 ``os.environ``）。
 
-    The result is cached so that the files are parsed only once. Tests that
-    need different values can call ``get_settings.cache_clear()`` after
-    mutating the environment or the config file.
+    结果会被缓存，使文件只解析一次。需要不同值的测试可以修改 environment 或 config
+    file 后调用 ``get_settings.cache_clear()``。
     """
-    # Pull secrets from .env into os.environ so load_config's api_key check
-    # and ModelConfig.resolve_api_key() at request time can both see them.
+    # 将 .env 中的 secret 放入 os.environ，使 load_config 的 api_key check 和 request
+    # time 的 ModelConfig.resolve_api_key() 都能读取它们。
     from dotenv import load_dotenv
 
     load_dotenv()

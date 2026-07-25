@@ -1,17 +1,16 @@
-/// A small, reusable error banner with an optional retry button.
+/// 可复用的小型 error banner，可选带有 retry button。
 ///
-/// Phase 6 standardizes the app's error states so every `AsyncError` renders
-/// the same way: a one-line message, the error detail, and a "Retry" button
-/// that the caller wires to `ref.invalidate(provider)`.
+/// 阶段 6 统一应用的 error state，使每个 `AsyncError` 都以相同方式渲染：一行 message、
+/// error detail，以及由调用方连接到 `ref.invalidate(provider)` 的“Retry” button。
 library;
 
 import 'package:flutter/material.dart';
 
 import '../../core/theme/colors.dart';
 
-/// A centered error block with an optional retry action.
+/// 居中的 error block，可选带有 retry action。
 class ErrorBanner extends StatelessWidget {
-  /// Creates the banner.
+  /// 创建 banner。
   const ErrorBanner({
     required this.message,
     this.error,
@@ -19,14 +18,14 @@ class ErrorBanner extends StatelessWidget {
     super.key,
   });
 
-  /// The headline message, e.g. "Could not load the conversation."
+  /// 标题 message，例如“Could not load the conversation.”。
   final String message;
 
-  /// The error detail to show under the headline, or `null` to hide it.
+  /// 显示在 headline 下方的 error detail；为 `null` 时隐藏。
   final Object? error;
 
-  /// Called when the user taps "Retry". When `null`, the retry button is
-  /// hidden (used when there is nothing to retry, only to inform).
+  /// 用户点击“Retry”时调用。为 `null` 时隐藏 retry button（用于没有可 retry 内容、仅需
+  /// 告知用户的场景）。
   final VoidCallback? onRetry;
 
   @override
@@ -39,11 +38,7 @@ class ErrorBanner extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.error_outline,
-              color: colors.ashen,
-              size: 32,
-            ),
+            Icon(Icons.error_outline, color: colors.ashen, size: 32),
             const SizedBox(height: 12),
             Text(
               message,

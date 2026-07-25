@@ -1,10 +1,8 @@
-/// The assembled v1 light [ThemeData] for the Parlo app.
+/// Parlo 应用组装后的 v1 light [ThemeData]。
 ///
-/// Pulls together the [ColorScheme] (colors.dart), the [TextTheme]
-/// (typography.dart), and the spacing/radius extensions (spacing.dart). The
-/// component themes (Card, AppBar, etc.) are tuned to match the
-/// "printed-paper" aesthetic from `design.md`: hairline borders, generous
-/// radii, no heavy shadows.
+/// 组合 [ColorScheme]（colors.dart）、[TextTheme]（typography.dart）以及 spacing/radius
+/// extension（spacing.dart）。Component theme（Card、AppBar 等）经过调整，以匹配
+/// `design.md` 中的“printed-paper” aesthetic：hairline border、充足 radius、不使用厚重 shadow。
 library;
 
 import 'package:flutter/material.dart';
@@ -13,10 +11,9 @@ import 'colors.dart';
 import 'spacing.dart';
 import 'typography.dart';
 
-/// The shadow used by cards on hover or when featured.
+/// Card 在 hover 或 featured 时使用的 shadow。
 ///
-/// From `design.md` "Shadows": a soft 4px-20px wash at 4% opacity. The design
-/// never uses heavier shadows.
+/// 来自 `design.md` 的“Shadows”：4% opacity 的柔和 4px-20px wash。设计不会使用更厚重的 shadow。
 const List<BoxShadow> kParloCardShadow = [
   BoxShadow(
     color: Color.fromRGBO(0, 0, 0, 0.04),
@@ -25,27 +22,31 @@ const List<BoxShadow> kParloCardShadow = [
   ),
 ];
 
-/// Builds the v1 light [ThemeData].
+/// 构建 v1 light [ThemeData]。
 ThemeData buildAppTheme() {
   const colors = ParloColors.light;
   final colorScheme = buildLightColorScheme();
-  final textTheme = buildTextTheme(colors.carbonInk, colors.graphite, colors.ashen);
+  final textTheme = buildTextTheme(
+    colors.carbonInk,
+    colors.graphite,
+    colors.ashen,
+  );
 
   return ThemeData(
     useMaterial3: true,
     colorScheme: colorScheme,
-    // Inter is the default for all text; serif overrides per-style.
+    // Inter 是所有 text 的 default；serif 按 style 覆盖。
     fontFamily: kSansFamily,
     textTheme: textTheme,
     scaffoldBackgroundColor: colors.boneParchment,
-    // Hand the spacing and radius scales to widgets via ThemeData extensions.
+    // 通过 ThemeData extension 将 spacing 和 radius scale 提供给 widget。
     extensions: const [
       ParloColors.light,
       ParloSpacing.light,
       ParloRadius.light,
     ],
-    // Cards: paper-white surface, 16px radius, no shadow by default, hairline
-    // border. Matches the design's flat printed-paper look.
+    // Card：paper-white surface、16px radius，默认无 shadow，使用 hairline border。匹配
+    // design 的 flat printed-paper look。
     cardTheme: CardThemeData(
       color: colors.paperWhite,
       elevation: 0,
@@ -55,7 +56,7 @@ ThemeData buildAppTheme() {
       ),
       margin: EdgeInsets.zero,
     ),
-    // App bars: transparent and flat, no shadow.
+    // App bar：透明且平面，不使用 shadow。
     appBarTheme: AppBarTheme(
       backgroundColor: colors.boneParchment,
       surfaceTintColor: Colors.transparent,
@@ -63,7 +64,7 @@ ThemeData buildAppTheme() {
       scrolledUnderElevation: 0,
       titleTextStyle: textTheme.titleMedium,
     ),
-    // Buttons: 8px radius, no uppercase, medium-weight labels.
+    // Button：8px radius，不使用 uppercase，label 使用 medium weight。
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         backgroundColor: colors.carbonInk,
@@ -92,7 +93,7 @@ ThemeData buildAppTheme() {
         ),
       ),
     ),
-    // Input fields: transparent fill, 8px radius, mist border.
+    // Input field：透明 fill、8px radius、mist border。
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: colors.paperWhite,
@@ -112,11 +113,7 @@ ThemeData buildAppTheme() {
       labelStyle: textTheme.bodyMedium,
       hintStyle: textTheme.bodyMedium?.copyWith(color: colors.pebble),
     ),
-    // Dividers: hairline mist.
-    dividerTheme: DividerThemeData(
-      color: colors.mist,
-      thickness: 1,
-      space: 1,
-    ),
+    // Divider：hairline mist。
+    dividerTheme: DividerThemeData(color: colors.mist, thickness: 1, space: 1),
   );
 }

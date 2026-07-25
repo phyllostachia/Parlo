@@ -1,3 +1,3 @@
-description: This file stores settings for Dart & Flutter DevTools.
+description: 此文件保存 Dart 和 Flutter DevTools 的设置。
 documentation: https://docs.flutter.dev/tools/devtools/extensions#configure-extension-enablement-states
 extensions:

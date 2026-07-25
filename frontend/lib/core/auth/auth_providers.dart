@@ -1,10 +1,8 @@
-/// Riverpod providers that expose the [AuthStore] and the persisted
-/// `SharedPreferences` to the rest of the app.
+/// 向应用其余部分提供 [AuthStore] 和持久化 `SharedPreferences` 的 Riverpod provider。
 ///
-/// `sharedPreferencesProvider` is overridden in `main.dart` with the real
-/// instance so the rest of the app can read it synchronously. `authStoreProvider`
-/// is a [ChangeNotifierProvider] so the go_router and the token dialog rebuild
-/// automatically when the token changes.
+/// `sharedPreferencesProvider` 会在 `main.dart` 中被真实 instance override，使应用其余
+/// 部分可以同步读取。`authStoreProvider` 是 [ChangeNotifierProvider]，因此 token 变化时
+/// go_router 和 token dialog 会自动 rebuild。
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,29 +10,28 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'auth_store.dart';
 
-/// The application's `shared_preferences` instance.
+/// 应用的 `shared_preferences` instance。
 ///
-/// This is overridden in `main.dart` with the instance obtained from
-/// `SharedPreferences.getInstance()` so the rest of the app can read it
-/// synchronously. The bearer token and the base URL are both stored here.
+/// 在 `main.dart` 中使用 `SharedPreferences.getInstance()` 得到的 instance 进行 override，
+/// 使应用其余部分可以同步读取。Bearer token 和 base URL 都保存在这里。
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
-  // The default factory throws so a missing override is caught early instead
-  // of silently producing null values deep in the app.
+  // default factory 会抛出异常，因此缺少 override 时可以尽早发现，而不是在应用深处
+  // 静默地产生 null value。
   throw StateError(
     'sharedPreferencesProvider must be overridden in main() with the '
     'instance from SharedPreferences.getInstance()',
   );
 });
 
-/// The single [AuthStore] for the whole app.
+/// 整个应用共享的唯一 [AuthStore]。
 ///
-/// Watches [sharedPreferencesProvider] so the store has a place to persist the
-/// token. The store is created once and reused for the app's lifetime.
+/// 监听 [sharedPreferencesProvider]，使 store 能够持久化 token。Store 只创建一次，并在
+/// 应用生命周期内复用。
 final authStoreProvider = ChangeNotifierProvider<AuthStore>((ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   final store = AuthStore(prefs);
-  // Load any saved token. This is fire-and-forget: the store starts empty and
-  // notifies listeners when the saved token arrives a few milliseconds later.
+  // 加载已保存的 token。这里采用 fire-and-forget：store 从空状态开始，几毫秒后收到已
+  // 保存的 token 时通知 listener。
   store.bootstrap();
   return store;
 });

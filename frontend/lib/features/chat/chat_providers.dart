@@ -1,16 +1,13 @@
-/// Riverpod providers and notifiers that back the chat screen.
+/// 支撑 chat screen 的 Riverpod provider 和 notifier。
 ///
-/// The central piece is [CurrentConversationNotifier], a family
-/// [AsyncNotifier] keyed by conversation id. It owns the visible message path
-/// and the in-flight Server-Sent Events subscription. Send / stop are actions
-/// on the notifier; the SSE stream is a side-effect of send, not a separate
-/// state source (architecture §3.1).
+/// 核心是 [CurrentConversationNotifier]，它是以 conversation id 为 key 的 family
+/// [AsyncNotifier]。它拥有 visible message path 和正在处理的 Server-Sent Events subscription。
+/// Send / stop 是 notifier 上的 action；SSE stream 是 send 的 side effect，而不是独立的
+/// state source（架构 §3.1）。
 ///
-/// The empty state (Phase 3) uses [ChatActionsNotifier.sendFirstMessage] to
-/// create a conversation and queue the assistant placeholder for streaming.
-/// The chat screen's notifier opens the stream when it mounts, so the
-/// streaming state survives the navigation from the empty state to
-/// `/c/{id}`.
+/// Empty state（阶段 3）使用 [ChatActionsNotifier.sendFirstMessage] 创建 conversation，并
+/// queue assistant placeholder 以便 streaming。Chat screen 的 notifier 在 mount 时打开
+/// stream，因此 streaming state 会跨越从 empty state 到 `/c/{id}` 的 navigation。
 library;
 
 import 'dart:async';
@@ -27,32 +24,29 @@ import '../../core/network/api_client.dart';
 import '../../core/network/sse_parser.dart';
 import '../sidebar/sidebar_providers.dart';
 
-/// The local state of an assistant stream.
+/// Assistant stream 的 local state。
 ///
-/// The backend's `is_complete` flag is `true` in the `finally` block no matter
-/// how the stream ended, so the frontend cannot tell a clean finish from a
-/// dropped connection by looking at `is_complete` alone. This enum is the
-/// local truth (architecture §5.4).
+/// 无论 stream 如何结束，backend 都会在 `finally` block 中将 `is_complete` flag 设为 `true`，
+/// 因此 frontend 仅凭 `is_complete` 无法区分正常完成和 connection drop。此 enum 是 local
+/// truth（架构 §5.4）。
 enum StreamState {
-  /// No stream has run yet in this session.
+  /// 此 session 中尚未运行 stream。
   idle,
 
-  /// Tokens are arriving from the backend.
+  /// Backend 正在发送 token。
   streaming,
 
-  /// The user pressed stop. The assistant message keeps whatever content
-  /// arrived so far.
+  /// User 按下 stop。Assistant message 保留目前已经收到的 content。
   stopped,
 
-  /// The stream dropped or the backend sent an `error` event. The UI shows a
-  /// "connection broken, retry" button.
+  /// Stream drop 或 backend 发送了 `error` event。UI 显示“connection broken, retry” button。
   error,
 
-  /// The stream finished cleanly. The assistant message is complete.
+  /// Stream 正常完成。Assistant message 已完成。
   done,
 }
 
-/// The model registry (`GET /api/models`).
+/// Model registry（`GET /api/models`）。
 class ModelsNotifier extends AsyncNotifier<ModelsResponse?> {
   @override
   Future<ModelsResponse?> build() async {
@@ -62,60 +56,60 @@ class ModelsNotifier extends AsyncNotifier<ModelsResponse?> {
     return ModelsResponse.fromJson(response.data!);
   }
 
-  /// Forces a refetch of the model list.
+  /// 强制 refetch model list。
   void refresh() => ref.invalidateSelf();
 }
 
-/// The full models response (default + list).
-final modelsProvider =
-    AsyncNotifierProvider<ModelsNotifier, ModelsResponse?>(ModelsNotifier.new);
+/// 完整 models response（default + list）。
+final modelsProvider = AsyncNotifierProvider<ModelsNotifier, ModelsResponse?>(
+  ModelsNotifier.new,
+);
 
-/// The flat list of models, derived from [modelsProvider]. Empty while loading.
+/// 从 [modelsProvider] 派生的 flat model list。Loading 时为空。
 final modelListProvider = Provider<List<ModelRead>>((ref) {
   return ref.watch(modelsProvider).valueOrNull?.models ?? const <ModelRead>[];
 });
 
-/// The configured default model id, derived from [modelsProvider].
+/// 从 [modelsProvider] 派生的已配置 default model id。
 final defaultModelIdProvider = Provider<String?>((ref) {
   return ref.watch(modelsProvider).valueOrNull?.defaultModel;
 });
 
-/// The current stream state for the viewed conversation.
+/// 当前查看 conversation 的 stream state。
 ///
-/// A singleton because only one conversation is viewed at a time. The
-/// conversation notifier resets this to [StreamState.idle] when it builds.
+/// 这是 singleton，因为一次只查看一个 conversation。Conversation notifier build 时会将其
+/// reset 为 [StreamState.idle]。
 final streamStateProvider = StateProvider<StreamState>((ref) {
   return StreamState.idle;
 });
 
-/// A pending "open this stream when the chat screen mounts" request, set by
-/// the empty state's first-send and consumed by the chat notifier's build.
+/// 由 empty state first-send 设置、并由 chat notifier build 消费的 pending request，表示
+///“chat screen mount 时打开此 stream”。
 ///
-/// The record is `(conversationId, messageId)` so the chat notifier can
-/// verify the pending stream is for THIS conversation before opening it.
+/// Record 是 `(conversationId, messageId)`，因此 chat notifier 在打开前可以验证 pending
+/// stream 是否属于当前 conversation。
 final pendingStreamProvider =
     StateProvider<({int conversationId, int messageId})?>((ref) {
-  return null;
-});
+      return null;
+    });
 
-/// The visible message path for one conversation, with send / stop actions.
+/// 一个 conversation 的 visible message path，以及 send / stop action。
 ///
-/// Auto-disposes when the user leaves the conversation so the SSE subscription
-/// is cancelled cleanly. The `build` method also opens a pending stream (set
-/// by the empty state) so streaming starts as soon as the chat screen mounts.
+/// User 离开 conversation 时会 auto-dispose，使 SSE subscription 被正确取消。`build` method
+/// 还会打开 pending stream（由 empty state 设置），使 streaming 在 chat screen mount 后立即开始。
 class CurrentConversationNotifier
     extends AutoDisposeFamilyAsyncNotifier<ConversationPath, int> {
-  /// The in-flight SSE subscription, or `null` when no stream is running.
+  /// 正在运行的 SSE subscription；没有 stream 运行时为 `null`。
   StreamSubscription<SseEvent>? _sub;
 
   @override
   Future<ConversationPath> build(int conversationId) async {
-    // Cancel any previous stream from a reused notifier instance.
+    // 取消复用 notifier instance 中可能存在的 previous stream。
     await _sub?.cancel();
     _sub = null;
     ref.read(streamStateProvider.notifier).state = StreamState.idle;
 
-    // Cancel the stream if the notifier disposes (user leaves the page).
+    // Notifier dispose 时取消 stream（用户离开 page）。
     ref.onDispose(() {
       _sub?.cancel();
       _sub = null;
@@ -127,7 +121,7 @@ class CurrentConversationNotifier
     );
     final path = ConversationPath.fromJson(response.data!);
 
-    // If the empty state queued a stream for this conversation, open it now.
+    // 如果 empty state 为此 conversation queue 了 stream，现在打开它。
     final pending = ref.read(pendingStreamProvider);
     if (pending != null && pending.conversationId == conversationId) {
       ref.read(pendingStreamProvider.notifier).state = null;
@@ -136,20 +130,18 @@ class CurrentConversationNotifier
     return path;
   }
 
-  /// Sends a user message and opens the SSE for the new assistant reply.
+  /// 发送 user message，并为新的 assistant reply 打开 SSE。
   ///
-  /// The backend creates both the user message and an empty assistant
-  /// placeholder in one call; we append both to the local path immediately so
-  /// the UI shows them without waiting for a refetch, then stream tokens into
-  /// the assistant placeholder.
+  /// Backend 在一次 call 中同时创建 user message 和空 assistant placeholder；我们立即将
+  /// 二者追加到 local path，使 UI 无需等待 refetch 即可显示它们，然后将 token stream 到
+  /// assistant placeholder。
   Future<void> send({required String text, String? imageData}) async {
     if (ref.read(streamStateProvider) == StreamState.streaming) return;
 
     final conversationId = arg;
     final dio = ref.read(dioProvider);
 
-    // We need the current path so we can append to it. `future` resolves
-    // immediately if the build already finished.
+    // 需要 current path 才能追加内容。如果 build 已完成，`future` 会立即 resolve。
     final current = await future;
 
     final body = UserMessageCreate(text: text, imageData: imageData).toJson();
@@ -183,42 +175,38 @@ class CurrentConversationNotifier
     unawaited(_openStream(sendMessage.assistantMessage.id));
   }
 
-  /// Stops the in-flight stream. The assistant message keeps its partial
-  /// content; the local stream state is set to [StreamState.stopped].
+  /// 停止正在处理的 stream。Assistant message 保留 partial content；local stream state 设置
+  /// 为 [StreamState.stopped]。
   Future<void> stop() async {
-    // Set the state to `stopped` BEFORE cancelling the subscription. The
-    // stream's `onDone` callback fires during `cancel` and would otherwise
-    // see `streaming` and overwrite the state with `error`.
+    // 在取消 subscription 之前将 state 设置为 `stopped`。Stream 的 `onDone` callback 会在
+    // `cancel` 期间触发，否则它会看到 `streaming` 并将 state 覆盖为 `error`。
     ref.read(streamStateProvider.notifier).state = StreamState.stopped;
     await _sub?.cancel();
     _sub = null;
     _markAssistantComplete();
   }
 
-  /// Regenerates an assistant reply.
+  /// 重新生成 assistant reply。
   ///
-  /// The backend creates a new empty assistant placeholder as a sibling of
-  /// [assistantMessageId] (both share the same parent user message), moves
-  /// the conversation's current leaf to the placeholder, and returns the
-  /// placeholder. This notifier replaces the old assistant node with the new
-  /// placeholder on the visible path, records the new sibling id so the
-  /// version switcher can move back to the old reply, and opens the SSE
-  /// stream to fill the placeholder.
+  /// Backend 创建一个作为 [assistantMessageId] sibling 的新空 assistant placeholder（二者
+  /// 共享同一个 parent user message），将 conversation current leaf 移动到 placeholder，
+  /// 并返回 placeholder。此 notifier 在 visible path 上用新 placeholder 替换旧 assistant
+  /// node，记录新的 sibling id，使 version switcher 能切回旧 reply，并打开 SSE stream 填充
+  /// placeholder。
   ///
-  /// Regenerating a middle assistant shortens the visible path: every message
-  /// after the new placeholder's parent stays in the tree but is no longer
-  /// on the visible path until the user switches back to that branch.
+  /// Regenerate middle assistant 会缩短 visible path：新 placeholder 的 parent 之后的每条
+  /// message 仍留在 tree 中，但在用户切回该 branch 前不再位于 visible path。
   ///
-  /// `retry` (for a broken or stopped stream) is the same call: a new sibling
-  /// is created, and the broken partial reply is preserved as a sibling the
-  /// user can switch back to (architecture §5.4 and §7).
+  /// `retry`（用于 broken 或 stopped stream）使用同一个 call：创建新 sibling，并将 broken
+  /// partial reply 保留为可切回的 sibling（架构 §5.4 和 §7）。
   Future<void> regenerate({required int assistantMessageId}) async {
     if (ref.read(streamStateProvider) == StreamState.streaming) return;
 
     final conversationId = arg;
     final current = await future;
-    final index = current.path
-        .indexWhere((node) => node.message.id == assistantMessageId);
+    final index = current.path.indexWhere(
+      (node) => node.message.id == assistantMessageId,
+    );
     if (index == -1) return;
     final oldNode = current.path[index];
     if (oldNode.message.role != MessageRole.assistant) return;
@@ -231,10 +219,8 @@ class CurrentConversationNotifier
     );
     final newAssistant = Message.fromJson(response.data!);
 
-    // Build the new visible path: keep every node before the old assistant
-    // (this includes the parent user message), then append the new
-    // placeholder. The old assistant and any of its descendants leave the
-    // visible path but stay in the tree.
+    // 构建新的 visible path：保留旧 assistant 之前的每个 node（包括 parent user message），
+    // 然后追加新 placeholder。旧 assistant 及其 descendants 离开 visible path，但仍保留在 tree 中。
     final newNode = MessageTreeNode(
       message: newAssistant,
       siblings: SiblingInfo(
@@ -251,12 +237,11 @@ class CurrentConversationNotifier
     unawaited(_openStream(newAssistant.id));
   }
 
-  /// Switches the visible path to end at the given leaf message.
+  /// 将 visible path 切换为以给定 leaf message 结束。
   ///
-  /// The backend moves the conversation's `current_leaf_id` to [leafId] and
-  /// returns the full path with fresh sibling metadata for every node. This
-  /// notifier replaces its state with that path. No SSE stream is opened:
-  /// the switched-to message is already complete.
+  /// Backend 将 conversation 的 `current_leaf_id` 移动到 [leafId]，并返回带有每个 node 的
+  /// 最新 sibling metadata 的完整 path。此 notifier 用该 path 替换自身 state。不打开 SSE
+  /// stream，因为切换到的 message 已经完成。
   Future<void> switchBranch({required int leafId}) async {
     if (ref.read(streamStateProvider) == StreamState.streaming) return;
 
@@ -269,8 +254,7 @@ class CurrentConversationNotifier
     state = AsyncData(newPath);
   }
 
-  /// Opens the SSE for the given assistant message id and patches the local
-  /// path on every event.
+  /// 为给定 assistant message id 打开 SSE，并在每个 event 到达时 patch local path。
   Future<void> _openStream(int assistantMessageId) async {
     await _sub?.cancel();
     final dio = ref.read(dioProvider);
@@ -292,7 +276,7 @@ class CurrentConversationNotifier
         _sub = null;
       },
       onDone: () {
-        // If the stream closed without a `done` event, treat it as a drop.
+        // 如果 stream 在没有 `done` event 的情况下关闭，则视为 drop。
         if (ref.read(streamStateProvider) == StreamState.streaming) {
           ref.read(streamStateProvider.notifier).state = StreamState.error;
         }
@@ -311,8 +295,7 @@ class CurrentConversationNotifier
       case SseReasoningDelta(:final content):
         _appendAssistantReasoning(content);
       case SseReasoningSignature():
-        // The signature is replayed by the backend on later turns; the UI
-        // does not show it. Nothing to do here.
+        // Backend 会在后续 turn replay signature；UI 不显示它。这里无需处理。
         break;
       case SseError():
         ref.read(streamStateProvider.notifier).state = StreamState.error;
@@ -326,34 +309,28 @@ class CurrentConversationNotifier
     }
   }
 
-  /// Appends text to the last assistant message's `content`.
+  /// 将 text 追加到最后一条 assistant message 的 `content`。
   void _appendAssistantContent(String delta) {
     _patchLastAssistant(
-      (message) => message.copyWith(
-        content: message.content + delta,
-      ),
+      (message) => message.copyWith(content: message.content + delta),
     );
   }
 
-  /// Appends text to the last assistant message's `reasoning`.
+  /// 将 text 追加到最后一条 assistant message 的 `reasoning`。
   void _appendAssistantReasoning(String delta) {
     _patchLastAssistant(
-      (message) => message.copyWith(
-        reasoning: (message.reasoning ?? '') + delta,
-      ),
+      (message) =>
+          message.copyWith(reasoning: (message.reasoning ?? '') + delta),
     );
   }
 
-  /// Marks the last assistant message as complete.
+  /// 将最后一条 assistant message 标记为 complete。
   void _markAssistantComplete() {
-    _patchLastAssistant(
-      (message) => message.copyWith(isComplete: true),
-    );
+    _patchLastAssistant((message) => message.copyWith(isComplete: true));
   }
 
-  /// Applies `update` to the last assistant message in the path and emits the
-  /// new state. Does nothing if the path is empty or the last message is not
-  /// an assistant message.
+  /// 对 path 中最后一条 assistant message 应用 `update` 并 emit new state。如果 path 为空，
+  /// 或最后一条 message 不是 assistant message，则不执行任何操作。
   void _patchLastAssistant(Message Function(Message) update) {
     final path = state.value;
     if (path == null || path.path.isEmpty) return;
@@ -368,30 +345,25 @@ class CurrentConversationNotifier
   }
 }
 
-/// The conversation path notifier, keyed by conversation id.
+/// 以 conversation id 为 key 的 conversation path notifier。
 ///
-/// Auto-dispose cancels the SSE when the user leaves the conversation.
-final currentConversationProvider =
-    AsyncNotifierProvider.autoDispose.family<
-        CurrentConversationNotifier,
-        ConversationPath,
-        int>(CurrentConversationNotifier.new);
+/// User 离开 conversation 时，auto-dispose 会取消 SSE。
+final currentConversationProvider = AsyncNotifierProvider.autoDispose
+    .family<CurrentConversationNotifier, ConversationPath, int>(
+      CurrentConversationNotifier.new,
+    );
 
-/// Cross-conversation chat actions that do not belong to a single
-/// conversation's notifier (e.g. creating a conversation from the empty
-/// state, before there is an id to key on).
+/// 不属于单个 conversation notifier 的 cross-conversation chat action（例如在还没有可作为
+/// key 的 id 前，从 empty state 创建 conversation）。
 class ChatActionsNotifier extends Notifier<void> {
   @override
   void build() {}
 
-  /// Creates a conversation, sends the first user message, and queues the
-  /// assistant placeholder for streaming. Returns the new conversation id so
-  /// the caller can navigate to `/c/{id}`.
+  /// 创建 conversation，发送第一条 user message，并 queue assistant placeholder 以便
+  /// streaming。返回新的 conversation id，使调用方可以 navigation 到 `/c/{id}`。
   ///
-  /// The conversation is created in the most-recently-updated profile. If
-  /// there are no profiles yet, a default "Chats" folder is created first so
-  /// the first-time experience works without forcing the user to manage
-  /// folders before they can chat.
+  /// Conversation 会创建在最近更新的 profile 中。如果还没有 profile，会先创建默认的
+  /// “Chats” folder，使首次使用时用户无需先管理 folder 就可以 chat。
   Future<int> sendFirstMessage({
     required String modelId,
     required String text,
@@ -400,14 +372,14 @@ class ChatActionsNotifier extends Notifier<void> {
     final profileId = await _resolveProfileId();
     final dio = ref.read(dioProvider);
 
-    // 1. Create the conversation bound to the chosen model.
+    // 1. 创建绑定到所选 model 的 conversation。
     final createResp = await dio.post<Map<String, dynamic>>(
       '/api/profiles/$profileId/conversations',
       data: <String, dynamic>{'model_id': modelId},
     );
     final conversation = Conversation.fromJson(createResp.data!);
 
-    // 2. Post the first user message → creates user + assistant placeholder.
+    // 2. Post 第一条 user message → 创建 user + assistant placeholder。
     final body = UserMessageCreate(text: text, imageData: imageData).toJson();
     final sendResp = await dio.post<Map<String, dynamic>>(
       '/api/conversations/${conversation.id}/messages',
@@ -415,25 +387,23 @@ class ChatActionsNotifier extends Notifier<void> {
     );
     final sendMessage = SendMessageResponse.fromJson(sendResp.data!);
 
-    // 3. Queue the assistant placeholder for streaming when the chat screen
-    //    mounts.
+    // 3. Queue assistant placeholder，使 chat screen mount 时开始 streaming。
     ref.read(pendingStreamProvider.notifier).state = (
       conversationId: conversation.id,
       messageId: sendMessage.assistantMessage.id,
     );
 
-    // 4. Refresh the sidebar so the new conversation shows up.
+    // 4. Refresh sidebar，使新 conversation 显示出来。
     ref.invalidate(conversationsForProfileProvider(profileId));
     ref.invalidate(profilesProvider);
 
     return conversation.id;
   }
 
-  /// Picks the profile to create a new conversation in.
+  /// 选择用于创建新 conversation 的 profile。
   ///
-  /// Uses the most-recently-updated profile (the sidebar is sorted that way,
-  /// so `first` is the newest). If there are no profiles, creates a "Chats"
-  /// folder and returns its id.
+  /// 使用最近更新的 profile（sidebar 按此方式排序，因此 `first` 是最新的）。如果没有
+  /// profile，则创建“Chats”folder 并返回其 id。
   Future<int> _resolveProfileId() async {
     var profiles = await ref.read(profilesProvider.future);
     if (profiles.isNotEmpty) return profiles.first.id;
@@ -443,6 +413,7 @@ class ChatActionsNotifier extends Notifier<void> {
   }
 }
 
-/// The chat actions notifier.
-final chatActionsProvider =
-    NotifierProvider<ChatActionsNotifier, void>(ChatActionsNotifier.new);
+/// Chat action notifier。
+final chatActionsProvider = NotifierProvider<ChatActionsNotifier, void>(
+  ChatActionsNotifier.new,
+);

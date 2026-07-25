@@ -1,32 +1,31 @@
-# Static analysis configuration for the Parlo frontend.
+# Parlo 前端的静态分析配置。
 #
-# The architecture plan (Phase 0.4) asks for strict casts, strict inference,
-# and no literal bool comparisons, on top of the recommended Flutter lint set.
+# 架构计划（阶段 0.4）要求启用 strict casts、strict inference 和禁止字面量 bool
+# 比较，并在推荐的 Flutter lint 集合之上增加这些规则。
 
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
-  # Strong-mode rules. These catch common dynamic-dispatch bugs at analysis
-  # time instead of at runtime.
+  # Strong mode 规则。这些规则会在分析阶段捕获常见的 dynamic dispatch 错误，
+  # 而不是等到运行时才发现。
   language:
     strict-casts: true
     strict-inference: true
     strict-raw-types: true
   errors:
-    # Treat these as errors (not warnings) so they fail the build in CI.
+    # 将这些问题视为错误而不是警告，使它们能够在 CI 中使构建失败。
     no_literal_bool_comparisons: error
     avoid_returning_null_for_future: error
     unawaited_futures: error
   exclude:
-    # Generated files are not worth linting and frequently trip false positives.
+    # 生成文件不需要执行 lint，而且经常会触发误报。
     - "**/*.g.dart"
     - "**/*.freezed.dart"
     - "lib/generated/**"
 
 linter:
   rules:
-    # Encourage clear, maintainable Dart. Keep the set reasonable so the lint
-    # output stays useful instead of noisy.
+    # 鼓励编写清晰且易维护的 Dart。规则集合保持适度，避免 lint 输出过于嘈杂。
     prefer_single_quotes: true
     prefer_const_constructors: true
     prefer_const_declarations: true
@@ -42,7 +41,6 @@ linter:
     use_key_in_widget_constructors: true
     use_super_parameters: true
     sort_child_properties_last: true
-    # NOTE: public_member_api_docs is intentionally NOT enabled here. It would
-    # flag every public widget and helper, which is noisier than it is useful.
-    # The project's own rule (document key types and functions in simple
-    # English) is enforced by code review instead.
+    # 注意：这里有意不启用 public_member_api_docs。它会标记每个 public widget 和
+    # helper，产生的噪声大于价值。项目要求（用简明汉语记录关键类型和函数）通过
+    # code review 执行。

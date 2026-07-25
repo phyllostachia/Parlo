@@ -1,7 +1,7 @@
 [project]
 name = "parlo-backend"
 version = "0.1.0"
-description = "Parlo BYOK AI Chatbot backend: self-hosted, single-user, OpenAI Response + Anthropic Message."
+description = "Parlo BYOK AI Chatbot 后端：自托管、单用户，支持 OpenAI Response 和 Anthropic Message。"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.14"

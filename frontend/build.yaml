@@ -1,25 +1,23 @@
-# Configuration for build_runner code generation.
+# build_runner 代码生成配置。
 #
-# The single global setting that matters here is `field_rename: snake` for
-# json_serializable. The backend sends JSON with snake_case keys (created_at,
-# model_id, etc.); this setting makes the generated fromJson code map those
-# keys to our camelCase Dart field names automatically, so the freezed classes
-# stay idiomatic Dart on the inside.
+# 这里最重要的全局设置是 json_serializable 的 `field_rename: snake`。后端发送的 JSON
+# 使用 snake_case 键（created_at、model_id 等）；该设置会让生成的 fromJson 代码自动
+# 将这些键映射到 camelCase Dart 字段，使 freezed 类的内部写法保持符合 Dart 习惯。
 
 targets:
   $default:
     builders:
       json_serializable:
         options:
-          # Map snake_case JSON keys to camelCase Dart fields in both directions.
+          # 在双向转换中，将 snake_case JSON 键映射到 camelCase Dart 字段。
           field_rename: snake
-          # Do not generate nullable fields as required. Keep the generator
-          # forgiving so partial backend responses do not crash the client.
+          # 不要将 nullable 字段生成为 required。让生成器保持宽容，避免不完整的后端
+          # 响应导致客户端崩溃。
           any_map: false
           checked: false
           explicit_to_json: true
       freezed:
         options:
-          # Generate the private `_*` constructors freezed expects. Defaults are
-          # fine; this section exists so the intent is documented.
+          # 生成 freezed 所需的私有 `_*` 构造函数。默认值已经足够；保留此段是为了
+          # 记录这一意图。
           generate_private_constructor: true

@@ -1,13 +1,11 @@
-/// The bottom chat input shown on a conversation page.
+/// Conversation page 底部显示的 chat input。
 ///
-/// Per `product.md` §6.4: Enter sends, Shift+Enter inserts a newline (no
-/// configuration option). While the assistant is streaming, the send button
-/// becomes a stop button that cancels the Server-Sent Events stream.
+/// 根据 `product.md` §6.4：Enter 发送，Shift+Enter 插入 newline（没有 configuration option）。
+/// Assistant streaming 时，send button 变为 stop button，并取消 Server-Sent Events stream。
 ///
-/// Phase 5 adds image attachment: a paperclip button opens the file picker,
-/// a drag-and-drop zone wraps the field, and an [ImageAttachmentBar] shows
-/// the preview. Image input is disabled when the conversation's bound model
-/// does not support vision.
+/// 阶段 5 增加 image attachment：paperclip button 打开 file picker，drag-and-drop zone 包裹
+/// field，[ImageAttachmentBar] 显示 preview。Conversation 绑定的 model 不支持 vision 时，
+/// image input 会被禁用。
 library;
 
 import 'package:desktop_drop/desktop_drop.dart';
@@ -21,12 +19,12 @@ import '../../core/util/image_data_url.dart';
 import 'chat_providers.dart';
 import 'image_attachment.dart';
 
-/// The bottom input widget.
+/// 底部 input widget。
 class ChatInput extends ConsumerStatefulWidget {
-  /// Creates the input.
+  /// 创建 input。
   const ChatInput({required this.conversationId, super.key});
 
-  /// The conversation this input posts into.
+  /// 此 input 要发送到的 conversation。
   final int conversationId;
 
   @override
@@ -36,15 +34,14 @@ class ChatInput extends ConsumerStatefulWidget {
 class _ChatInputState extends ConsumerState<ChatInput> {
   final TextEditingController _controller = TextEditingController();
 
-  /// The currently attached image, or `null` when none is attached. Kept as
-  /// a [ValueNotifier] so the [ImageAttachmentBar] rebuilds only when the
-  /// attachment changes, not on every keystroke.
+  /// 当前附加的 image；没有 attachment 时为 `null`。使用 [ValueNotifier]，使
+  /// [ImageAttachmentBar] 只在 attachment 变化时 rebuild，而不是每次按键都 rebuild。
   final ValueNotifier<ImageDataUrl?> _attachment = ValueNotifier<ImageDataUrl?>(
     null,
   );
 
-  /// Whether the drag-and-drop zone is currently being hovered. Drives the
-  /// border highlight so the user gets feedback that a drop is accepted.
+  /// Drag-and-drop zone 当前是否处于 hover。它驱动 border highlight，让用户知道 drop
+  /// 会被接受。
   bool _isDropHovered = false;
 
   @override
@@ -66,7 +63,7 @@ class _ChatInputState extends ConsumerState<ChatInput> {
           .read(currentConversationProvider(widget.conversationId).notifier)
           .send(text: text, imageData: imageData);
     } catch (error) {
-      // Restore the attachment so the user can retry without re-picking.
+      // 恢复 attachment，使用户无需重新选择即可 retry。
       _attachment.value = attachmentCopy;
       if (mounted) {
         ScaffoldMessenger.of(
@@ -91,9 +88,8 @@ class _ChatInputState extends ConsumerState<ChatInput> {
 
   Future<void> _handleDrop(DropDoneDetails details) async {
     setState(() => _isDropHovered = false);
-    // Take the first image-only file from the drop. The drop zone only
-    // accepts images because of the type filter below, but being defensive
-    // is cheap.
+    // 取 drop 中第一个 image-only file。虽然下面的 type filter 使 drop zone 只接受 image，
+    // 但增加防御性处理的成本很低。
     for (final file in details.files) {
       final attachment = await imageDataUrlFromXFile(file);
       if (attachment != null) {
@@ -108,9 +104,8 @@ class _ChatInputState extends ConsumerState<ChatInput> {
     }
   }
 
-  /// Whether the conversation's bound model can accept images. Reads the
-  /// current path and the model registry; `false` while either is loading
-  /// or when the model is not a vision model.
+  /// Conversation 绑定的 model 是否接受 image。读取 current path 和 model registry；任一
+  /// 正在 loading 或 model 不是 vision model 时返回 `false`。
   bool get _canAttachImage {
     final path = ref
         .read(currentConversationProvider(widget.conversationId))
@@ -138,7 +133,7 @@ class _ChatInputState extends ConsumerState<ChatInput> {
       onDragEntered: (_) => setState(() => _isDropHovered = true),
       onDragExited: (_) => setState(() => _isDropHovered = false),
       child: Padding(
-        // Design "Input Wrap": 16px above, 24px below, centered 720px column.
+        // Design “Input Wrap”：上方 16px、下方 24px，居中的 720px column。
         padding: EdgeInsets.fromLTRB(
           spacing.s16,
           spacing.s16,
@@ -214,9 +209,8 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                               offset: const Offset(0, -4),
                               child: TextField(
                                 controller: _controller,
-                                // The field stays editable while streaming so the
-                                // user can type the next message; only the send
-                                // button is disabled.
+                                // Streaming 时 field 仍可编辑，使用户可以输入下一条 message；
+                                // 只有 send button 被禁用。
                                 enabled: true,
                                 maxLines: null,
                                 minLines: 1,
@@ -263,14 +257,13 @@ class _ChatInputState extends ConsumerState<ChatInput> {
   }
 }
 
-/// The intent that fires when the user presses Enter (without shift) in the
-/// chat input.
+/// 用户在 chat input 中按下 Enter（不带 shift）时触发的 intent。
 class _SendIntent extends Intent {
   const _SendIntent();
 }
 
-/// The paperclip button that opens the image picker. Matches the design's
-/// "Attach Image Button": a 17px icon with 6px padding and an 8px radius.
+/// 打开 image picker 的 paperclip button。匹配 design 的“Attach Image Button”：17px icon、
+/// 6px padding 和 8px radius。
 class _AttachButton extends StatelessWidget {
   const _AttachButton({required this.onPressed});
 
@@ -291,9 +284,8 @@ class _AttachButton extends StatelessWidget {
   }
 }
 
-/// The send button from the design: a 32x32 carbon-ink square with an 8px
-/// radius and a white arrow-up glyph. While streaming it becomes a stop
-/// button that cancels the SSE stream.
+/// Design 中的 send button：32x32 carbon-ink square、8px radius 和 white arrow-up glyph。
+/// Streaming 时它变为 stop button，并取消 SSE stream。
 class _SendButton extends StatelessWidget {
   const _SendButton({
     required this.isStreaming,

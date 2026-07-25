@@ -1,14 +1,12 @@
-/// The `< n / m >` switcher that moves the visible path between sibling
-/// assistant replies.
+/// 在 sibling assistant reply 之间移动 visible path 的 `< n / m >` switcher。
 ///
-/// Per `product.md` §6.3, when an assistant message has more than one
-/// sibling (alternative replies under the same parent user message), the UI
-/// shows a small `< 2 / 3 >` control. Clicking the left or right arrow asks
-/// the backend to move the conversation's current leaf to the previous or
-/// next sibling, and the visible path is replaced with the new branch.
+/// 根据 `product.md` §6.3，当 assistant message 有多个 sibling（同一 parent user message
+/// 下的 alternative reply）时，UI 显示小型 `< 2 / 3 >` control。点击左或右 arrow 会要求
+/// backend 将 conversation current leaf 移动到 previous 或 next sibling，并用新 branch 替换
+/// visible path。
 ///
-/// The switcher is only shown when there are two or more siblings. A single
-/// sibling means there is nothing to switch to, so the widget returns nothing.
+/// 只有存在两个或更多 sibling 时显示 switcher。单个 sibling 没有可切换目标，因此 widget
+/// 不返回内容。
 library;
 
 import 'package:flutter/material.dart';
@@ -16,39 +14,35 @@ import 'package:flutter/material.dart';
 import '../../core/models/message.dart';
 import '../../core/theme/colors.dart';
 
-/// A `< n / m >` branch switcher for one message tree node.
+/// 单个 message tree node 的 `< n / m >` branch switcher。
 class VersionSwitcher extends StatelessWidget {
-  /// Creates the switcher.
+  /// 创建 switcher。
   const VersionSwitcher({
     required this.siblings,
     required this.onSwitch,
     super.key,
   });
 
-  /// The sibling metadata for the message this switcher sits under. The
-  /// `siblings` list is every message id sharing the parent (including the
-  /// active one); `activeId` is the one the visible path currently goes
-  /// through.
+  /// 此 switcher 所属 message 的 sibling metadata。`siblings` list 包含与 parent 共享的每个
+  /// message id（包括 active one）；`activeId` 是当前 visible path 经过的 message。
   final SiblingInfo siblings;
 
-  /// Called with the target sibling's message id when the user clicks an
-  /// arrow. The caller is expected to forward this to
-  /// `CurrentConversationNotifier.switchBranch`.
+  /// User 点击 arrow 时，携带目标 sibling 的 message id 调用。调用方应将它转发给
+  /// `CurrentConversationNotifier.switchBranch`。
   final void Function(int leafId) onSwitch;
 
   @override
   Widget build(BuildContext context) {
-    // Hide the switcher entirely when there is only one reply. The product
-    // doc says the switcher appears "when an assistant message has more
-    // than one sibling reply".
+    // 只有一条 reply 时完全隐藏 switcher。Product doc 规定 switcher 在“assistant message
+    // has more than one sibling reply”时出现。
     if (siblings.siblings.length < 2) {
       return const SizedBox.shrink();
     }
 
     final colors = Theme.of(context).extension<ParloColors>()!;
     final activeIndex = siblings.siblings.indexOf(siblings.activeId);
-    // Position is shown 1-based so the user reads "2 / 3", not "1 / 2" with
-    // zero-indexed numbers.
+    // Position 使用 1-based 显示，使 user 看到“2 / 3”，而不是带 zero-indexed number 的
+    // “1 / 2”。
     final position = activeIndex + 1;
     final total = siblings.siblings.length;
     final canGoPrevious = activeIndex > 0;

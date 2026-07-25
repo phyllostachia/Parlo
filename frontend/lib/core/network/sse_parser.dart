@@ -1,8 +1,7 @@
-/// Parses Server-Sent Events from the backend's chat stream endpoint into
-/// [SseEvent] objects.
+/// 将 backend chat stream endpoint 的 Server-Sent Events 解析为 [SseEvent] object。
 ///
-/// The backend (see `backend/app/api/chat.py`) emits one event per assistant
-/// token update. The wire format follows the SSE standard:
+/// Backend（参见 `backend/app/api/chat.py`）每次 assistant token update 发出一个 event。
+/// Wire format 遵循 SSE standard：
 ///
 /// ```
 /// event: text_delta
@@ -10,20 +9,16 @@
 ///
 /// ```
 ///
-/// An event is one or more field lines, terminated by a blank line. We only
-/// care about the `event:` and `data:` fields; `id:`, `retry:`, and comments
-/// (lines starting with `:`) are ignored. The `data:` payload is JSON; the
-/// event type decides which [SseEvent] subtype we build.
+/// 一个 event 由一条或多条 field line 组成，并以空行结束。我们只关心 `event:` 和 `data:`
+/// field；`id:`、`retry:` 和 comment（以 `:` 开头的 line）会被忽略。`data:` payload 是
+/// JSON，event type 决定要构建哪个 [SseEvent] subtype。
 ///
-/// The parser must handle the case where a single SSE event arrives split
-/// across several byte chunks, and the case where one chunk contains several
-/// events. We buffer until we see a blank line, then emit.
+/// Parser 必须处理一个 SSE event 被拆分到多个 byte chunk 中的情况，也必须处理一个 chunk
+/// 包含多个 event 的情况。我们持续 buffer，直到看到空行后再 emit。
 ///
-/// Implementation note: we use a [StreamController] with an explicit
-/// `onCancel` that cancels the upstream subscription. This makes `stop()`
-/// propagate cleanly (closing the underlying HTTP connection) instead of
-/// relying on an `async*` generator's `await for` to release, which can hang
-/// through a `cast().transform()` chain.
+/// 实现注意：使用带有显式 `onCancel` 的 [StreamController]，在取消时取消 upstream
+/// subscription。这样 `stop()` 可以正确传递并关闭底层 HTTP connection，而不依赖
+/// `async*` generator 的 `await for` 释放；后者可能在 `cast().transform()` chain 中卡住。
 library;
 
 import 'dart:async';
@@ -31,9 +26,9 @@ import 'dart:convert';
 
 import '../models/sse_event.dart';
 
-/// Parses a byte stream from `/api/chat/stream` into a stream of [SseEvent].
+/// 将 `/api/chat/stream` 的 byte stream 解析为 [SseEvent] stream。
 ///
-/// Usage:
+/// 用法：
 /// ```dart
 /// final response = await dio.get<ResponseBody>(
 ///   '/api/chat/stream',
@@ -41,16 +36,15 @@ import '../models/sse_event.dart';
 ///   options: Options(responseType: ResponseType.stream),
 /// );
 /// final sub = parseSseStream(response.data!.stream).listen((event) {
-///   // handle event
+///   // 处理 event
 /// });
-/// // later:
-/// await sub.cancel();  // closes the HTTP connection
+/// // 稍后：
+/// await sub.cancel();  // 关闭 HTTP connection
 /// ```
 Stream<SseEvent> parseSseStream(Stream<List<int>> byteStream) {
-  // dio's `ResponseBody.stream` is a `Stream<Uint8List>`; `utf8.decoder` is a
-  // `StreamTransformer<List<int>, String>`. Cast each chunk to `List<int>` so
-  // the transform type-checks at runtime (Uint8List is a List<int>, so the
-  // cast is cheap and never fails).
+  // dio 的 `ResponseBody.stream` 是 `Stream<Uint8List>`；`utf8.decoder` 是
+  // `StreamTransformer<List<int>, String>`。将每个 chunk cast 为 `List<int>`，使 transform
+  // 在 runtime 通过 type check（Uint8List 是 List<int>，因此 cast 成本低且不会失败）。
   final stringStream = byteStream.cast<List<int>>().transform(utf8.decoder);
 
   final controller = StreamController<SseEvent>();
@@ -59,13 +53,10 @@ Stream<SseEvent> parseSseStream(Stream<List<int>> byteStream) {
   late StreamSubscription<String> upstreamSub;
   upstreamSub = stringStream.listen(
     (chunk) {
-      // Normalize line endings so both `\n` and `\r\n` work.
-      buffer = (buffer + chunk)
-          .replaceAll('\r\n', '\n')
-          .replaceAll('\r', '\n');
+      // 统一 line ending，使 `\n` 和 `\r\n` 都能工作。
+      buffer = (buffer + chunk).replaceAll('\r\n', '\n').replaceAll('\r', '\n');
 
-      // Emit every complete event in the buffer. A complete event ends with
-      // a blank line (`\n\n`).
+      // Emit buffer 中的每个完整 event。完整 event 以空行（`\n\n`）结尾。
       while (true) {
         final sep = buffer.indexOf('\n\n');
         if (sep == -1) break;
@@ -79,9 +70,8 @@ Stream<SseEvent> parseSseStream(Stream<List<int>> byteStream) {
     },
     onError: controller.addError,
     onDone: () {
-      // If the stream ends without a trailing blank line, emit whatever is
-      // left. The backend always ends cleanly, but a dropped connection can
-      // leave a partial event in the buffer.
+      // 如果 stream 结束时没有 trailing blank line，则 emit 剩余内容。Backend 通常会正常
+      // 结束，但 dropped connection 可能在 buffer 中留下 partial event。
       if (buffer.isNotEmpty) {
         final event = _parseRawEvent(buffer);
         if (event != null) {
@@ -92,31 +82,29 @@ Stream<SseEvent> parseSseStream(Stream<List<int>> byteStream) {
     },
   );
 
-  // When the consumer cancels (e.g. the user presses stop), cancel the
-  // upstream subscription so the underlying HTTP connection closes.
+  // consumer 取消时（例如用户按下 stop），取消 upstream subscription，使底层 HTTP
+  // connection 关闭。
   controller.onCancel = () => upstreamSub.cancel();
 
   return controller.stream;
 }
 
-/// Parses one SSE event block (the text between two blank lines) into an
-/// [SseEvent], or returns `null` if the block has no `event:` field or an
-/// unknown event type.
+/// 将一个 SSE event block（两个空行之间的 text）解析为 [SseEvent]；如果 block 没有
+/// `event:` field 或 event type 未知，则返回 `null`。
 SseEvent? _parseRawEvent(String raw) {
   String? eventType;
   final dataLines = <String>[];
 
   for (final line in raw.split('\n')) {
     if (line.isEmpty || line.startsWith(':')) {
-      // Empty lines and comment lines are ignored. We should not see empty
-      // lines here (they are the event terminator), but being defensive is
-      // cheap.
+      // 忽略空行和 comment line。这里通常不会看到空行（它们是 event terminator），但
+      // 防御性处理成本很低。
       continue;
     }
     const eventPrefix = 'event:';
     const dataPrefix = 'data:';
     if (line.startsWith(eventPrefix)) {
-      // SSE strips one optional leading space after the colon.
+      // SSE 会去除冒号后的一个可选 leading space。
       eventType = line.substring(eventPrefix.length).trim();
     } else if (line.startsWith(dataPrefix)) {
       var value = line.substring(dataPrefix.length);
@@ -130,21 +118,19 @@ SseEvent? _parseRawEvent(String raw) {
   if (eventType == null) {
     return null;
   }
-  // Per the SSE spec, multiple `data:` lines are joined with `\n`. Our backend
-  // always sends one `data:` line, but we follow the spec anyway.
+  // 根据 SSE spec，多条 `data:` line 使用 `\n` 连接。Backend 总是发送一条 `data:` line，
+  // 但这里仍遵循 spec。
   final data = dataLines.join('\n');
 
   return _buildEvent(eventType, data);
 }
 
-/// Builds the right [SseEvent] subtype for the given event type and JSON data.
+/// 根据给定的 event type 和 JSON data 构建正确的 [SseEvent] subtype。
 ///
-/// Returns `null` for unknown event types so the parser never throws on a
-/// future event the backend starts sending.
+/// 未知 event type 返回 `null`，使 parser 不会因 backend 将来发送的新 event 而抛出异常。
 SseEvent? _buildEvent(String type, String data) {
-  // Helper: decode the data as JSON, returning null if it is not a valid
-  // object. We are lenient because a corrupted data line should not crash the
-  // whole stream.
+  // Helper：将 data 解码为 JSON；不是有效 object 时返回 null。这里保持宽容，因为损坏的
+  // data line 不应导致整个 stream 崩溃。
   Map<String, dynamic> decodeObject() {
     if (data.isEmpty) return <String, dynamic>{};
     final decoded = jsonDecode(data);
@@ -152,13 +138,13 @@ SseEvent? _buildEvent(String type, String data) {
     return <String, dynamic>{};
   }
 
-  // Helper: read a required String field, falling back to '' if missing.
+  // Helper：读取 required String field；缺失时回退为 ''。
   String readString(Map<String, dynamic> obj, String key) {
     final value = obj[key];
     return value is String ? value : '';
   }
 
-  // Helper: read a required int field, falling back to 0 if missing.
+  // Helper：读取 required int field；缺失时回退为 0。
   int readInt(Map<String, dynamic> obj, String key) {
     final value = obj[key];
     if (value is int) return value;
@@ -185,7 +171,7 @@ SseEvent? _buildEvent(String type, String data) {
     case 'done':
       return const SseEvent.done();
     default:
-      // Unknown event type: ignore rather than crash.
+      // 未知 event type：忽略，而不是崩溃。
       return null;
   }
 }

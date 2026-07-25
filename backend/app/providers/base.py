@@ -1,19 +1,16 @@
-"""Provider abstraction layer.
+"""Provider abstraction layer。
 
-The application talks to upstream model providers only through the
-:class:`Provider` protocol and the small set of data structures defined here.
-This keeps the rest of the codebase protocol-agnostic; supporting a new
-provider means adding a module that implements :class:`Provider`.
+应用只通过这里定义的 :class:`Provider` protocol 和少量 data structure 与上游 model
+provider 通信。这样代码库的其他部分不依赖具体 protocol；支持新 provider 只需要添加
+实现 :class:`Provider` 的 module。
 
-Decision D12 fixed the supported protocols at two: the OpenAI Responses API
-and the Anthropic Messages API. Decision D13 ruled out agent workflows, so
-the abstraction only needs to model "messages in, tokens out" — there is no
-tool-call surface, no multi-turn orchestration state, and no retry policy.
+决策 D12 将支持的 protocol 固定为两个：OpenAI Responses API 和 Anthropic Messages API。
+决策 D13 排除了 agent workflow，因此 abstraction 只需表达“messages in，tokens out”，
+不需要 tool-call surface、multi-turn orchestration state 或 retry policy。
 
-Images and thinking history are carried on :class:`ChatMessage` so each
-adapter can translate them into its own wire format. The Anthropic adapter
-uses ``reasoning_signature`` to replay a previous thinking block; the OpenAI
-adapter ignores it.
+图片和 thinking history 都携带在 :class:`ChatMessage` 中，使每个 adapter 可以将它们
+转换为自己的 wire format。Anthropic adapter 使用 ``reasoning_signature`` replay 之前的
+thinking block；OpenAI adapter 会忽略它。
 """
 
 from __future__ import annotations
@@ -33,44 +30,42 @@ StreamEventKind = Literal[
     "done",
     "error",
 ]
-"""The event kinds the unified stream emits.
+"""统一 stream 发出的 event kind。
 
-* ``text_delta`` — a chunk of assistant visible text.
-* ``reasoning_delta`` — a chunk of reasoning/thinking text (displayed folded).
-* ``reasoning_signature`` — the full signature needed to replay a thinking
-  block as history in a later turn (Anthropic only; emitted once per thinking
-  block, in ``content``).
-* ``done`` — the upstream finished cleanly; no payload.
-* ``error`` — the upstream or adapter failed; ``content`` carries the message.
+* ``text_delta`` — 一段 assistant 可见文本。
+* ``reasoning_delta`` — 一段 reasoning/thinking 文本（折叠显示）。
+* ``reasoning_signature`` — 后续 turn 将 thinking block 作为 history replay 所需的完整
+    signature（仅 Anthropic；每个 thinking block 在 ``content`` 中发送一次）。
+* ``done`` — 上游正常完成；没有 payload。
+* ``error`` — 上游或 adapter 失败；``content`` 携带错误 message。
 """
 
 
 @dataclass
 class ChatMessage:
-    """A single message in the request history.
+    """request history 中的一条 message。
 
-    Exactly one of ``text`` or ``image_path`` is normally set for a user
-    message; an assistant message has ``text`` and may have ``reasoning``.
+    对 user message，通常只设置 ``text`` 或 ``image_path`` 其中之一；assistant message
+    有 ``text``，并且可能有 ``reasoning``。
     """
 
     role: Literal["user", "assistant", "system"]
     text: str | None = None
     image_path: str | None = None
-    """Server-generated filename of an attached image, if any."""
+    """附加图片的 server-generated filename（如果存在）。"""
     reasoning: str | None = None
-    """Reasoning/thinking text produced by the model for this assistant turn."""
+    """model 为该 assistant turn 生成的 reasoning/thinking text。"""
     reasoning_signature: str | None = None
-    """Anthropic thinking-block signature, used only to replay the block."""
+    """Anthropic thinking-block signature，仅用于 replay 该 block。"""
 
 
 @dataclass
 class ChatRequest:
-    """A request to stream a completion for the given message history.
+    """针对给定 message history 请求 streaming completion。
 
-    ``thinking_effort`` is the level selected for the conversation (one of the
-    model's listed levels). It is forwarded to the upstream as
-    ``reasoning.effort`` (OpenAI) or ``thinking.effort`` (Anthropic adaptive);
-    an empty string means the adapter should send no thinking parameter.
+    ``thinking_effort`` 是会话选择的 level（model 列出的 level 之一）。它会以
+    ``reasoning.effort``（OpenAI）或 ``thinking.effort``（Anthropic adaptive）的形式
+    转发给上游；空 string 表示 adapter 不应发送 thinking parameter。
     """
 
     messages: list[ChatMessage] = field(default_factory=list)
@@ -80,7 +75,7 @@ class ChatRequest:
 
 @dataclass
 class StreamEvent:
-    """One event emitted by a provider's stream."""
+    """provider stream 发出的一个 event。"""
 
     kind: StreamEventKind
     content: str = ""
@@ -88,14 +83,13 @@ class StreamEvent:
 
 @runtime_checkable
 class Provider(Protocol):
-    """A streaming chat-completion adapter for a specific upstream protocol."""
+    """针对特定上游 protocol 的 streaming chat-completion adapter。"""
 
     async def stream(self, request: ChatRequest) -> AsyncIterator[StreamEvent]:
-        """Yield :class:`StreamEvent` objects for one completion.
+        """为一次 completion 生成 :class:`StreamEvent` object。
 
-        Implementations are async generators. They must terminate either by
-        yielding a ``done`` event or by yielding an ``error`` event, so the
-        caller can treat stream end as success or failure unambiguously.
+        实现是 async generator，必须通过生成 ``done`` event 或 ``error`` event 之一结束，
+        使调用方能够明确判断 stream 结束是成功还是失败。
         """
         ...
         yield StreamEvent(kind="done")  # pragma: no cover  (Protocol body)
@@ -104,18 +98,17 @@ class Provider(Protocol):
 async def parse_sse_stream(
     response,
 ) -> AsyncIterator[tuple[str, dict]]:
-    """Parse a Server-Sent Events stream into ``(event_type, json_data)`` pairs.
+    """将 Server-Sent Events stream 解析为 ``(event_type, json_data)`` pair。
 
-    Accepts both the OpenAI convention (where ``event:`` names the type) and
-    streams that omit ``event:`` and rely on a ``type`` field inside the JSON
-    payload. Lines that are neither ``event:`` nor ``data:`` (comments, keep
-    alives, retry hints) are ignored.
+    同时接受 OpenAI convention（由 ``event:`` 命名 type）和省略 ``event:``、依赖 JSON
+    payload 中 ``type`` field 的 stream。既不是 ``event:`` 也不是 ``data:`` 的 line
+    （comment、keep-alive、retry hint）会被忽略。
     """
     event_type = ""
     data_parts: list[str] = []
     async for line in response.aiter_lines():
         if line == "":
-            # A blank line terminates the current event.
+            # 空行表示当前 event 结束。
             if data_parts:
                 payload = "\n".join(data_parts)
                 data_parts = []
@@ -123,7 +116,7 @@ async def parse_sse_stream(
                 try:
                     parsed = json.loads(payload)
                 except json.JSONDecodeError:
-                    # Skip non-JSON keepalive data; nothing else to recover.
+                    # 跳过非 JSON keepalive data；没有其他内容可恢复。
                     event_type = ""
                     continue
                 if not resolved_type and isinstance(parsed, dict):
@@ -139,15 +132,14 @@ async def parse_sse_stream(
 
 
 def get_provider(model: ModelConfig, settings: Settings) -> Provider:
-    """Construct the provider adapter selected by ``model.protocol``.
+    """构建由 ``model.protocol`` 选择的 provider adapter。
 
-    The adapter is bound to a single model (its base URL, resolved API key,
-    and output budget all come from :class:`ModelConfig`) but still needs the
-    process-wide :class:`Settings` to locate the image upload directory when
-    forwarding multimodal messages.
+    adapter 绑定到单个 model（base URL、resolved API key 和 output budget 都来自
+    :class:`ModelConfig`），但仍需要 process-wide :class:`Settings`，以便转发 multimodal
+    message 时定位 image upload directory。
 
-    Imported locally so the base module does not pull in httpx on import,
-    which keeps unit tests that only exercise the data structures fast.
+    这里采用 local import，使 base module 在 import 时不加载 httpx，从而让只测试 data
+    structure 的 unit test 保持快速。
     """
     if model.protocol == "openai-response":
         from .openai_response import OpenAIResponseProvider

@@ -1,22 +1,18 @@
-"""SQLModel entities and API schemas.
+"""SQLModel entity 和 API schema。
 
-The data model has three tables:
+数据模型包含三张 table：
 
-* :class:`Profile` — a top-level group of conversations (a "project" or
-  "topic area"). Chosen in decision D22 over alternative meanings of
-  "profile".
-* :class:`Conversation` — a chat thread belonging to a profile. It tracks
-  the currently active leaf message so the client can reconstruct the visible
-  message path.
-* :class:`Message` — a single message in a conversation, linked to its parent
-  via ``parent_id`` to form a tree. Sibling messages under the same parent
-  are alternative replies; switching between them is done by moving
-  ``conversation.current_leaf_id``. This structure is mandated by decision
-  D18 because learners need to re-ask and compare answers.
+* :class:`Profile` — 会话的顶层分组（即“project”或“topic area”）。根据决策 D22，
+    选择了这个含义，而不是 ``profile`` 的其他含义。
+* :class:`Conversation` — 属于某个 profile 的 chat thread。它记录当前 active leaf
+    message，使客户端能够重建可见 message path。
+* :class:`Message` — conversation 中的一条 message，通过 ``parent_id`` 连接到 parent
+    并形成 tree。同一 parent 下的 sibling message 是不同的 reply；在它们之间切换就是
+    移动 ``conversation.current_leaf_id``。根据决策 D18，学习者需要重新提问并比较答案，
+    因此采用这种结构。
 
-The module also declares lightweight Pydantic request/response models used by
-the API layer so that internal fields such as ``reasoning_signature`` are
-not exposed to the client.
+此 module 还声明 API layer 使用的轻量 Pydantic request/response model，使
+``reasoning_signature`` 等内部 field 不会暴露给客户端。
 """
 
 from __future__ import annotations
@@ -28,20 +24,20 @@ from sqlmodel import Field, SQLModel
 
 
 def _now() -> datetime:
-    """Return the current UTC time as a timezone-aware datetime.
+    """以 timezone-aware datetime 返回当前 UTC time。
 
-    A helper is used instead of ``datetime.utcnow`` because the latter is
-    deprecated and returns naive datetimes that are easy to misuse.
+    使用 helper 而不是 ``datetime.utcnow``，因为后者已 deprecated，并且返回容易误用的
+    naive datetime。
     """
     return datetime.now(timezone.utc)
 
 
 MessageRole = Literal["user", "assistant", "system"]
-"""Allowed values for :attr:`Message.role`."""
+"""允许的 :attr:`Message.role` value。"""
 
 
 class Profile(SQLModel, table=True):
-    """A named group of conversations."""
+    """一组有名称的 conversation。"""
 
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(index=True)
@@ -50,24 +46,21 @@ class Profile(SQLModel, table=True):
 
 
 class Conversation(SQLModel, table=True):
-    """A chat thread inside a profile.
+    """profile 中的 chat thread。
 
-    ``current_leaf_id`` points at the last message on the currently visible
-    path. The full path is reconstructed by walking ``parent_id`` from this
-    leaf back to the root, which is O(depth) and avoids recursive queries.
+    ``current_leaf_id`` 指向当前可见 path 上的最后一条 message。完整 path 通过从该 leaf
+    沿 ``parent_id`` 回溯到 root 重建，复杂度为 O(depth)，避免 recursive query。
     """
 
     id: int | None = Field(default=None, primary_key=True)
     profile_id: int = Field(foreign_key="profile.id", index=True, ondelete="CASCADE")
     title: str = ""
     model_id: str = ""
-    """The model used for every assistant turn in this conversation. Fixed at
-    creation time (decision D03); to use a different model, create a new
-    conversation. The value is the ``id`` of an entry in ``config.yaml``."""
+    """该 conversation 的每个 assistant turn 使用的 model。创建时固定（决策 D03）；如需
+    使用其他 model，请创建新 conversation。该 value 是 ``config.yaml`` 中某个 entry 的 ``id``。"""
     thinking_effort: str = ""
-    """Thinking-effort level selected for this conversation. Must be one of
-    the levels listed in the model's ``thinking_effort`` field. Changeable via
-    ``PATCH`` (decision D05/D09)."""
+    """为该 conversation 选择的 thinking-effort level。必须是 model 的 ``thinking_effort``
+    field 中列出的 level 之一。可以通过 ``PATCH`` 修改（决策 D05/D09）。"""
     current_leaf_id: int | None = Field(
         default=None,
         foreign_key="message.id",
@@ -78,18 +71,16 @@ class Conversation(SQLModel, table=True):
 
 
 class Message(SQLModel, table=True):
-    """A message node in a conversation tree.
+    """conversation tree 中的一个 message node。
 
-    ``parent_id`` is ``None`` for a root message. Multiple messages can share
-    a ``parent_id``; each one is an alternative reply to that parent.
-    ``is_complete`` is ``False`` while the server is streaming tokens into the
-    message, so the client can show a placeholder and so interrupt recovery
-    can tell partial messages from finished ones.
+    root message 的 ``parent_id`` 为 ``None``。多条 message 可以共享一个 ``parent_id``，
+    每条 message 都是该 parent 的一个 alternative reply。服务器向 message streaming
+    token 时 ``is_complete`` 为 ``False``，客户端可以显示 placeholder，interrupt recovery
+    也可以据此区分 partial message 和已完成 message。
 
-    ``reasoning_signature`` stores Anthropic's thinking-block signature so the
-    block can be replayed verbatim when the assistant message is sent back as
-    history in a later turn. OpenAI reasoning has no equivalent, so the field
-    is ``None`` for OpenAI providers.
+    ``reasoning_signature`` 保存 Anthropic 的 thinking-block signature，使 assistant message
+    在后续 turn 作为 history 发送时可以原样 replay 该 block。OpenAI reasoning 没有对应物，
+    因此 OpenAI provider 的该 field 为 ``None``。
     """
 
     id: int | None = Field(default=None, primary_key=True)
@@ -100,9 +91,8 @@ class Message(SQLModel, table=True):
         default=None, foreign_key="message.id", index=True, ondelete="CASCADE"
     )
     role: str
-    """One of ``user``, ``assistant``, ``system``. Stored as plain text because
-    SQLModel cannot map a ``Literal`` to a column type; the read schemas
-    re-narrow the value with :data:`MessageRole`."""
+    """``user``、``assistant``、``system`` 三者之一。由于 SQLModel 不能将 ``Literal`` 映射
+    到 column type，这里存储为 plain text；read schema 使用 :data:`MessageRole` 重新收窄 value。"""
     content: str = ""
     reasoning: str | None = None
     reasoning_signature: str | None = None
@@ -111,17 +101,16 @@ class Message(SQLModel, table=True):
     created_at: datetime = Field(default_factory=_now)
 
 
-# Request schemas (no table=True) used by the API layer.
+# API layer 使用的 request schema（不带 table=True）。
 
 class ConversationCreate(SQLModel):
-    """Body of a create-conversation request.
+    """create-conversation request 的 body。
 
-    ``model_id`` selects the model for this conversation (decision D03). It
-    must match an entry in ``config.yaml``; the endpoint validates that.
+    ``model_id`` 选择该 conversation 使用的 model（决策 D03），必须匹配 ``config.yaml``
+    中的 entry，endpoint 会进行校验。
 
-    ``thinking_effort`` defaults to the first level of the model's
-    ``thinking_effort`` list when omitted (decision D05). If given, it must be
-    one of the model's listed levels.
+    省略 ``thinking_effort`` 时，默认使用 model 的 ``thinking_effort`` list 中的第一个
+    level（决策 D05）。如果提供了值，则必须是 model 列出的 level 之一。
     """
 
     model_id: str
@@ -130,11 +119,10 @@ class ConversationCreate(SQLModel):
 
 
 class ConversationUpdate(SQLModel):
-    """Body of a PATCH conversation request.
+    """PATCH conversation request 的 body。
 
-    Only ``thinking_effort`` (and ``title``) may be changed after creation;
-    ``model_id`` is fixed (decision D09). Both fields are optional and only
-    the provided ones are applied.
+    创建后只能修改 ``thinking_effort`` 和 ``title``；``model_id`` 固定不变（决策 D09）。
+    两个 field 都是 optional，只有提供的 field 会被应用。
     """
 
     title: str | None = None
@@ -143,23 +131,21 @@ class ConversationUpdate(SQLModel):
 
 
 class UserMessageCreate(SQLModel):
-    """Body of a create-user-message request.
+    """create-user-message request 的 body。
 
-    ``parent_id`` defaults to the conversation's current leaf when omitted,
-    which is the common case for appending a new question to the visible
-    path.
+    省略 ``parent_id`` 时，默认为 conversation 的 current leaf，这是向可见 path 追加新问题
+    的常见情况。
     """
     parent_id: int | None = None
     text: str
     image_data: str | None = None
-    """Optional base64 data URL for an image attached to the message.
+    """附加到 message 的图片的可选 base64 data URL。
 
-    The image is decoded and stored on disk by :mod:`app.storage`; only the
-    resulting path is persisted on the message.
+    图片由 :mod:`app.storage` 解码并存储到磁盘，message 只持久化最终 path。
     """
 
 
-# Response schemas (no table=True) returned to the client.
+# 返回给客户端的 response schema（不带 table=True）。
 
 class ProfileRead(SQLModel):
     id: int
@@ -187,57 +173,53 @@ class MessageRead(SQLModel):
     content: str
     reasoning: str | None
     image_url: str | None = None
-    """URL the client can use to fetch the attached image, if any."""
+    """客户端可以用来获取附加图片的 URL；没有图片时为 ``None``。"""
     is_complete: bool
     created_at: datetime
 
 
 class SiblingInfo(SQLModel):
-    """Metadata about the sibling messages of a node on the visible path.
+    """可见 path 上某个 node 的 sibling message metadata。
 
-    Lets the client render ``< 2 / 3 >`` version switchers without fetching
-    the whole tree.
+    客户端无需获取整棵 tree，就能据此渲染 ``< 2 / 3 >`` version switcher。
     """
     siblings: list[int] = []
-    """IDs of all messages sharing this node's ``parent_id`` (including it)."""
+    """与该 node 共享 ``parent_id`` 的所有 message ID（包括该 node）。"""
     active_id: int
-    """ID of the sibling that the visible path currently descends into."""
+    """当前可见 path 进入的 sibling ID。"""
 
 
 class MessageTreeNode(SQLModel):
-    """A message on the visible path plus its sibling metadata."""
+    """可见 path 上的一条 message 及其 sibling metadata。"""
     message: MessageRead
     siblings: SiblingInfo
 
 
 class ConversationPath(SQLModel):
-    """The visible message path of a conversation.
+    """conversation 的可见 message path。
 
-    Ordered from root to the current leaf. Each entry is a
-    :class:`MessageTreeNode` so the client can render version switchers at
-    every level.
+    按 root 到 current leaf 排序。每个 entry 都是 :class:`MessageTreeNode`，因此客户端
+    可以在每一层渲染 version switcher。
     """
     conversation: ConversationRead
     path: list[MessageTreeNode]
 
 
 class SendMessageResponse(SQLModel):
-    """Returned when a user message is created.
+    """创建 user message 时返回的 response。
 
-    Bundles the new user message together with the freshly-created assistant
-    placeholder that the client should stream tokens into via
-    ``GET /api/chat/stream``.
+    它将新的 user message 与刚创建的 assistant placeholder 组合在一起，客户端应通过
+    ``GET /api/chat/stream`` 将 token streaming 到该 placeholder。
     """
     user_message: MessageRead
     assistant_message: MessageRead
 
 
 class ModelRead(SQLModel):
-    """Client-facing view of a model definition from ``config.yaml``.
+    """``config.yaml`` 中 model definition 的 client-facing view。
 
-    Deliberately omits ``api_key`` (a secret reference) and ``base_url`` (not
-    useful to the client). ``max_tokens`` is also omitted: it is an upstream
-    output budget, not something the client renders.
+    有意省略 ``api_key``（secret reference）和 ``base_url``（客户端不需要）。
+    ``max_tokens`` 也被省略，因为它是上游 output budget，不是客户端要渲染的内容。
     """
 
     id: str
@@ -249,11 +231,10 @@ class ModelRead(SQLModel):
 
 
 class ModelsResponse(SQLModel):
-    """Response of ``GET /api/models``.
+    """``GET /api/models`` 的 response。
 
-    Carries the configured default model id and the list of available models
-    so the client can render its model and thinking-effort selectors without
-    any hardcoded protocol knowledge.
+    携带已配置的 default model id 和可用 model list，使客户端无需 hardcoded protocol
+    knowledge 就能渲染 model 和 thinking-effort selector。
     """
 
     default_model: str

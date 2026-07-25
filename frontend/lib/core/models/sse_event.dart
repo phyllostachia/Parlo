@@ -1,59 +1,56 @@
-/// The `SseEvent` sealed class and its six subtypes.
+/// `SseEvent` sealed class 及其六个 subtype。
 ///
-/// The backend streams assistant replies as Server-Sent Events (architecture
-/// section 5). Each event is a single `event: <type>` plus a `data: <json>`
-/// pair on the wire. The SSE parser turns those bytes into one of these six
-/// subtypes; the chat notifier switches over them to update the in-flight
-/// assistant message.
+/// Backend 将 assistant reply 作为 Server-Sent Events streaming（架构第 5 节）。每个 event
+/// 在 wire 上由一个 `event: <type>` 和一个 `data: <json>` pair 组成。SSE parser 将这些
+/// bytes 转换为六个 subtype 之一；chat notifier 根据它们 switch，以更新正在处理的 assistant
+/// message。
 ///
-/// This is a `sealed` class so `switch` expressions over the six subtypes are
-/// checked for exhaustiveness by the compiler.
+/// 这是 `sealed` class，因此 compiler 会检查覆盖六个 subtype 的 `switch` expression 是否
+/// exhaustiveness。
 ///
-/// These types are constructed by the parser, not deserialized wholesale from
-/// JSON, so this file has no `.g.dart` companion.
+/// 这些 type 由 parser 构造，而不是从 JSON 整体 deserialize，因此此 file 没有 `.g.dart`
+/// companion。
 library;
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'sse_event.freezed.dart';
 
-/// One Server-Sent Event emitted by the backend's chat stream endpoint.
+/// Backend chat stream endpoint 发出的一个 Server-Sent Event。
 @freezed
 sealed class SseEvent with _$SseEvent {
-  /// The first event of every stream. Carries the assistant message id that the
-  /// stream writes into.
+  /// 每个 stream 的第一个 event。携带 stream 要写入的 assistant message id。
   const factory SseEvent.started({
-    /// The id of the assistant placeholder this stream is filling.
+    /// 此 stream 正在填充的 assistant placeholder id。
     required int messageId,
   }) = SseStarted;
 
-  /// A chunk of assistant body text. Append to the message's `content`.
+  /// 一段 assistant body text。追加到 message 的 `content`。
   const factory SseEvent.textDelta({
-    /// The text to append.
+    /// 要追加的 text。
     required String content,
   }) = SseTextDelta;
 
-  /// A chunk of model reasoning ("thinking"). Append to the message's
-  /// `reasoning`.
+  /// 一段 model reasoning（“thinking”）。追加到 message 的 `reasoning`。
   const factory SseEvent.reasoningDelta({
-    /// The reasoning text to append.
+    /// 要追加的 reasoning text。
     required String content,
   }) = SseReasoningDelta;
 
-  /// A signature that lets the upstream replay the thinking block verbatim on
-  /// a later turn. Stored on the message; not shown in the UI.
+  /// 允许上游在后续 turn 原样 replay thinking block 的 signature。存储在 message 上，不在
+  /// UI 中显示。
   const factory SseEvent.reasoningSignature({
-    /// The signature string.
+    /// 签名 string。
     required String content,
   }) = SseReasoningSignature;
 
-  /// An error from the upstream provider or the stream itself. Stops the
-  /// stream; the UI shows a "connection broken, retry" button.
+  /// 来自上游 provider 或 stream 本身的 error。它会停止 stream；UI 显示“connection broken,
+  /// retry” button。
   const factory SseEvent.error({
-    /// A human-readable error message.
+    /// 可读的 error message。
     required String message,
   }) = SseError;
 
-  /// The stream finished cleanly. The message is now complete.
+  /// Stream 正常完成。Message 现在已完成。
   const factory SseEvent.done() = SseDone;
 }

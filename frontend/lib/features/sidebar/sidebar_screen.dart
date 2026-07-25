@@ -1,12 +1,12 @@
-/// The sidebar — the persistent left column of the app.
+/// Sidebar：应用中持久存在的左侧 column。
 ///
-/// Layout follows `product.md` §5:
-/// - Top: buttons to create a new profile and a new conversation.
-/// - Middle: the profile folder tree (Phase 2's `ProfileTree`).
-/// - Bottom: a gear button that opens the settings panel.
+/// Layout 遵循 `product.md` §5：
+/// - Top：创建新 profile 和新 conversation 的 button。
+/// - Middle：profile folder tree（阶段 2 的 `ProfileTree`）。
+/// - Bottom：打开 settings panel 的 gear button。
 ///
-/// The sidebar is constant across routes; only its highlighted conversation
-/// changes when `currentConversationId` changes.
+/// Sidebar 在各 route 中保持不变；只有 `currentConversationId` 变化时高亮的 conversation
+/// 会改变。
 library;
 
 import 'package:flutter/material.dart';
@@ -17,9 +17,9 @@ import 'profile_tree.dart';
 import 'settings_panel.dart';
 import 'sidebar_providers.dart';
 
-/// The full sidebar widget.
+/// 完整 sidebar widget。
 class SidebarScreen extends ConsumerWidget {
-  /// Creates the sidebar.
+  /// 创建 sidebar。
   const SidebarScreen({
     required this.currentConversationId,
     required this.onNavigate,
@@ -28,20 +28,18 @@ class SidebarScreen extends ConsumerWidget {
     super.key,
   });
 
-  /// The conversation id shown in the main area, or `null` on the empty state.
-  /// Used to highlight the active conversation in the tree.
+  /// Main area 显示的 conversation id；empty state 时为 `null`。用于高亮 tree 中的 active
+  /// conversation。
   final int? currentConversationId;
 
-  /// Called when the user picks a conversation. The argument is a path like
-  /// `/c/123`. Kept as a callback (rather than the sidebar reaching into the
-  /// router directly) so the shell owns navigation.
+  /// User 选择 conversation 时调用。Argument 是 `/c/123` 形式的 path。保留为 callback，
+  /// 而不是让 sidebar 直接访问 router，使 shell 负责 navigation。
   final void Function(String path) onNavigate;
 
-  /// Whether to render the 80px icon-only sidebar used on narrow screens and
-  /// after manually collapsing the wide sidebar.
+  /// 是否渲染 narrow screen 和手动折叠 wide sidebar 后使用的 80px icon-only sidebar。
   final bool collapsed;
 
-  /// Toggles between the full sidebar and the compact icon-only sidebar.
+  /// 在完整 sidebar 和 compact icon-only sidebar 之间 toggle。
   final VoidCallback? onToggle;
 
   @override
@@ -49,9 +47,9 @@ class SidebarScreen extends ConsumerWidget {
     final colors = Theme.of(context).extension<ParloColors>()!;
     final contentWidth = collapsed ? 56.0 : 248.0;
 
-    // Design "Sidebar": 280px wide when expanded and 80px when collapsed,
-    // with a soft-stone fill, 16px padding, 16px gap between the three
-    // sections (top / tree / settings row), and a hairline chalk border.
+    // Design “Sidebar”：expanded 时宽 280px，collapsed 时宽 80px；使用 soft-stone fill、
+    // 16px padding、三个 section（top / tree / settings row）之间 16px gap，以及 hairline
+    // chalk border。
     return AnimatedContainer(
       width: collapsed ? 80 : 280,
       duration: const Duration(milliseconds: 220),
@@ -109,8 +107,8 @@ class SidebarScreen extends ConsumerWidget {
       confirmText: 'Create',
     );
     if (name == null || name.trim().isEmpty) return;
-    // Fire-and-forget; the AsyncNotifier state will reflect the refetch.
-    // Errors surface via the AsyncValue in the tree.
+    // Fire-and-forget；AsyncNotifier state 会反映 refetch。Error 会通过 tree 中的 AsyncValue
+    // 暴露。
     await ref.read(profilesProvider.notifier).createProfile(name.trim());
   }
 
@@ -122,8 +120,8 @@ class SidebarScreen extends ConsumerWidget {
   }
 }
 
-/// The sidebar's top section: the brand row (serif wordmark + collapse icon)
-/// and two full-width action buttons ("新建对话" and "新建分组").
+/// Sidebar 的 top section：brand row（serif wordmark + collapse icon）和两个 full-width
+/// action button（“新建对话”和“新建分组”）。
 class _SidebarHeader extends StatelessWidget {
   const _SidebarHeader({
     required this.collapsed,
@@ -170,8 +168,8 @@ class _SidebarHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Design "Brand Row": 20px serif wordmark on the left, an 18px
-        // panel-left-close icon on the right, 4px padding.
+        // Design “Brand Row”：左侧 20px serif wordmark，右侧 18px panel-left-close icon，
+        // padding 4px。
         Padding(
           padding: const EdgeInsets.all(4),
           child: Row(
@@ -201,7 +199,7 @@ class _SidebarHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        // Design "New Actions Row": two full-width ghost buttons, 4px apart.
+        // Design “New Actions Row”：两个相距 4px 的 full-width ghost button。
         _SidebarActionButton(
           icon: Icons.edit_outlined,
           label: '新建对话',
@@ -218,11 +216,10 @@ class _SidebarHeader extends StatelessWidget {
   }
 }
 
-/// A full-width ghost button used for the sidebar's action rows
-/// ("新建对话" / "新建分组") and the settings row at the bottom.
+/// Sidebar action row（“新建对话”/“新建分组”）和底部 settings row 使用的 full-width ghost button。
 ///
-/// Matches the design: 16px icon + 14px medium label, 10px gap, padding
-/// 8x10, 8px corner radius, transparent fill that lightens on hover.
+/// 匹配 design：16px icon + 14px medium label、10px gap、8x10 padding、8px corner radius，
+/// 以及 hover 时变亮的透明 fill。
 class _SidebarActionButton extends StatefulWidget {
   const _SidebarActionButton({
     required this.icon,
@@ -236,11 +233,10 @@ class _SidebarActionButton extends StatefulWidget {
   final String label;
   final VoidCallback onTap;
 
-  /// Whether to show only the icon in the compact sidebar.
+  /// Compact sidebar 中是否只显示 icon。
   final bool collapsed;
 
-  /// Whether to draw the hairline top border (used by the settings row,
-  /// which sits at the bottom of the sidebar separated by a divider).
+  /// 是否绘制 hairline top border（settings row 使用；它位于 sidebar bottom，并由 divider 分隔）。
   final bool topBorder;
 
   @override
@@ -302,8 +298,7 @@ class _SidebarActionButtonState extends State<_SidebarActionButton> {
   }
 }
 
-/// The sidebar's bottom row: a full-width "设置" row with a hairline divider
-/// above it (the design's "Settings Row").
+/// Sidebar 的 bottom row：full-width“设置”row，上方带 hairline divider（design 的“Settings Row”）。
 class _SidebarFooter extends StatelessWidget {
   const _SidebarFooter({required this.collapsed, required this.onSettings});
 
@@ -322,7 +317,7 @@ class _SidebarFooter extends StatelessWidget {
   }
 }
 
-/// An icon-only button used by the compact sidebar header.
+/// Compact sidebar header 使用的 icon-only button。
 class _SidebarIconButton extends StatelessWidget {
   const _SidebarIconButton({
     required this.icon,
@@ -347,7 +342,7 @@ class _SidebarIconButton extends StatelessWidget {
   }
 }
 
-/// A small Lucide-style panel-left open/close icon.
+/// 小型 Lucide-style panel-left open/close icon。
 class _SidebarToggleIcon extends StatelessWidget {
   const _SidebarToggleIcon({required this.collapsed});
 
@@ -402,11 +397,10 @@ class _SidebarToggleIconPainter extends CustomPainter {
       oldDelegate.color != color || oldDelegate.collapsed != collapsed;
 }
 
-/// A small reusable dialog that asks the user for a single text value.
+/// 请求 user 输入单个 text value 的小型可复用 dialog。
 ///
-/// Returns the entered text, or `null` if the user dismissed the dialog. Kept
-/// here because the sidebar uses it for "new folder"; rename uses an inline
-/// editor in the tree instead.
+/// 返回输入的 text；user dismiss dialog 时返回 `null`。保留在这里是因为 sidebar 用它
+/// 创建“new folder”，而 rename 在 tree 中使用 inline editor。
 Future<String?> _showNameDialog({
   required BuildContext context,
   required String title,

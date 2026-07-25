@@ -1,6 +1,5 @@
-"""HTTP API routers.
+"""HTTP API router。
 
-This package groups the FastAPI APIRouters by resource. ``main`` wires them
-into the application under a shared ``/api`` prefix and attaches the shared
-authentication dependency.
+此包按资源组织 FastAPI APIRouter。``main`` 会将它们接入应用的统一 ``/api`` 前缀，
+并附加共享的鉴权 dependency。
 """

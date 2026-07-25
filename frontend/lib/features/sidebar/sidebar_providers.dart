@@ -1,19 +1,16 @@
-/// Riverpod providers and notifiers that back the sidebar.
+/// 支撑 sidebar 的 Riverpod provider 和 notifier。
 ///
-/// The sidebar reads two kinds of data:
-/// - The full list of profiles (`GET /api/profiles`), shown as the top-level
-///   folder tree.
-/// - The conversations inside each expanded profile
-///   (`GET /api/profiles/{id}/conversations`), shown when a folder is open.
+/// Sidebar 读取两类 data：
+/// - 完整 profile list（`GET /api/profiles`），显示为顶层 folder tree。
+/// - 每个 expanded profile 内的 conversation（`GET /api/profiles/{id}/conversations`），
+///   在 folder 打开时显示。
 ///
-/// Mutations (create / rename / delete) go through the same notifiers so the
-/// list state stays consistent without a manual refetch.
+/// Mutation（create / rename / delete）都通过相同 notifier 执行，使 list state 无需手动
+/// refetch 也能保持一致。
 ///
-/// The architecture says the conversations list is "filtered by
-/// selectedProfileId". This implementation uses a `family` provider keyed by
-/// profile id instead, so the folder tree can show several expanded profiles
-/// at once (matching the folder-tree UX in `product.md` §5.1). The difference
-/// is small and the family approach composes better with expand/collapse.
+/// 架构文档规定 conversation list “filtered by selectedProfileId”。此实现改用以 profile id
+/// 为 key 的 `family` provider，使 folder tree 可以同时显示多个 expanded profile（匹配
+/// `product.md` §5.1 的 folder-tree UX）。差异很小，而 family 方案与 expand/collapse 组合更好。
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,7 +19,7 @@ import '../../core/models/conversation.dart';
 import '../../core/models/profile.dart';
 import '../../core/network/api_client.dart';
 
-/// Decodes the JSON list returned by `GET /api/profiles`.
+/// Decode `GET /api/profiles` 返回的 JSON list。
 List<Profile> _parseProfiles(List<dynamic>? raw) {
   final list = raw ?? const <dynamic>[];
   return list
@@ -30,7 +27,7 @@ List<Profile> _parseProfiles(List<dynamic>? raw) {
       .toList(growable: false);
 }
 
-/// Decodes the JSON list returned by `GET /api/profiles/{id}/conversations`.
+/// Decode `GET /api/profiles/{id}/conversations` 返回的 JSON list。
 List<Conversation> _parseConversations(List<dynamic>? raw) {
   final list = raw ?? const <dynamic>[];
   return list
@@ -38,11 +35,10 @@ List<Conversation> _parseConversations(List<dynamic>? raw) {
       .toList(growable: false);
 }
 
-/// The list of all profiles, with create / rename / delete actions.
+/// 所有 profile 的 list，以及 create / rename / delete action。
 ///
-/// After every mutation we re-run `build` (via `ref.invalidateSelf`) so the
-/// list reflects the server's current state and ordering. The sidebar shows a
-/// loading shimmer while the refetch is in flight.
+/// 每次 mutation 后重新运行 `build`（通过 `ref.invalidateSelf`），使 list 反映 server 当前
+/// state 和 order。Refetch in flight 时 sidebar 显示 loading shimmer。
 class ProfilesNotifier extends AsyncNotifier<List<Profile>> {
   @override
   Future<List<Profile>> build() async {
@@ -51,10 +47,10 @@ class ProfilesNotifier extends AsyncNotifier<List<Profile>> {
     return _parseProfiles(response.data);
   }
 
-  /// Creates a profile with the given name.
+  /// 使用给定 name 创建 profile。
   ///
-  /// The backend takes `name` as a query parameter (see
-  /// `backend/app/api/profiles.py`), not as a JSON body.
+  /// Backend 将 `name` 作为 query parameter（参见 `backend/app/api/profiles.py`）接收，
+  /// 而不是 JSON body。
   Future<void> createProfile(String name) async {
     final dio = ref.read(dioProvider);
     state = const AsyncLoading<List<Profile>>().copyWithPrevious(state);
@@ -68,7 +64,7 @@ class ProfilesNotifier extends AsyncNotifier<List<Profile>> {
     });
   }
 
-  /// Renames a profile. The new name goes in the query string.
+  /// 重命名 profile。新 name 放在 query string 中。
   Future<void> renameProfile(int id, String name) async {
     final dio = ref.read(dioProvider);
     state = const AsyncLoading<List<Profile>>().copyWithPrevious(state);
@@ -82,8 +78,8 @@ class ProfilesNotifier extends AsyncNotifier<List<Profile>> {
     });
   }
 
-  /// Deletes a profile. The backend cascades the delete to its conversations
-  /// and their messages via the foreign-key `ON DELETE CASCADE` rules.
+  /// 删除 profile。Backend 通过 foreign-key `ON DELETE CASCADE` rule 将删除级联到其
+  /// conversation 和 message。
   Future<void> deleteProfile(int id) async {
     final dio = ref.read(dioProvider);
     state = const AsyncLoading<List<Profile>>().copyWithPrevious(state);
@@ -95,44 +91,39 @@ class ProfilesNotifier extends AsyncNotifier<List<Profile>> {
   }
 }
 
-/// The singleton provider for the profile list.
-final profilesProvider =
-    AsyncNotifierProvider<ProfilesNotifier, List<Profile>>(
+/// Profile list 的 singleton provider。
+final profilesProvider = AsyncNotifierProvider<ProfilesNotifier, List<Profile>>(
   ProfilesNotifier.new,
 );
 
-/// The conversations inside one profile, keyed by profile id.
+/// 一个 profile 内的 conversation，以 profile id 为 key。
 ///
-/// A `family` so the folder tree can have several profiles expanded at once,
-/// each loading its conversations independently. Callers invalidate this
-/// provider (with the profile id) after mutating a conversation.
+/// 使用 `family`，使 folder tree 可以同时展开多个 profile，并分别加载各自 conversation。
+/// Mutation conversation 后，调用方使用 profile id invalidate 此 provider。
 final conversationsForProfileProvider =
     FutureProvider.family<List<Conversation>, int>((ref, profileId) async {
-  final dio = ref.read(dioProvider);
-  final response = await dio.get<List<dynamic>>(
-    '/api/profiles/$profileId/conversations',
-  );
-  return _parseConversations(response.data);
-});
+      final dio = ref.read(dioProvider);
+      final response = await dio.get<List<dynamic>>(
+        '/api/profiles/$profileId/conversations',
+      );
+      return _parseConversations(response.data);
+    });
 
-/// The set of profile ids whose folder is expanded in the sidebar.
+/// Sidebar 中已展开 folder 的 profile id set。
 ///
-/// Kept as a [Set] so membership tests are O(1) and the order does not matter
-/// (the tree orders by `updated_at`).
+/// 使用 [Set]，使 membership test 为 O(1)，且不关心顺序（tree 按 `updated_at` 排序）。
 final expandedProfilesProvider = StateProvider<Set<int>>((ref) {
   return <int>{};
 });
 
-/// Cross-cutting sidebar actions that affect conversations and need to
-/// invalidate both the conversations family and the profile list (because
-/// touching a conversation bumps the profile's `updated_at` and reorders the
-/// sidebar).
+/// 影响 conversation 的 cross-cutting sidebar action，需要同时 invalidate conversations
+/// family 和 profile list（因为操作 conversation 会更新 profile 的 `updated_at`，并改变
+/// sidebar order）。
 class SidebarActionsNotifier extends Notifier<void> {
   @override
   void build() {}
 
-  /// Renames a conversation. `profileId` is needed to invalidate the right
-  /// conversations-family instance.
+  /// 重命名 conversation。需要 `profileId` 以 invalidate 正确的 conversations-family instance。
   Future<void> renameConversation({
     required int profileId,
     required int conversationId,
@@ -147,8 +138,8 @@ class SidebarActionsNotifier extends Notifier<void> {
     ref.invalidate(profilesProvider);
   }
 
-  /// Deletes a conversation. Messages are removed by the backend's
-  /// `ON DELETE CASCADE` rule on `message.conversation_id`.
+  /// 删除 conversation。Backend 会根据 `message.conversation_id` 上的 `ON DELETE CASCADE`
+  /// rule 删除 message。
   Future<void> deleteConversation({
     required int profileId,
     required int conversationId,
@@ -160,6 +151,7 @@ class SidebarActionsNotifier extends Notifier<void> {
   }
 }
 
-/// The sidebar actions notifier.
-final sidebarActionsProvider =
-    NotifierProvider<SidebarActionsNotifier, void>(SidebarActionsNotifier.new);
+/// Sidebar action notifier。
+final sidebarActionsProvider = NotifierProvider<SidebarActionsNotifier, void>(
+  SidebarActionsNotifier.new,
+);

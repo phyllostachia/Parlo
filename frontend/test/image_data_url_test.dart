@@ -1,9 +1,8 @@
-/// Unit tests for the image data URL converter.
+/// Image data URL converter 的 unit test。
 ///
-/// The converter reads the leading bytes of an image to detect the MIME
-/// type, then builds a `data:<mime>;base64,<...>` string the backend
-/// accepts. These tests pin down the detection for every supported format
-/// and the rejection of unknown data.
+/// Converter 读取图片的 leading bytes 以检测 MIME type，然后构建 backend 接受的
+/// `data:<mime>;base64,<...>` string。这些 test 固定每个 supported format 的检测行为，
+/// 以及 unknown data 的拒绝行为。
 library;
 
 import 'dart:convert';
@@ -20,16 +19,25 @@ void main() {
     });
 
     test('detects a PNG and builds the data URL', () {
-      final bytes = Uint8List.fromList(
-        <int>[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x01, 0x02],
-      );
+      final bytes = Uint8List.fromList(<int>[
+        0x89,
+        0x50,
+        0x4E,
+        0x47,
+        0x0D,
+        0x0A,
+        0x1A,
+        0x0A,
+        0x01,
+        0x02,
+      ]);
       final result = imageDataUrlFromBytes(bytes);
 
       expect(result, isNotNull);
       expect(result!.mimeType, 'image/png');
-      // The data URL prefix matches the detected type.
+      // Data URL prefix 与检测到的 type 匹配。
       expect(result.dataUrl, startsWith('data:image/png;base64,'));
-      // The base64 body decodes back to the original bytes.
+      // Base64 body 可以 decode 回原始 bytes。
       final body = result.dataUrl.substring(result.dataUrl.indexOf(',') + 1);
       expect(base64Decode(body), bytes);
     });
@@ -43,8 +51,14 @@ void main() {
     });
 
     test('detects a GIF', () {
-      final bytes =
-          Uint8List.fromList(<int>[0x47, 0x49, 0x46, 0x38, 0x39, 0x61]);
+      final bytes = Uint8List.fromList(<int>[
+        0x47,
+        0x49,
+        0x46,
+        0x38,
+        0x39,
+        0x61,
+      ]);
       final result = imageDataUrlFromBytes(bytes);
 
       expect(result, isNotNull);
@@ -52,12 +66,20 @@ void main() {
     });
 
     test('detects a WebP', () {
-      final bytes = Uint8List.fromList(
-        <int>[
-          0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00,
-          0x57, 0x45, 0x42, 0x50,
-        ],
-      );
+      final bytes = Uint8List.fromList(<int>[
+        0x52,
+        0x49,
+        0x46,
+        0x46,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x57,
+        0x45,
+        0x42,
+        0x50,
+      ]);
       final result = imageDataUrlFromBytes(bytes);
 
       expect(result, isNotNull);
@@ -65,7 +87,7 @@ void main() {
     });
 
     test('returns null for unknown byte signatures', () {
-      // A text file's leading bytes do not match any image signature.
+      // Text file 的 leading bytes 不匹配任何 image signature。
       final bytes = Uint8List.fromList(<int>[0x48, 0x65, 0x6C, 0x6C, 0x6F]);
       expect(imageDataUrlFromBytes(bytes), isNull);
     });

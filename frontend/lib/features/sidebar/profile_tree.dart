@@ -1,12 +1,11 @@
-/// The profile folder tree shown in the sidebar.
+/// Sidebar 中显示的 profile folder tree。
 ///
-/// Renders the list of profiles as folders. Each folder can be expanded to
-/// show its conversations. Both profile and conversation rows reveal a
-/// "..." menu on hover with rename (inline edit) and delete (with
-/// confirmation). Clicking a conversation navigates to it.
+/// 将 profile list 渲染为 folder。每个 folder 都可以展开以显示其中的 conversation。
+/// Profile 和 conversation row 都会在 hover 时显示“...”menu，其中有 rename（inline edit）
+/// 和 delete（带 confirmation）。点击 conversation 会 navigation 到它。
 ///
-/// The order is `updated_at` descending on both levels — the backend already
-/// returns them that way, so we render in list order.
+/// 两层都按 `updated_at` descending 排序；backend 已按此顺序返回，因此直接按 list order
+/// 渲染。
 library;
 
 import 'package:flutter/material.dart';
@@ -18,9 +17,9 @@ import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import 'sidebar_providers.dart';
 
-/// The full profile + conversation tree shown in the sidebar.
+/// Sidebar 中显示的完整 profile + conversation tree。
 class ProfileTree extends ConsumerWidget {
-  /// Creates the tree.
+  /// 创建 tree。
   const ProfileTree({
     required this.currentConversationId,
     required this.onNavigate,
@@ -29,16 +28,16 @@ class ProfileTree extends ConsumerWidget {
     super.key,
   });
 
-  /// The conversation id shown in the main area, or `null` on the empty state.
+  /// Main area 显示的 conversation id；empty state 时为 `null`。
   final int? currentConversationId;
 
-  /// Called with a path like `/c/123` when the user picks a conversation.
+  /// User 选择 conversation 时，以 `/c/123` 形式的 path 调用。
   final void Function(String path) onNavigate;
 
-  /// Whether to render the compact icon-only profile list.
+  /// 是否渲染 compact icon-only profile list。
   final bool collapsed;
 
-  /// Expands the full sidebar when a compact profile icon is selected.
+  /// 选择 compact profile icon 时展开完整 sidebar。
   final VoidCallback? onExpand;
 
   @override
@@ -93,7 +92,7 @@ class ProfileTree extends ConsumerWidget {
           itemCount: profiles.length,
           itemBuilder: (context, index) {
             return Padding(
-              // Design "Profile List": 4px gap between profile groups.
+              // Design “Profile List”：profile group 之间间隔 4px。
               padding: EdgeInsets.only(
                 bottom: index == profiles.length - 1 ? 0 : 4,
               ),
@@ -110,7 +109,7 @@ class ProfileTree extends ConsumerWidget {
   }
 }
 
-/// One profile folder row, plus its conversations when expanded.
+/// 一条 profile folder row，以及展开时显示的 conversation。
 class _ProfileFolder extends ConsumerStatefulWidget {
   const _ProfileFolder({
     required this.profile,
@@ -127,7 +126,7 @@ class _ProfileFolder extends ConsumerStatefulWidget {
 }
 
 class _ProfileFolderState extends ConsumerState<_ProfileFolder> {
-  /// Whether the row is currently in inline-rename mode.
+  /// Row 当前是否处于 inline-rename mode。
   bool _isRenaming = false;
   late final TextEditingController _renameController;
 
@@ -177,8 +176,7 @@ class _ProfileFolderState extends ConsumerState<_ProfileFolder> {
       confirmText: 'Delete',
     );
     if (confirmed) {
-      // Remove from the expanded set so the row does not try to load
-      // conversations for a now-deleted profile.
+      // 从 expanded set 移除，使 row 不会尝试为已删除的 profile 加载 conversation。
       final current = Set<int>.from(ref.read(expandedProfilesProvider));
       current.remove(widget.profile.id);
       ref.read(expandedProfilesProvider.notifier).state = current;
@@ -200,9 +198,8 @@ class _ProfileFolderState extends ConsumerState<_ProfileFolder> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _TreeRow(
-          // Design "Profile Header": a 14px chevron (down when expanded,
-          // right when collapsed) followed by a 15px folder icon, both in
-          // the muted ashen color.
+          // Design “Profile Header”：14px chevron（expanded 时向下，collapsed 时向右）后接
+          // 15px folder icon，二者都使用 muted ashen color。
           leading: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -228,7 +225,7 @@ class _ProfileFolderState extends ConsumerState<_ProfileFolder> {
                 )
               : Text(
                   widget.profile.name,
-                  // Design: 13px, weight 550, ashen.
+                  // Design：13px、weight 550、ashen。
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -259,7 +256,7 @@ class _ProfileFolderState extends ConsumerState<_ProfileFolder> {
   }
 }
 
-/// The list of conversations shown when a profile folder is expanded.
+/// Profile folder 展开时显示的 conversation list。
 class _ConversationsList extends ConsumerWidget {
   const _ConversationsList({
     required this.profileId,
@@ -304,7 +301,7 @@ class _ConversationsList extends ConsumerWidget {
   }
 }
 
-/// A single conversation row inside a profile folder.
+/// Profile folder 内的一条 conversation row。
 class _ConversationRow extends ConsumerStatefulWidget {
   const _ConversationRow({
     required this.conversation,
@@ -426,15 +423,14 @@ class _ConversationRowState extends ConsumerState<_ConversationRow> {
   }
 }
 
-/// The actions offered on a profile or conversation row's "..." menu.
+/// Profile 或 conversation row 的“...”menu 提供的 action。
 enum _MenuItem { rename, delete }
 
-/// A reusable sidebar row that shows a "..." menu on hover.
+/// 在 hover 时显示“...”menu 的可复用 sidebar row。
 ///
-/// Used by both profile folders and conversations. The optional [indent] flag
-/// shifts the row right so conversations sit visually under their folder. The
-/// optional [highlight] + [highlightColor] give the active conversation a
-/// subtle background.
+/// Profile folder 和 conversation 都使用它。可选 [indent] flag 将 row 向右移动，使
+/// conversation 在视觉上位于 folder 下方。可选 [highlight] + [highlightColor] 为 active
+/// conversation 提供 subtle background。
 class _TreeRow extends StatefulWidget {
   const _TreeRow({
     this.leading,
@@ -486,9 +482,8 @@ class _TreeRowState extends State<_TreeRow> {
         onTap: widget.onTap,
         behavior: HitTestBehavior.opaque,
         child: Container(
-          // Design rows: 8px corner radius, 8x10 padding. Conversation rows
-          // sit 18px to the right of their folder header (design's
-          // "Profile Items" left padding).
+          // Design row：8px corner radius、8x10 padding。Conversation row 位于 folder header
+          // 右侧 18px（design 的“Profile Items”left padding）。
           decoration: BoxDecoration(
             color: background,
             borderRadius: BorderRadius.circular(8),
@@ -502,10 +497,8 @@ class _TreeRowState extends State<_TreeRow> {
                 const SizedBox(width: 8),
               ],
               Expanded(child: widget.label),
-              // Keep the button in the tree while its route is open. Without
-              // this, moving the pointer from the row into the popup fires
-              // `onExit`, disposes the button, and the selected item loses
-              // its callback before it can run.
+              // Popup route 打开时保持 button 留在 tree 中。否则 pointer 从 row 移入 popup
+              // 会触发 `onExit`，dispose button，导致 selected item 在 callback 运行前丢失 callback。
               if ((_isHovered || _isMenuOpen) && widget.menuItems.isNotEmpty)
                 PopupMenuButton<_MenuItem>(
                   child: const SizedBox(
@@ -542,7 +535,7 @@ String _labelForItem(_MenuItem item) {
   }
 }
 
-/// A small indented hint row, used inside an expanded folder.
+/// Expanded folder 内使用的小型 indented hint row。
 class _IndentedHint extends StatelessWidget {
   const _IndentedHint({required this.text, this.actionLabel, this.onAction});
 
@@ -573,7 +566,7 @@ class _IndentedHint extends StatelessWidget {
   }
 }
 
-/// A centered hint shown when the whole tree is loading, empty, or errored.
+/// 整棵 tree loading、empty 或 error 时显示的居中 hint。
 class _CenteredHint extends StatelessWidget {
   const _CenteredHint({required this.text, this.actionLabel, this.onAction});
 
@@ -607,7 +600,7 @@ class _CenteredHint extends StatelessWidget {
   }
 }
 
-/// A compact placeholder that keeps the collapsed rail free of text.
+/// 保持 collapsed rail 不显示 text 的 compact placeholder。
 class _CollapsedHint extends StatelessWidget {
   const _CollapsedHint({required this.icon});
 
@@ -620,7 +613,7 @@ class _CollapsedHint extends StatelessWidget {
   }
 }
 
-/// One icon-only profile/conversation row in the compact sidebar.
+/// Compact sidebar 中的一条 icon-only profile/conversation row。
 class _CollapsedTreeRow extends StatefulWidget {
   const _CollapsedTreeRow({
     required this.icon,
@@ -677,8 +670,7 @@ class _CollapsedTreeRowState extends State<_CollapsedTreeRow> {
   }
 }
 
-/// A reusable delete-confirmation dialog. Returns `true` when the user
-/// confirms.
+/// 可复用的 delete-confirmation dialog。User 确认时返回 `true`。
 Future<bool> _showDeleteConfirmation({
   required BuildContext context,
   required String title,

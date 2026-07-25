@@ -1,9 +1,8 @@
-/// Widget tests for the token + backend address dialog.
+/// Token + backend address dialog 的 widget test。
 ///
-/// The dialog is shown by [TokenDialogHost], which watches the auth store and
-/// the base URL store and opens the dialog when there is no token, the token
-/// was flagged as unauthorized, or the base URL is empty. These tests verify
-/// each trigger and that saving both values closes the dialog.
+/// Dialog 由 [TokenDialogHost] 显示，它监听 auth store 和 base URL store，并在 token 缺失、
+/// token 被标记为 unauthorized 或 base URL 为空时打开 dialog。这些 test 验证每个 trigger，
+/// 以及保存两个 value 后 dialog 会关闭。
 library;
 
 import 'package:flutter/material.dart';
@@ -20,22 +19,22 @@ import 'package:parlo/core/network/base_url_store.dart';
 import 'package:parlo/features/chat/chat_providers.dart';
 import 'package:parlo/features/sidebar/sidebar_providers.dart';
 
-/// A [ProfilesNotifier] that returns an empty list without hitting the
-/// network, used only in tests.
+/// 返回 empty list 且不访问 network 的 [ProfilesNotifier]，仅供 test 使用。
 class _EmptyProfilesNotifier extends ProfilesNotifier {
   @override
   Future<List<Profile>> build() async => const <Profile>[];
 }
 
-/// A [ModelsNotifier] that returns null without hitting the network.
+/// 返回 null 且不访问 network 的 [ModelsNotifier]。
 class _EmptyModelsNotifier extends ModelsNotifier {
   @override
   Future<ModelsResponse?> build() async => null;
 }
 
 void main() {
-  testWidgets('shows the token dialog on first use when no token is set',
-      (tester) async {
+  testWidgets('shows the token dialog on first use when no token is set', (
+    tester,
+  ) async {
     SharedPreferences.setMockInitialValues(<String, Object>{});
     final prefs = await SharedPreferences.getInstance();
 
@@ -51,8 +50,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // The dialog opens because no token has been set yet. The headline is the
-    // "first use" variant.
+    // Dialog 因尚未设置 token 而打开。Headline 是“first use”variant。
     expect(find.text('Welcome to Parlo'), findsOneWidget);
     expect(find.text('Bearer token'), findsOneWidget);
     expect(find.text('Backend domain'), findsOneWidget);
@@ -77,7 +75,7 @@ void main() {
 
     expect(find.text('Welcome to Parlo'), findsOneWidget);
 
-    // The dialog has three text fields: domain, port, token (in order).
+    // Dialog 有三个 text field：domain、port、token（按此顺序）。
     final fields = find.descendant(
       of: find.byType(AlertDialog),
       matching: find.byType(TextField),
@@ -92,47 +90,47 @@ void main() {
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
-    // The dialog closes after both values are written and the stores notify
-    // the host.
+    // 两个 value 都写入且 store 通知 host 后，dialog 关闭。
     expect(find.text('Welcome to Parlo'), findsNothing);
 
-    // The token and base URL were both persisted to SharedPreferences.
+    // Token 和 base URL 都已持久化到 SharedPreferences。
     expect(prefs.getString(kAuthTokenKey), 'test-token');
     expect(prefs.getString(kBaseUrlKey), 'https://parlo.example.com:8000');
   });
 
   testWidgets(
-      'does not show the dialog when both a token and an address are set',
-      (tester) async {
-    // Seed the preferences with a token and a base URL so both stores
-    // bootstrap with them; the host should not open the dialog.
-    SharedPreferences.setMockInitialValues(<String, Object>{
-      kAuthTokenKey: 'already-here',
-      kBaseUrlKey: 'https://parlo.example.com:8000',
-    });
-    final prefs = await SharedPreferences.getInstance();
+    'does not show the dialog when both a token and an address are set',
+    (tester) async {
+      // 用 token 和 base URL 初始化 preferences，使两个 store 都能从它们 bootstrap；host
+      // 不应打开 dialog。
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        kAuthTokenKey: 'already-here',
+        kBaseUrlKey: 'https://parlo.example.com:8000',
+      });
+      final prefs = await SharedPreferences.getInstance();
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(prefs),
-          profilesProvider.overrideWith(() => _EmptyProfilesNotifier()),
-          modelsProvider.overrideWith(() => _EmptyModelsNotifier()),
-        ],
-        child: const ParloApp(),
-      ),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            profilesProvider.overrideWith(() => _EmptyProfilesNotifier()),
+            modelsProvider.overrideWith(() => _EmptyModelsNotifier()),
+          ],
+          child: const ParloApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('Welcome to Parlo'), findsNothing);
-    expect(find.text('Set your backend address'), findsNothing);
-  });
+      expect(find.text('Welcome to Parlo'), findsNothing);
+      expect(find.text('Set your backend address'), findsNothing);
+    },
+  );
 
-  testWidgets('shows the "backend address" dialog when only the token is set',
-      (tester) async {
-    // Seed only the token; the base URL is still missing, so the dialog
-    // should appear with the "set your backend address" headline (not the
-    // first-use "Welcome" headline, because the user already has a token).
+  testWidgets('shows the "backend address" dialog when only the token is set', (
+    tester,
+  ) async {
+    // 只初始化 token；base URL 仍缺失，因此 dialog 应以“set your backend address”headline
+    // 出现（不是 first-use“Welcome”headline，因为 user 已经有 token）。
     SharedPreferences.setMockInitialValues(<String, Object>{
       kAuthTokenKey: 'already-here',
     });
@@ -156,8 +154,9 @@ void main() {
     expect(find.text('Port'), findsOneWidget);
   });
 
-  testWidgets('Save button stays disabled until all fields are filled',
-      (tester) async {
+  testWidgets('Save button stays disabled until all fields are filled', (
+    tester,
+  ) async {
     SharedPreferences.setMockInitialValues(<String, Object>{});
     final prefs = await SharedPreferences.getInstance();
 
@@ -173,13 +172,12 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // The Save button is disabled (onPressed is null) when fields are empty.
+    // Field 为空时 Save button 被禁用（onPressed 为 null）。
     FilledButton saveButton() =>
         tester.widget<FilledButton>(find.byType(FilledButton));
     expect(saveButton().onPressed, isNull);
 
-    // Fill only the token — Save stays disabled because the address is
-    // still missing.
+    // 只填写 token；Save 仍禁用，因为 address 仍缺失。
     final fields = find.descendant(
       of: find.byType(AlertDialog),
       matching: find.byType(TextField),
@@ -188,12 +186,12 @@ void main() {
     await tester.pump();
     expect(saveButton().onPressed, isNull);
 
-    // Fill the domain — Save still disabled because the port is missing.
+    // 填写 domain；Save 仍禁用，因为 port 缺失。
     await tester.enterText(fields.at(0), 'parlo.example.com');
     await tester.pump();
     expect(saveButton().onPressed, isNull);
 
-    // Fill the port — Save is now enabled.
+    // 填写 port；Save 现在启用。
     await tester.enterText(fields.at(1), '8000');
     await tester.pump();
     expect(saveButton().onPressed, isNotNull);

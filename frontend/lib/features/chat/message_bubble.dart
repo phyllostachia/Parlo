@@ -1,11 +1,10 @@
-/// A single message in the conversation path.
+/// Conversation path 中的一条 message。
 ///
-/// Per `product.md` §6.3:
-/// - User messages get a subtle bubble with the text and (if any) image.
-/// - Assistant messages render as Markdown with a model-name footer, an
-///   optional collapsible thinking strip, a version switcher when there
-///   are sibling replies, a hover action bar (Copy / Regenerate), and a
-///   "connection broken, retry" button when the stream dropped.
+/// 根据 `product.md` §6.3：
+/// - User message 使用包含 text 和 image（如果有）的 subtle bubble。
+/// - Assistant message 渲染为 Markdown，并带 model-name footer、可选的 collapsible thinking
+///   strip；有 sibling reply 时显示 version switcher，显示 hover action bar（Copy / Regenerate），
+///   stream drop 时显示“connection broken, retry”button。
 library;
 
 import 'package:flutter/material.dart';
@@ -25,9 +24,9 @@ import 'message_actions.dart';
 import 'thinking_strip.dart';
 import 'version_switcher.dart';
 
-/// A single message row.
+/// 单条 message row。
 class MessageBubble extends ConsumerWidget {
-  /// Creates the bubble.
+  /// 创建 bubble。
   const MessageBubble({
     required this.message,
     required this.conversation,
@@ -40,34 +39,28 @@ class MessageBubble extends ConsumerWidget {
     super.key,
   });
 
-  /// The message to render.
+  /// 要渲染的 message。
   final Message message;
 
-  /// The conversation the message belongs to. Used to resolve the model
-  /// display name shown under assistant messages.
+  /// Message 所属的 conversation。用于解析 assistant message 下方显示的 model display name。
   final Conversation conversation;
 
-  /// The sibling metadata for this message's position on the path. Drives
-  /// the version switcher for assistant messages.
+  /// 此 message 在 path 上所在位置的 sibling metadata。驱动 assistant message 的 version switcher。
   final SiblingInfo siblings;
 
-  /// Whether this message is the one currently being streamed.
+  /// 此 message 是否是当前正在 streaming 的 message。
   final bool isStreaming;
 
-  /// Whether this is the last message on the visible path. The retry button
-  /// only appears on the last assistant message.
+  /// 此 message 是否是 visible path 的最后一条。Retry button 只出现在最后一条 assistant message 上。
   final bool isLast;
 
-  /// The current stream state for the conversation. Used to decide whether
-  /// to show the "connection broken, retry" button.
+  /// Conversation 当前的 stream state。用于决定是否显示“connection broken, retry”button。
   final StreamState streamState;
 
-  /// Called with an assistant message id when the user asks to regenerate
-  /// (or retry) a reply.
+  /// User 要求 regenerate（或 retry）reply 时，携带 assistant message id 调用。
   final void Function(int assistantMessageId) onRegenerate;
 
-  /// Called with a target leaf message id when the user clicks the version
-  /// switcher.
+  /// User 点击 version switcher 时，携带目标 leaf message id 调用。
   final void Function(int leafId) onSwitchBranch;
 
   @override
@@ -93,7 +86,7 @@ class MessageBubble extends ConsumerWidget {
   }
 }
 
-/// A user message: subtle bubble, text, and optional image.
+/// User message：subtle bubble、text 和可选 image。
 class _UserBubble extends StatelessWidget {
   const _UserBubble({required this.message, required this.ref});
 
@@ -109,8 +102,8 @@ class _UserBubble extends StatelessWidget {
         ? null
         : '$baseUrl${message.imageUrl}';
 
-    // Design "User Message Row": the bubble hugs the right edge of the
-    // 720px column; the bubble itself caps at ~420px of text width.
+    // Design “User Message Row”：bubble 贴近 720px column 的右边缘；bubble 自身的 text
+    // width 上限约为 420px。
     return Align(
       alignment: Alignment.centerRight,
       child: ConstrainedBox(
@@ -147,9 +140,8 @@ class _UserBubble extends StatelessWidget {
   }
 }
 
-/// An assistant message: optional thinking strip, Markdown body, optional
-/// streaming indicator, version switcher, hover action bar, and a retry
-/// button when the stream dropped.
+/// Assistant message：可选 thinking strip、Markdown body、可选 streaming indicator、version
+/// switcher、hover action bar，以及 stream drop 时显示的 retry button。
 class _AssistantBlock extends ConsumerStatefulWidget {
   const _AssistantBlock({
     required this.message,
@@ -178,10 +170,8 @@ class _AssistantBlock extends ConsumerStatefulWidget {
 }
 
 class _AssistantBlockState extends ConsumerState<_AssistantBlock> {
-  /// Whether the pointer is currently over this message. On the web, the
-  /// action bar is only shown while this is `true`. On mobile, the action
-  /// bar is always shown (the platform has no hover), so this field is
-  /// ignored in that mode.
+  /// Pointer 当前是否位于此 message 上。Web 上只有它为 `true` 时显示 action bar。Mobile
+  /// 始终显示 action bar（platform 没有 hover），因此该 field 在该 mode 下会被忽略。
   bool _isHovered = false;
 
   bool get _showRetryButton =>
@@ -202,8 +192,8 @@ class _AssistantBlockState extends ConsumerState<_AssistantBlock> {
     final showActionsOnHover =
         capabilities.messageActions == MessageActionsMode.hover;
 
-    // The action bar is shown when the message is complete AND (we are on
-    // mobile, which always shows it, OR the pointer is hovering on web).
+    // Message 完成且（当前是始终显示 action 的 mobile，或 pointer 正在 Web 上 hover）时
+    // 显示 action bar。
     final actionsVisible = _showActions && (!showActionsOnHover || _isHovered);
 
     final hasReasoning =
@@ -252,9 +242,8 @@ class _AssistantBlockState extends ConsumerState<_AssistantBlock> {
               ),
             if (widget.message.isComplete) ...[
               SizedBox(height: spacing.s8),
-              // Design "Assistant Footer Row": model attribution on the
-              // left, the version switcher centered, and the hover actions
-              // on the right.
+              // Design “Assistant Footer Row”：左侧显示 model attribution，中间显示 version
+              // switcher，右侧显示 hover action。
               Row(
                 children: [
                   Expanded(
@@ -298,7 +287,7 @@ class _AssistantBlockState extends ConsumerState<_AssistantBlock> {
     );
   }
 
-  /// Finds the display name for the conversation's model id, or `null`.
+  /// 查找 conversation model id 的 display name；找不到时为 `null`。
   String? _resolveModelName(List<ModelRead> models, String modelId) {
     for (final model in models) {
       if (model.id == modelId) return model.displayName;
@@ -307,8 +296,7 @@ class _AssistantBlockState extends ConsumerState<_AssistantBlock> {
   }
 }
 
-/// A small "thinking…" placeholder shown while the assistant's first token
-/// has not yet arrived.
+/// Assistant 第一个 token 尚未到达时显示的小型“thinking…”placeholder。
 class _StreamingPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -331,7 +319,7 @@ class _StreamingPlaceholder extends StatelessWidget {
   }
 }
 
-/// A single pulsing dot shown at the end of a streaming assistant message.
+/// Streaming assistant message 末尾显示的单个 pulsing dot。
 class _StreamingDot extends StatefulWidget {
   const _StreamingDot({required this.color});
 
@@ -373,9 +361,8 @@ class _StreamingDotState extends State<_StreamingDot>
   }
 }
 
-/// The "connection broken, retry" button shown when the stream dropped or
-/// the user stopped it. The label changes with the stream state so the user
-/// understands what happened.
+/// Stream drop 或 user stop 时显示的“connection broken, retry”button。Label 会随 stream
+/// state 变化，使 user 理解发生了什么。
 class _RetryButton extends StatelessWidget {
   const _RetryButton({required this.streamState, required this.onPressed});
 
@@ -395,7 +382,7 @@ class _RetryButton extends StatelessWidget {
   }
 }
 
-/// A system message — rarely shown, kept minimal.
+/// System message：很少显示，并保持 minimal。
 class _SystemBlock extends StatelessWidget {
   const _SystemBlock({required this.message});
 

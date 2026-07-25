@@ -1,13 +1,11 @@
-/// The empty state — what the user sees at `/` when no conversation is open.
+/// 没有打开 conversation 时，用户在 `/` 看到的 empty state。
 ///
-/// Per `product.md` §6.2: a centered large input with a model picker above
-/// it. The user picks a model, types the first message, and sends. Sending
-/// creates a conversation, posts the first message, and navigates to
-/// `/c/{id}`, where the chat screen picks up the streaming.
+/// 根据 `product.md` §6.2：居中的 large input，上方放 model picker。User 选择 model，输入
+/// 第一条 message 并发送。发送会创建 conversation、post 第一条 message，并 navigation
+/// 到 `/c/{id}`，chat screen 会在那里接管 streaming。
 ///
-/// Phase 5 adds image attachment: a paperclip button, a drag-and-drop zone,
-/// and a preview bar. Image input is disabled when the selected model does
-/// not support vision.
+/// 阶段 5 增加 image attachment：paperclip button、drag-and-drop zone 和 preview bar。
+/// 所选 model 不支持 vision 时，image input 被禁用。
 library;
 
 import 'package:desktop_drop/desktop_drop.dart';
@@ -24,12 +22,12 @@ import '../../core/widgets/error_banner.dart';
 import 'chat_providers.dart';
 import 'image_attachment.dart';
 
-/// The centered empty-state widget.
+/// 居中的 empty-state widget。
 class EmptyState extends ConsumerStatefulWidget {
-  /// Creates the empty state.
+  /// 创建 empty state。
   const EmptyState({required this.onNavigate, super.key});
 
-  /// Called with a path like `/c/123` after the first message is sent.
+  /// 第一条 message 发送后，以 `/c/123` 形式的 path 调用。
   final void Function(String path) onNavigate;
 
   @override
@@ -39,7 +37,7 @@ class EmptyState extends ConsumerStatefulWidget {
 class _EmptyStateState extends ConsumerState<EmptyState> {
   final TextEditingController _controller = TextEditingController();
 
-  /// The currently attached image, or `null` when none is attached.
+  /// 当前附加的 image；没有 attachment 时为 `null`。
   final ValueNotifier<ImageDataUrl?> _attachment = ValueNotifier<ImageDataUrl?>(
     null,
   );
@@ -109,16 +107,14 @@ class _EmptyStateState extends ConsumerState<EmptyState> {
     }
   }
 
-  /// Whether the selected model can accept images. Reads the model registry
-  /// to check the `vision` flag of the model the user picked (or the
-  /// configured default).
+  /// 所选 model 是否接受 image。读取 model registry，检查 user 选择的 model（或已配置
+  /// default）的 `vision` flag。
   bool _canAttachImage(ModelRead? selectedModel) {
     if (selectedModel == null) return false;
     return selectedModel.vision;
   }
 
-  /// Finds the [ModelRead] the user currently has selected, or `null` while
-  /// the model registry is still loading.
+  /// 查找 user 当前选择的 [ModelRead]；model registry 仍在 loading 时为 `null`。
   ModelRead? _selectedModel(List<ModelRead> models, String? defaultModel) {
     final id = _selectedModelId ?? defaultModel;
     if (id == null) return models.isNotEmpty ? models.first : null;
@@ -181,10 +177,9 @@ class _EmptyStateState extends ConsumerState<EmptyState> {
   }
 }
 
-/// The model dropdown above the empty-state input.
+/// Empty-state input 上方的 model dropdown。
 ///
-/// Matches the design's "Model Selector": a bordered capsule with a sparkles
-/// icon, the model name, and a chevron.
+/// 匹配 design 的“Model Selector”：带 border 的 capsule、sparkles icon、model name 和 chevron。
 class _ModelPicker extends StatelessWidget {
   const _ModelPicker({
     required this.models,
@@ -254,8 +249,7 @@ class _ModelPicker extends StatelessWidget {
   }
 }
 
-/// The model picker plus the large centered input, with image attachment
-/// support.
+/// Model picker 和居中的 large input，并支持 image attachment。
 class _PickerAndInput extends StatelessWidget {
   const _PickerAndInput({
     required this.models,
@@ -369,11 +363,10 @@ class _PickerAndInput extends StatelessWidget {
   }
 }
 
-/// The large centered input on the empty state.
+/// Empty state 中居中的 large input。
 ///
-/// Enter sends the message, Shift+Enter inserts a newline. The field and its
-/// actions share one horizontal row so the input matches the compact paper
-/// input in the prototype.
+/// Enter 发送 message，Shift+Enter 插入 newline。Field 和 action 共用一个水平 row，使 input
+/// 匹配 prototype 中的 compact paper input。
 class _LargeInputField extends StatelessWidget {
   const _LargeInputField({
     required this.controller,
@@ -486,8 +479,7 @@ class _LargeInputField extends StatelessWidget {
   }
 }
 
-/// The intent that fires when the user presses Enter (without shift) in the
-/// empty-state input.
+/// User 在 empty-state input 中按下 Enter（不带 shift）时触发的 intent。
 class _SendIntent extends Intent {
   const _SendIntent();
 }

@@ -1,9 +1,8 @@
-/// Unit tests for the SSE parser.
+/// SSE parser 的 unit test。
 ///
-/// The backend emits Server-Sent Events with a known wire format (see
-/// `backend/app/api/chat.py`). These tests pin down the parser's behavior on
-/// the shapes the backend actually sends, including the tricky case where one
-/// event is split across two byte chunks.
+/// Backend 以已知 wire format 发出 Server-Sent Events（参见 `backend/app/api/chat.py`）。
+/// 这些 test 固定 parser 对 backend 实际发送 shape 的处理行为，包括一个 event 被拆分到
+/// 两个 byte chunk 的复杂情况。
 library;
 
 import 'dart:async';
@@ -45,15 +44,12 @@ void main() {
     });
 
     test('reassembles an event split across chunks', () async {
-      // The first chunk cuts off mid-event. The parser must buffer until the
-      // closing blank line arrives.
+      // 第一个 chunk 在 event 中间截断。Parser 必须 buffer，直到 closing blank line 到达。
       final chunk1 = _encode(
         'event: reasoning_delta\n'
         'data: {"content":"Think',
       );
-      final chunk2 = _encode(
-        'ing"}\n\n',
-      );
+      final chunk2 = _encode('ing"}\n\n');
       final controller = StreamController<List<int>>();
       final eventsFuture = parseSseStream(controller.stream).toList();
 
@@ -93,8 +89,8 @@ void main() {
     });
 
     test('emits a trailing event with no closing blank line', () async {
-      // A dropped connection can leave a fully-formed event in the buffer
-      // without a trailing `\n\n`. The parser should still emit it.
+      // Dropped connection 可能在 buffer 中留下没有 trailing `\n\n` 的完整 event。Parser
+      // 仍应 emit 它。
       final bytes = _encode(
         'event: text_delta\n'
         'data: {"content":"tail"}\n\n'
@@ -117,12 +113,12 @@ void main() {
       );
       final events = await parseSseStream(Stream.value(bytes)).toList();
 
-      // The unknown event is dropped; the known one is kept.
+      // Unknown event 被丢弃；known event 保留。
       expect(events, hasLength(1));
       expect((events.first as SseTextDelta).content, 'ok');
     });
   });
 }
 
-/// Encodes a string to a list of UTF-8 bytes, the shape dio's stream returns.
+/// 将 string 编码为 UTF-8 byte list，即 dio stream 返回的 shape。
 List<int> _encode(String source) => source.codeUnits;

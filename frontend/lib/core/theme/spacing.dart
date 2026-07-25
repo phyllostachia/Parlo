@@ -1,18 +1,16 @@
-/// Spacing and corner-radius tokens, exposed as a [ThemeExtension] so widgets
-/// can write `Theme.of(context).extension<ParloSpacing>()!.s16` instead of
-/// hardcoding 16.
+/// Spacing 和 corner-radius token，以 [ThemeExtension] 暴露，使 widget 可以写
+/// `Theme.of(context).extension<ParloSpacing>()!.s16`，而不是 hardcode 16。
 ///
-/// The base unit is 8px (design.md "Spacing & Shapes"). Every value in the
-/// scale is a multiple of 8. Corner radii are kept separately because they are
-/// not "spacing" semantically.
+/// Base unit 是 8px（design.md “Spacing & Shapes”）。Scale 中每个 value 都是 8 的倍数。
+/// Corner radius 单独保存，因为从语义上说它不是“spacing”。
 library;
 
 import 'package:flutter/material.dart';
 
-/// The 8px-based spacing scale from `design.md`.
+/// `design.md` 中基于 8px 的 spacing scale。
 @immutable
 class ParloSpacing extends ThemeExtension<ParloSpacing> {
-  /// Creates the spacing scale.
+  /// 创建 spacing scale。
   const ParloSpacing({
     required this.s8,
     required this.s16,
@@ -24,7 +22,7 @@ class ParloSpacing extends ThemeExtension<ParloSpacing> {
     required this.s96,
   });
 
-  /// The design's spacing scale.
+  /// Design 的 spacing scale。
   static const light = ParloSpacing(
     s8: 8,
     s16: 16,
@@ -36,21 +34,28 @@ class ParloSpacing extends ThemeExtension<ParloSpacing> {
     s96: 96,
   );
 
-  /// 8px — the base unit, used for tight gaps inside a component.
+  /// 8px：base unit，用于 component 内部的紧凑 gap。
   final double s8;
-  /// 16px — medium gaps between elements.
+
+  /// 16px：element 之间的中等 gap。
   final double s16;
-  /// 24px — padding inside a card or accordion.
+
+  /// 24px：card 或 accordion 内部的 padding。
   final double s24;
-  /// 32px — card padding (design.md).
+
+  /// 32px：card padding（design.md）。
   final double s32;
-  /// 40px — gap between major sections when slightly tighter than 64.
+
+  /// 40px：major section 之间比 64 更紧凑时使用的 gap。
   final double s40;
-  /// 64px — standard section gap.
+
+  /// 64px：standard section gap。
   final double s64;
-  /// 80px — wide section gap.
+
+  /// 80px：wide section gap。
   final double s80;
-  /// 96px — very wide section gap.
+
+  /// 96px：very wide section gap。
   final double s96;
 
   @override
@@ -80,10 +85,10 @@ class ParloSpacing extends ThemeExtension<ParloSpacing> {
   ParloSpacing lerp(ParloSpacing? other, double t) => this;
 }
 
-/// The corner-radius scale from `design.md`.
+/// `design.md` 中的 corner-radius scale。
 @immutable
 class ParloRadius extends ThemeExtension<ParloRadius> {
-  /// Creates the radius scale.
+  /// 创建 radius scale。
   const ParloRadius({
     required this.nav,
     required this.input,
@@ -92,26 +97,30 @@ class ParloRadius extends ThemeExtension<ParloRadius> {
     required this.elevatedCard,
   });
 
-  /// The design's radius scale.
+  /// Design 的 radius scale。
   static const light = ParloRadius(
-    // Nav links, inputs, buttons all share 8px in the design.
+    // Design 中 nav link、input、button 都使用 8px。
     nav: 8,
     input: 8,
     button: 8,
-    // Cards are 16px; elevated/featured cards are 24px.
+    // Card 使用 16px；elevated/featured card 使用 24px。
     card: 16,
     elevatedCard: 24,
   );
 
-  /// 8px — nav links.
+  /// 8px：nav link。
   final double nav;
-  /// 8px — input fields.
+
+  /// 8px：input field。
   final double input;
-  /// 8px — buttons.
+
+  /// 8px：button。
   final double button;
-  /// 16px — nested/secondary cards.
+
+  /// 16px：nested/secondary card。
   final double card;
-  /// 24px — elevated and featured cards.
+
+  /// 24px：elevated 和 featured card。
   final double elevatedCard;
 
   @override

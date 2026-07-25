@@ -1,10 +1,8 @@
-/// Riverpod providers that expose the [BaseUrlStore] and connect it to the
-/// [baseUrlProvider] consumed by the dio client.
+/// 暴露 [BaseUrlStore] 并将其连接到 dio client 使用的 [baseUrlProvider] 的 Riverpod provider。
 ///
-/// `baseUrlStoreProvider` is a [ChangeNotifierProvider] so the dio provider
-/// rebuilds automatically when the base URL changes. The `baseUrlProvider`
-/// (kept in `api_client.dart` for backwards compatibility) watches this
-/// store and returns its current value.
+/// `baseUrlStoreProvider` 是 [ChangeNotifierProvider]，因此 base URL 变化时 dio provider 会
+/// 自动 rebuild。`baseUrlProvider`（为 backwards compatibility 保留在 `api_client.dart`）
+/// 监听此 store，并返回其当前 value。
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,17 +10,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../auth/auth_providers.dart';
 import 'base_url_store.dart';
 
-/// The single [BaseUrlStore] for the whole app.
+/// 整个应用共享的唯一 [BaseUrlStore]。
 ///
-/// Watches [sharedPreferencesProvider] so the store has a place to persist
-/// the base URL. The store is created once and reused for the app's
-/// lifetime. `bootstrap()` loads any saved value asynchronously.
+/// 监听 [sharedPreferencesProvider]，使 store 能够持久化 base URL。Store 只创建一次，并在
+/// 应用生命周期内复用。`bootstrap()` 会异步加载已保存的 value。
 final baseUrlStoreProvider = ChangeNotifierProvider<BaseUrlStore>((ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   final store = BaseUrlStore(prefs);
-  // Load any saved base URL. This is fire-and-forget: the store starts empty
-  // and notifies listeners when the saved value arrives a few milliseconds
-  // later.
+  // 加载已保存的 base URL。这里采用 fire-and-forget：store 从空状态开始，几毫秒后收到
+  // 已保存的 value 时通知 listener。
   store.bootstrap();
   return store;
 });

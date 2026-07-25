@@ -1,12 +1,10 @@
-/// The settings panel shown when the sidebar gear is tapped.
+/// User 点击 sidebar gear 时显示的 settings panel。
 ///
-/// Per `product.md` §7.2 the panel only manages three things the frontend can
-/// really own: the bearer token, the backend address, and the theme.
-/// Everything else lives in the backend `config.yaml`.
+/// 根据 `product.md` §7.2，此 panel 只管理 frontend 真正拥有的三项内容：bearer token、
+/// backend address 和 theme。其他内容都位于 backend `config.yaml` 中。
 ///
-/// v1 ships only the light theme. The dark and "follow system" options are
-/// listed but disabled with a "Coming soon" tag so the panel does not lie
-/// about what works today.
+/// v1 只提供 light theme。Dark 和“follow system”option 会列出但禁用，并标记“Coming soon”，
+/// 使 panel 不会虚假表示当前可用功能。
 library;
 
 import 'package:flutter/material.dart';
@@ -18,9 +16,9 @@ import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import '../settings/backend_url_field.dart';
 
-/// The settings panel shown as a centered dialog.
+/// 以居中 dialog 显示的 settings panel。
 class SettingsPanelDialog extends ConsumerStatefulWidget {
-  /// Creates the dialog.
+  /// 创建 dialog。
   const SettingsPanelDialog({super.key});
 
   @override
@@ -139,7 +137,7 @@ class _SettingsPanelDialogState extends ConsumerState<SettingsPanelDialog> {
   }
 }
 
-/// The token field from the settings design.
+/// Settings design 中的 token field。
 class _TokenSection extends StatelessWidget {
   const _TokenSection({
     required this.controller,
@@ -186,7 +184,7 @@ class _TokenSection extends StatelessWidget {
   }
 }
 
-/// The backend address fields from the settings design.
+/// Settings design 中的 backend address field。
 class _BackendUrlSection extends StatelessWidget {
   const _BackendUrlSection({
     required this.domainController,
@@ -220,8 +218,7 @@ class _BackendUrlSection extends StatelessWidget {
   }
 }
 
-/// The theme section. v1 only supports the light theme; the others are
-/// listed but disabled.
+/// Theme section。v1 只支持 light theme；其他 option 会列出但禁用。
 ///
 class _ThemeSection extends StatelessWidget {
   const _ThemeSection();

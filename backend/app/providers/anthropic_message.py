@@ -1,37 +1,33 @@
-"""Adapter for the Anthropic Messages API.
+"""Anthropic Messages API 的 adapter。
 
-The Messages API is Anthropic's native protocol (decision D12). The endpoint
-is ``<base_url>/v1/messages`` — the ``/v1`` segment is appended here so the
-``base_url`` in ``config.yaml`` follows the Anthropic SDK convention of
-naming the host without the version (for example
-``https://api.anthropic.com`` or ``https://api.ofox.io/anthropic``).
+Messages API 是 Anthropic 的 native protocol（决策 D12）。Endpoint 为
+``<base_url>/v1/messages``；这里追加 ``/v1``，使 ``config.yaml`` 中的 ``base_url``
+遵循 Anthropic SDK 只填写不带 version 的 host 的约定（例如 ``https://api.anthropic.com``
+或 ``https://api.ofox.io/anthropic``）。
 
-Its request shape:
+Request shape 如下：
 
-* ``model`` — the model id.
-* ``max_tokens`` — required upper bound on output tokens.
-* ``system`` — optional system prompt string at the top level (not inside
-  ``messages``).
-* ``messages`` — alternating ``user``/``assistant`` entries. Each ``content``
-  is an array of typed blocks: ``text``, ``image`` (base64 source), or
-  ``thinking`` (with a ``signature`` for replay).
-* ``stream`` — set to ``true`` for SSE token streaming.
+* ``model`` — model id。
+* ``max_tokens`` — output token 的 required upper bound。
+* ``system`` — top-level 的可选 system prompt string（不在 ``messages`` 中）。
+* ``messages`` — 交替排列的 ``user``/``assistant`` entry。每个 ``content`` 都是 typed
+    block array：``text``、``image``（base64 source）或 ``thinking``（带有用于 replay 的
+    ``signature``）。
+* ``stream`` — 设置为 ``true`` 以启用 SSE token streaming。
 
-Streaming events of interest:
+需要关注的 streaming event：
 
-* ``content_block_start`` — opens a block; ``content_block.type`` is
-  ``"text"`` or ``"thinking"``. The thinking block may carry an initial
-  ``signature``.
-* ``content_block_delta`` — carries a ``delta`` whose ``type`` is
-  ``text_delta``, ``thinking_delta``, or ``signature_delta``.
-* ``content_block_stop`` — closes a block; the thinking block's final
-  signature is emitted as a unified ``reasoning_signature`` event.
-* ``message_stop`` — clean end of stream.
-* ``error`` — upstream error.
+* ``content_block_start`` — 打开一个 block；``content_block.type`` 是 ``"text"`` 或
+    ``"thinking"``。thinking block 可能携带初始 ``signature``。
+* ``content_block_delta`` — 携带一个 ``delta``，其 ``type`` 可以是 ``text_delta``、
+    ``thinking_delta`` 或 ``signature_delta``。
+* ``content_block_stop`` — 关闭一个 block；thinking block 的最终 signature 会作为统一
+    的 ``reasoning_signature`` event 发出。
+* ``message_stop`` — stream 正常结束。
+* ``error`` — 上游 error。
 
-Reasoning replay matters because Anthropic requires a thinking block to be
-echoed back, with its original signature, when the assistant turn is sent as
-history in a later request. Without it the API rejects the continuation.
+Reasoning replay 很重要，因为 Anthropic 要求在后续 request 将 assistant turn 作为 history
+发回时，同时回显带有原始 signature 的 thinking block。缺少它时，API 会拒绝 continuation。
 """
 
 from __future__ import annotations
@@ -47,11 +43,11 @@ from ..storage import read_image_base64
 from .base import ChatMessage, ChatRequest, Provider, StreamEvent, parse_sse_stream
 
 ANTHROPIC_VERSION = "2023-06-01"
-"""API version header required by Anthropic on every request."""
+"""Anthropic 要求每个 request 携带的 API version header。"""
 
 
 class AnthropicMessageProvider:
-    """Streaming adapter for the Anthropic Messages API."""
+    """Anthropic Messages API 的 streaming adapter。"""
 
     def __init__(self, model: ModelConfig, settings: Settings) -> None:
         self._model = model
@@ -62,8 +58,7 @@ class AnthropicMessageProvider:
         self._signature_buffer: str = ""
 
     async def stream(self, request: ChatRequest) -> AsyncIterator[StreamEvent]:
-        """Translate :class:`ChatRequest` into a Messages API call and yield
-        unified :class:`StreamEvent` objects."""
+        """将 :class:`ChatRequest` 转换为 Messages API call，并生成统一的 :class:`StreamEvent`。"""
         self._current_block_type = None
         self._thinking_buffer = ""
         self._signature_buffer = ""
@@ -90,19 +85,16 @@ class AnthropicMessageProvider:
             yield StreamEvent(kind="error", content=f"upstream transport error: {exc}")
 
     async def _build_body(self, request: ChatRequest) -> dict[str, Any]:
-        """Convert the unified message list into the Messages API payload.
+        """将统一的 message list 转换为 Messages API payload。
 
-        System messages move to the top-level ``system`` string. Assistant
-        turns with both ``reasoning`` and ``reasoning_signature`` emit a
-        thinking block so the conversation can be continued; otherwise only
-        the text block is emitted.
+        System message 会移动到 top-level ``system`` string。同时具有 ``reasoning`` 和
+        ``reasoning_signature`` 的 assistant turn 会生成 thinking block，使 conversation
+        能够继续；否则只生成 text block。
 
-        ``thinking.type: "adaptive"`` is set with the selected effort level
-        when the conversation requested thinking; ``display: "summarized"`` is
-        always set so the client sees the reasoning summary (decision D06;
-        newer Anthropic models default to ``omitted`` otherwise). ``max_tokens``
-        caps thinking + visible output (decision D08) and replaces the old
-        hardcoded 8192.
+        当 conversation 请求 thinking 时，使用选定 effort level 设置
+        ``thinking.type: "adaptive"``；始终设置 ``display: "summarized"``，使客户端能看到
+        reasoning summary（决策 D06；否则较新的 Anthropic model 默认使用 ``omitted``）。
+        ``max_tokens`` 限制 thinking + visible output（决策 D08），替代旧的 hardcoded 8192。
         """
         system_parts: list[str] = []
         messages: list[dict[str, Any]] = []
@@ -132,7 +124,7 @@ class AnthropicMessageProvider:
         return body
 
     async def _build_content(self, message: ChatMessage) -> list[dict[str, Any]]:
-        """Return the typed content blocks for a single message."""
+        """返回单条 message 的 typed content block。"""
         blocks: list[dict[str, Any]] = []
         if message.role == "assistant":
             if message.reasoning and message.reasoning_signature:
@@ -166,12 +158,11 @@ class AnthropicMessageProvider:
     async def _translate_event(
         self, event_type: str, data: dict[str, Any]
     ) -> AsyncIterator[StreamEvent]:
-        """Map one upstream SSE event onto zero or more unified events.
+        """将一个上游 SSE event 映射为零个或多个统一 event。
 
-        Tracks the current block type so deltas are routed to the right
-        stream, and accumulates the thinking-block signature from both
-        ``content_block_start`` and ``signature_delta`` events so it can be
-        replayed later.
+        函数跟踪当前 block type，使 delta 被路由到正确的 stream，并从
+        ``content_block_start`` 和 ``signature_delta`` event 累积 thinking-block signature，
+        以便稍后 replay。
         """
         if event_type == "content_block_start":
             block = data.get("content_block", {})
@@ -213,7 +204,7 @@ class AnthropicMessageProvider:
 
 
 def _extract_error(body: bytes) -> str:
-    """Best-effort extraction of a human-readable message from an error body."""
+    """尽力从 error body 中提取可读的 message。"""
     try:
         parsed = json.loads(body)
     except json.JSONDecodeError:

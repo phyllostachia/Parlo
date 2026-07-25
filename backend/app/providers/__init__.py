@@ -1,7 +1,6 @@
-"""Provider adapters.
+"""Provider adapter。
 
-Each module in this package implements the unified :class:`~app.providers.base.Provider`
-protocol for a specific upstream model-provider protocol. The rest of the
-application talks to providers only through the abstract interface, so adding
-support for a new protocol is a matter of adding a new module here.
+此包中的每个 module 都为一种特定的上游 model-provider protocol 实现统一的
+:class:`~app.providers.base.Provider` protocol。应用的其他部分只通过 abstract interface
+与 provider 通信，因此支持新 protocol 只需在这里添加新 module。
 """

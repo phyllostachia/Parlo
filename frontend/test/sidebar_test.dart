@@ -1,8 +1,7 @@
-/// Sidebar widget tests.
+/// Sidebar widget test。
 ///
-/// These tests stub the [profilesProvider] so the sidebar does not make real
-/// network calls. They verify the tree renders the folders and the empty
-/// hint, which are the two visible states the user can land on.
+/// 这些 test stub [profilesProvider]，使 sidebar 不会发起真实 network call。它们验证 tree
+/// 会渲染 folder 和 empty hint，这是 user 可能看到的两个可见 state。
 library;
 
 import 'dart:ui';
@@ -24,8 +23,7 @@ import 'package:parlo/features/chat/chat_providers.dart';
 import 'package:parlo/features/sidebar/sidebar_screen.dart';
 import 'package:parlo/features/sidebar/sidebar_providers.dart';
 
-/// A [ProfilesNotifier] that returns a fixed list without hitting the
-/// network, used by the sidebar tests.
+/// 返回固定 list 且不访问 network 的 [ProfilesNotifier]，供 sidebar test 使用。
 class _FixedProfilesNotifier extends ProfilesNotifier {
   _FixedProfilesNotifier(this._profiles);
   final List<Profile> _profiles;
@@ -34,14 +32,13 @@ class _FixedProfilesNotifier extends ProfilesNotifier {
   Future<List<Profile>> build() async => _profiles;
 }
 
-/// A [ProfilesNotifier] that returns an empty list without hitting the
-/// network.
+/// 返回 empty list 且不访问 network 的 [ProfilesNotifier]。
 class _EmptyProfilesNotifier extends ProfilesNotifier {
   @override
   Future<List<Profile>> build() async => const <Profile>[];
 }
 
-/// A [ModelsNotifier] that returns null without hitting the network.
+/// 返回 null 且不访问 network 的 [ModelsNotifier]。
 class _EmptyModelsNotifier extends ModelsNotifier {
   @override
   Future<ModelsResponse?> build() async => null;
@@ -71,8 +68,7 @@ void main() {
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
           profilesProvider.overrideWith(() => _FixedProfilesNotifier(profiles)),
-          // Stub the model registry so the empty state does not fire a real
-          // network request.
+          // Stub model registry，使 empty state 不会发起真实 network request。
           modelsProvider.overrideWith(() => _EmptyModelsNotifier()),
         ],
         child: const ParloApp(),
@@ -159,9 +155,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // The empty hint is a single sentence, with a newline between its two
-    // lines. We match on the first line to avoid tight coupling to the
-    // exact wrapping.
+    // Empty hint 是包含 newline 的单句 text。这里只匹配第一行，避免与精确 wrapping 产生
+    // 紧耦合。
     expect(
       find.byWidgetPredicate(
         (widget) =>

@@ -1,93 +1,93 @@
-# Parlo Backend
+# Parlo 后端
 
-Self-hosted, single-user backend for the Parlo BYOK AI Chatbot.
-It owns the SQLite database and proxies streaming chat requests to one of two upstream model-provider protocols.
+Parlo BYOK AI Chatbot 的自托管、单用户后端。
+它负责管理 SQLite 数据库，并将流式聊天请求代理到两种上游 model-provider protocol 之一。
 
-## Configuration
+## 配置
 
-Configuration is split across two files:
+配置分为两个文件：
 
-- **`.env`** — secrets only: `AUTH_TOKEN` and each provider's `*_API_KEY`. This file is git-ignored and never committed.
-- **`config.yaml`** — everything else: the model registry, CORS origins, database path, image storage.
+- **`.env`** — 仅保存密钥：`AUTH_TOKEN` 和各 provider 的 `*_API_KEY`。此文件被 git-ignored，永远不会提交。
+- **`config.yaml`** — 保存其他所有配置：模型注册表、CORS 来源、数据库路径和图片存储位置。
 
-Each model in `config.yaml` declares:
+`config.yaml` 中的每个模型都会声明：
 
 - `id`
 - `display_name`
-- `api_key`, the variable name in env
+- `api_key`，环境变量中的名称
 - `base_url`
 - `family`
-- `protocol`, 'openai-response' or 'claude-message'
+- `protocol`，`openai-response` 或 `claude-message`
 - `vision`
-- the list of supported `thinking_effort` levels
+- 支持的 `thinking_effort` 级别列表
 - `max_tokens`
 
-Conversations are bound to a single model; the selected thinking-effort level is stored per conversation and forwarded to the upstream.
+每个会话只绑定一个模型；选定的 thinking-effort 级别会按会话保存，并转发给上游。
 
-## Supported providers
+## 支持的 provider
 
-Two protocols:
+支持两种 protocol：
 
-- `openai-response` — OpenAI Responses API (`/v1/responses`)
-- `anthropic-message` — Anthropic Messages API (`/v1/messages`)
+- `openai-response` — OpenAI Responses API（`/v1/responses`）
+- `anthropic-message` — Anthropic Messages API（`/v1/messages`）
 
-Thinking control uses the current effort-based APIs on both sides:
+两种 protocol 都使用当前基于 effort 的 API 控制 thinking：
 
-- `reasoning.effort` for OpenAI
-- `thinking.type: "adaptive"` with `thinking.effort` for Anthropic.
+- OpenAI 使用 `reasoning.effort`
+- Anthropic 使用 `thinking.type: "adaptive"` 和 `thinking.effort`。
 
-## Setup
+## 设置
 
 ```bash
 cd backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
-cp config.yaml.example config.yaml   # edit models/origins as needed
-cp .env.example .env                 # fill in AUTH_TOKEN and *_API_KEY
+cp config.yaml.example config.yaml   # 按需编辑模型和来源
+cp .env.example .env                 # 填写 AUTH_TOKEN 和 *_API_KEY
 ```
 
-The config file path defaults to `config.yaml` in the current working directory; override it with the `PARLO_CONFIG_PATH` environment variable.
+配置文件路径默认为当前工作目录中的 `config.yaml`；可以通过 `PARLO_CONFIG_PATH` 环境变量覆盖。
 
-## Run
+## 运行
 
 ```bash
 uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-The API is served under `/api`. Uploaded images are served under `/images`.
+API 位于 `/api` 路径下。上传的图片位于 `/images` 路径下。
 
-## API overview
+## API 概览
 
 | Method | Path                                                      | Description                                         |
 | ------ | --------------------------------------------------------- | --------------------------------------------------- |
-| GET    | `/api/health`                                             | Liveness probe (no auth)                            |
-| GET    | `/api/models`                                             | List available models + default (decides client UI) |
-| GET    | `/api/profiles`                                           | List profiles                                       |
-| POST   | `/api/profiles`                                           | Create profile                                      |
-| PATCH  | `/api/profiles/{id}`                                      | Rename profile                                      |
-| DELETE | `/api/profiles/{id}`                                      | Delete profile                                      |
-| GET    | `/api/profiles/{id}/conversations`                        | List conversations                                  |
-| POST   | `/api/profiles/{id}/conversations`                        | Create conversation (binds a model)                 |
-| GET    | `/api/conversations/{id}`                                 | Get conversation                                    |
-| PATCH  | `/api/conversations/{id}`                                 | Update title / thinking_effort                      |
-| DELETE | `/api/conversations/{id}`                                 | Delete conversation                                 |
-| GET    | `/api/conversations/{id}/messages`                        | Get visible message path                            |
-| POST   | `/api/conversations/{id}/messages`                        | Create user message + assistant placeholder         |
-| POST   | `/api/conversations/{id}/messages/{parent_id}/regenerate` | New assistant placeholder                           |
-| POST   | `/api/conversations/{id}/messages/{leaf_id}/switch`       | Switch visible branch                               |
-| DELETE | `/api/conversations/{id}/messages/{id}`                   | Delete message subtree                              |
-| GET    | `/api/chat/stream?message_id=...`                         | SSE token stream                                    |
+| GET    | `/api/health`                                             | 存活探针（无需鉴权）                                |
+| GET    | `/api/models`                                             | 列出可用模型和默认模型（决定客户端 UI）             |
+| GET    | `/api/profiles`                                           | 列出 profile                                       |
+| POST   | `/api/profiles`                                           | 创建 profile                                       |
+| PATCH  | `/api/profiles/{id}`                                      | 重命名 profile                                     |
+| DELETE | `/api/profiles/{id}`                                      | 删除 profile                                       |
+| GET    | `/api/profiles/{id}/conversations`                        | 列出会话                                           |
+| POST   | `/api/profiles/{id}/conversations`                        | 创建会话（绑定模型）                                |
+| GET    | `/api/conversations/{id}`                                 | 获取会话                                           |
+| PATCH  | `/api/conversations/{id}`                                 | 更新 title / thinking_effort                       |
+| DELETE | `/api/conversations/{id}`                                 | 删除会话                                           |
+| GET    | `/api/conversations/{id}/messages`                        | 获取可见消息路径                                    |
+| POST   | `/api/conversations/{id}/messages`                        | 创建 user 消息和 assistant 占位消息                 |
+| POST   | `/api/conversations/{id}/messages/{parent_id}/regenerate` | 创建新的 assistant 占位消息                         |
+| POST   | `/api/conversations/{id}/messages/{leaf_id}/switch`       | 切换可见分支                                        |
+| DELETE | `/api/conversations/{id}/messages/{id}`                   | 删除消息子树                                        |
+| GET    | `/api/chat/stream?message_id=...`                         | SSE token 流                                       |
 
-All endpoints except `/api/health` require `Authorization: Bearer <token>` (or `?token=<token>` for the SSE endpoint, since browser `EventSource` cannot set headers).
+除 `/api/health` 外，所有 endpoint 都要求提供 `Authorization: Bearer <token>`。SSE endpoint 也可以使用 `?token=<token>`，因为浏览器的 `EventSource` 无法设置 header。
 
-## Message tree
+## 消息树
 
-Messages form a tree within a conversation.
-Each conversation tracks `current_leaf_id`; the visible path is reconstructed by walking `parent_id` from the leaf to the root.
-Sibling messages under the same parent are alternative replies; switching between them is done by moving the conversation's `current_leaf_id`.
+消息会在一个会话中组成一棵树。
+每个会话都会记录 `current_leaf_id`；可见路径通过从叶节点沿 `parent_id` 向根节点回溯来重建。
+同一 parent 下的 sibling 消息是不同的回复版本；在它们之间切换，就是移动会话的 `current_leaf_id`。
 
-## Tests
+## 测试
 
 ```bash
 pytest

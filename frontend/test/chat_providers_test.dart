@@ -1,11 +1,8 @@
-/// Unit tests for the [CurrentConversationNotifier] send / stream state
-/// machine.
+/// [CurrentConversationNotifier] send / stream state machine 的 unit test。
 ///
-/// These tests mock dio so they run without a backend. They verify the
-/// critical path the architecture (Phase 7.1) calls out: sending a message
-/// appends the user + assistant placeholder to the local path, the SSE
-/// stream fills the assistant message, and the stream state transitions
-/// through `streaming` to `done`.
+/// 这些 test mock dio，因此无需 backend 即可运行。它们验证架构（阶段 7.1）强调的关键
+/// path：发送 message 会将 user + assistant placeholder 追加到 local path，SSE stream
+/// 填充 assistant message，stream state 从 `streaming` 过渡到 `done`。
 library;
 
 import 'dart:async';
@@ -23,10 +20,10 @@ import 'package:parlo/core/models/message.dart';
 import 'package:parlo/core/network/api_client.dart';
 import 'package:parlo/features/chat/chat_providers.dart';
 
-/// A mock Dio used by the notifier tests.
+/// Notifier test 使用的 mock Dio。
 class _MockDio extends Mock implements Dio {}
 
-/// The conversation id used in every test.
+/// 每个 test 使用的 conversation id。
 const _conversationId = 1;
 
 void main() {
@@ -47,10 +44,9 @@ void main() {
       ],
     );
     addTearDown(container.dispose);
-    // Keep the conversation provider alive so autoDispose does not reclaim it
-    // between `read` calls in the test body. Without this listener, the family
-    // instance disposes as soon as `read` returns, and a later `read` would
-    // re-build (showing AsyncLoading) instead of seeing the patched state.
+    // 保持 conversation provider 存活，避免 autoDispose 在 test body 的 `read` call 之间回收
+    // 它。没有此 listener 时，family instance 会在 `read` 返回后立即 dispose，后续 `read`
+    // 会重新 build（显示 AsyncLoading），而不是看到 patched state。
     final sub = container.listen(
       currentConversationProvider(_conversationId),
       (_, _) {},
@@ -58,104 +54,102 @@ void main() {
     addTearDown(sub.close);
   });
 
-  test('send appends user + assistant and streams tokens into the assistant',
-      () async {
-    _stubPathLoad(dio, empty: true);
-    _stubSendMessage(dio);
-    _stubStream(
-      dio,
-      <String>[
+  test(
+    'send appends user + assistant and streams tokens into the assistant',
+    () async {
+      _stubPathLoad(dio, empty: true);
+      _stubSendMessage(dio);
+      _stubStream(dio, <String>[
         'event: started\ndata: {"message_id":11}\n\n',
         'event: text_delta\ndata: {"content":"Hello"}\n\n',
         'event: text_delta\ndata: {"content":" world"}\n\n',
         'event: done\ndata: {}\n\n',
-      ],
-    );
+      ]);
 
-    final doneState = Completer<void>();
-    container.listen<StreamState>(streamStateProvider, (_, next) {
-      if (next == StreamState.done && !doneState.isCompleted) {
-        doneState.complete();
-      }
-    });
+      final doneState = Completer<void>();
+      container.listen<StreamState>(streamStateProvider, (_, next) {
+        if (next == StreamState.done && !doneState.isCompleted) {
+          doneState.complete();
+        }
+      });
 
-    final notifier = container.read(
-      currentConversationProvider(_conversationId).notifier,
-    );
-    await container.read(currentConversationProvider(_conversationId).future);
+      final notifier = container.read(
+        currentConversationProvider(_conversationId).notifier,
+      );
+      await container.read(currentConversationProvider(_conversationId).future);
 
-    await notifier.send(text: 'Hello world');
+      await notifier.send(text: 'Hello world');
 
-    await doneState.future.timeout(const Duration(seconds: 5));
+      await doneState.future.timeout(const Duration(seconds: 5));
 
-    final path = container
-        .read(currentConversationProvider(_conversationId))
-        .requireValue;
+      final path = container
+          .read(currentConversationProvider(_conversationId))
+          .requireValue;
 
-    expect(path.path, hasLength(2));
-    expect(path.path[0].message.role, MessageRole.user);
-    expect(path.path[0].message.content, 'Hello world');
-    expect(path.path[1].message.role, MessageRole.assistant);
-    expect(path.path[1].message.content, 'Hello world');
-    expect(path.path[1].message.isComplete, isTrue);
+      expect(path.path, hasLength(2));
+      expect(path.path[0].message.role, MessageRole.user);
+      expect(path.path[0].message.content, 'Hello world');
+      expect(path.path[1].message.role, MessageRole.assistant);
+      expect(path.path[1].message.content, 'Hello world');
+      expect(path.path[1].message.isComplete, isTrue);
 
-    expect(container.read(streamStateProvider), StreamState.done);
-  });
+      expect(container.read(streamStateProvider), StreamState.done);
+    },
+  );
 
-  test('stop cancels the stream and marks the assistant message complete',
-      () async {
-    _stubPathLoad(dio, empty: true);
-    _stubSendMessage(dio);
+  test(
+    'stop cancels the stream and marks the assistant message complete',
+    () async {
+      _stubPathLoad(dio, empty: true);
+      _stubSendMessage(dio);
 
-    final streamController = StreamController<Uint8List>();
-    _stubStreamFromController(dio, streamController);
+      final streamController = StreamController<Uint8List>();
+      _stubStreamFromController(dio, streamController);
 
-    final streamingSeen = Completer<void>();
-    container.listen<StreamState>(streamStateProvider, (_, next) {
-      if (next == StreamState.streaming && !streamingSeen.isCompleted) {
-        streamingSeen.complete();
-      }
-    });
+      final streamingSeen = Completer<void>();
+      container.listen<StreamState>(streamStateProvider, (_, next) {
+        if (next == StreamState.streaming && !streamingSeen.isCompleted) {
+          streamingSeen.complete();
+        }
+      });
 
-    final notifier = container.read(
-      currentConversationProvider(_conversationId).notifier,
-    );
-    await container.read(currentConversationProvider(_conversationId).future);
+      final notifier = container.read(
+        currentConversationProvider(_conversationId).notifier,
+      );
+      await container.read(currentConversationProvider(_conversationId).future);
 
-    await notifier.send(text: 'Stop me');
+      await notifier.send(text: 'Stop me');
 
-    streamController.add(_encode(
-      'event: started\ndata: {"message_id":11}\n\n',
-    ));
-    streamController.add(_encode(
-      'event: text_delta\ndata: {"content":"Hi"}\n\n',
-    ));
-    await streamingSeen.future.timeout(const Duration(seconds: 5));
+      streamController.add(
+        _encode('event: started\ndata: {"message_id":11}\n\n'),
+      );
+      streamController.add(
+        _encode('event: text_delta\ndata: {"content":"Hi"}\n\n'),
+      );
+      await streamingSeen.future.timeout(const Duration(seconds: 5));
 
-    // Give the text_delta a moment to be processed before we cancel.
-    await Future<void>.delayed(const Duration(milliseconds: 50));
-    await notifier.stop();
+      // 给 text_delta 一点处理时间，再执行 cancel。
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await notifier.stop();
 
-    final path = container
-        .read(currentConversationProvider(_conversationId))
-        .requireValue;
-    expect(path.path[1].message.content, 'Hi');
-    expect(path.path[1].message.isComplete, isTrue);
-    expect(container.read(streamStateProvider), StreamState.stopped);
+      final path = container
+          .read(currentConversationProvider(_conversationId))
+          .requireValue;
+      expect(path.path[1].message.content, 'Hi');
+      expect(path.path[1].message.isComplete, isTrue);
+      expect(container.read(streamStateProvider), StreamState.stopped);
 
-    await streamController.close();
-  });
+      await streamController.close();
+    },
+  );
 
   test('a stream error transitions the stream state to error', () async {
     _stubPathLoad(dio, empty: true);
     _stubSendMessage(dio);
-    _stubStream(
-      dio,
-      <String>[
-        'event: started\ndata: {"message_id":11}\n\n',
-        'event: error\ndata: {"message":"boom"}\n\n',
-      ],
-    );
+    _stubStream(dio, <String>[
+      'event: started\ndata: {"message_id":11}\n\n',
+      'event: error\ndata: {"message":"boom"}\n\n',
+    ]);
 
     final errorSeen = Completer<void>();
     container.listen<StreamState>(streamStateProvider, (_, next) {
@@ -179,14 +173,11 @@ void main() {
       'into the new placeholder', () async {
     _stubPathLoadWithAssistant(dio);
     _stubRegenerate(dio, newAssistantId: 12, parentId: 10);
-    _stubStream(
-      dio,
-      <String>[
-        'event: started\ndata: {"message_id":12}\n\n',
-        'event: text_delta\ndata: {"content":"Fresh"}\n\n',
-        'event: done\ndata: {}\n\n',
-      ],
-    );
+    _stubStream(dio, <String>[
+      'event: started\ndata: {"message_id":12}\n\n',
+      'event: text_delta\ndata: {"content":"Fresh"}\n\n',
+      'event: done\ndata: {}\n\n',
+    ]);
 
     final doneState = Completer<void>();
     container.listen<StreamState>(streamStateProvider, (_, next) {
@@ -208,57 +199,58 @@ void main() {
         .read(currentConversationProvider(_conversationId))
         .requireValue;
 
-    // The path still has two nodes: the user message and the new assistant.
+    // Path 仍有两个 node：user message 和新的 assistant。
     expect(path.path, hasLength(2));
     expect(path.path[0].message.role, MessageRole.user);
     expect(path.path[1].message.role, MessageRole.assistant);
     expect(path.path[1].message.id, 12);
     expect(path.path[1].message.content, 'Fresh');
     expect(path.path[1].message.isComplete, isTrue);
-    // The siblings list grew: the old assistant (11) and the new one (12).
+    // Siblings list 已增长：旧 assistant（11）和新的 assistant（12）。
     expect(path.path[1].siblings.siblings, containsAll(<int>[11, 12]));
     expect(path.path[1].siblings.activeId, 12);
   });
 
-  test('switchBranch replaces the visible path with the backend response',
-      () async {
-    _stubPathLoadWithAssistant(dio);
-    _stubSwitchBranch(
-      dio,
-      leafId: 99,
-      newAssistantContent: 'Switched reply',
-      newSiblingIds: const <int>[11, 99],
-    );
+  test(
+    'switchBranch replaces the visible path with the backend response',
+    () async {
+      _stubPathLoadWithAssistant(dio);
+      _stubSwitchBranch(
+        dio,
+        leafId: 99,
+        newAssistantContent: 'Switched reply',
+        newSiblingIds: const <int>[11, 99],
+      );
 
-    final notifier = container.read(
-      currentConversationProvider(_conversationId).notifier,
-    );
-    await container.read(currentConversationProvider(_conversationId).future);
+      final notifier = container.read(
+        currentConversationProvider(_conversationId).notifier,
+      );
+      await container.read(currentConversationProvider(_conversationId).future);
 
-    await notifier.switchBranch(leafId: 99);
+      await notifier.switchBranch(leafId: 99);
 
-    final path = container
-        .read(currentConversationProvider(_conversationId))
-        .requireValue;
+      final path = container
+          .read(currentConversationProvider(_conversationId))
+          .requireValue;
 
-    expect(path.path.last.message.id, 99);
-    expect(path.path.last.message.content, 'Switched reply');
-    expect(path.path.last.siblings.siblings, <int>[11, 99]);
-    expect(path.path.last.siblings.activeId, 99);
-  });
+      expect(path.path.last.message.id, 99);
+      expect(path.path.last.message.content, 'Switched reply');
+      expect(path.path.last.siblings.siblings, <int>[11, 99]);
+      expect(path.path.last.siblings.activeId, 99);
+    },
+  );
 }
 
-/// Registers fallback values so `any(named: ...)` works for dio's arguments.
+/// 注册 fallback value，使 `any(named: ...)` 能用于 dio argument。
 void _registerFallbackValues() {
   registerFallbackValue(Options());
   registerFallbackValue(<String, dynamic>{});
 }
 
-/// Encodes a string to UTF-8 bytes as a [Uint8List], the shape dio's stream
-/// returns.
+/// 将 string 编码为 UTF-8 bytes，并作为 [Uint8List] 返回，即 dio stream 返回的 shape。
 Uint8List _encode(String source) => Uint8List.fromList(utf8.encode(source));
 
-/// The shared conversation JSON used by every path-load stub.
+/// 每个 path-load stub 共用的 conversation JSON。
 Map<String, dynamic> _conversationJson() {
   return <String, dynamic>{
     'id': 1,
@@ -272,8 +264,7 @@ Map<String, dynamic> _conversationJson() {
   };
 }
 
-/// Stubs `GET /api/conversations/1/messages` to return an empty (or one-node)
-/// path.
+/// Stub `GET /api/conversations/1/messages`，返回 empty（或 one-node）path。
 void _stubPathLoad(_MockDio dio, {required bool empty}) {
   final data = <String, dynamic>{
     'conversation': _conversationJson(),
@@ -291,28 +282,35 @@ void _stubPathLoad(_MockDio dio, {required bool empty}) {
             'is_complete': true,
             'created_at': '2026-07-01T00:00:00Z',
           },
-          'siblings': {'siblings': <int>[5], 'active_id': 5},
+          'siblings': {
+            'siblings': <int>[5],
+            'active_id': 5,
+          },
         },
     ],
   };
-  when(() => dio.get<Map<String, dynamic>>('/api/conversations/1/messages'))
-      .thenAnswer((_) async => Response<Map<String, dynamic>>(
-            data: data,
-            requestOptions:
-                RequestOptions(path: '/api/conversations/1/messages'),
-          ));}
+  when(
+    () => dio.get<Map<String, dynamic>>('/api/conversations/1/messages'),
+  ).thenAnswer(
+    (_) async => Response<Map<String, dynamic>>(
+      data: data,
+      requestOptions: RequestOptions(path: '/api/conversations/1/messages'),
+    ),
+  );
+}
 
-/// Stubs `POST /api/conversations/1/messages` to return a user message and an
-/// assistant placeholder. The user message's `content` echoes the text the
-/// caller sent (the real backend does the same), so tests that check the
-/// rendered user bubble get the right value.
+/// Stub `POST /api/conversations/1/messages`，返回 user message 和 assistant placeholder。
+/// User message 的 `content` 会回显调用方发送的 text（真实 backend 也是这样），因此检查
+/// rendered user bubble 的 test 能得到正确 value。
 void _stubSendMessage(_MockDio dio, {int assistantId = 11}) {
-  when(() => dio.post<Map<String, dynamic>>(
-        '/api/conversations/1/messages',
-        data: any(named: 'data'),
-      )).thenAnswer((invocation) async {
-    final body = invocation.namedArguments[const Symbol('data')]
-        as Map<String, dynamic>;
+  when(
+    () => dio.post<Map<String, dynamic>>(
+      '/api/conversations/1/messages',
+      data: any(named: 'data'),
+    ),
+  ).thenAnswer((invocation) async {
+    final body =
+        invocation.namedArguments[const Symbol('data')] as Map<String, dynamic>;
     final text = (body['text'] as String?) ?? '';
     final data = <String, dynamic>{
       'user_message': <String, dynamic>{
@@ -340,13 +338,12 @@ void _stubSendMessage(_MockDio dio, {int assistantId = 11}) {
     };
     return Response<Map<String, dynamic>>(
       data: data,
-      requestOptions:
-          RequestOptions(path: '/api/conversations/1/messages'),
+      requestOptions: RequestOptions(path: '/api/conversations/1/messages'),
     );
   });
 }
 
-/// Stubs `GET /api/chat/stream` to emit the given SSE byte chunks.
+/// Stub `GET /api/chat/stream`，使其 emit 给定的 SSE byte chunk。
 void _stubStream(_MockDio dio, List<String> chunks) {
   final bytes = <int>[];
   for (final chunk in chunks) {
@@ -360,18 +357,21 @@ void _stubStream(_MockDio dio, List<String> chunks) {
       'content-type': <String>['text/event-stream'],
     },
   );
-  when(() => dio.get<ResponseBody>(
-        '/api/chat/stream',
-        queryParameters: any(named: 'queryParameters'),
-        options: any(named: 'options'),
-      )).thenAnswer((_) async => Response<ResponseBody>(
-        data: body,
-        requestOptions: RequestOptions(path: '/api/chat/stream'),
-      ));
+  when(
+    () => dio.get<ResponseBody>(
+      '/api/chat/stream',
+      queryParameters: any(named: 'queryParameters'),
+      options: any(named: 'options'),
+    ),
+  ).thenAnswer(
+    (_) async => Response<ResponseBody>(
+      data: body,
+      requestOptions: RequestOptions(path: '/api/chat/stream'),
+    ),
+  );
 }
 
-/// Stubs `GET /api/chat/stream` to return bytes from a controller the test
-/// controls.
+/// Stub `GET /api/chat/stream`，返回由 test 控制的 controller 发出的 bytes。
 void _stubStreamFromController(
   _MockDio dio,
   StreamController<Uint8List> controller,
@@ -383,19 +383,23 @@ void _stubStreamFromController(
       'content-type': <String>['text/event-stream'],
     },
   );
-  when(() => dio.get<ResponseBody>(
-        '/api/chat/stream',
-        queryParameters: any(named: 'queryParameters'),
-        options: any(named: 'options'),
-      )).thenAnswer((_) async => Response<ResponseBody>(
-        data: body,
-        requestOptions: RequestOptions(path: '/api/chat/stream'),
-      ));
+  when(
+    () => dio.get<ResponseBody>(
+      '/api/chat/stream',
+      queryParameters: any(named: 'queryParameters'),
+      options: any(named: 'options'),
+    ),
+  ).thenAnswer(
+    (_) async => Response<ResponseBody>(
+      data: body,
+      requestOptions: RequestOptions(path: '/api/chat/stream'),
+    ),
+  );
 }
 
-/// Stubs `GET /api/conversations/1/messages` to return a path with one user
-/// message and one complete assistant message. Used by the regenerate and
-/// switchBranch tests, which need an existing assistant to act on.
+/// Stub `GET /api/conversations/1/messages`，返回包含一条 user message 和一条 complete
+/// assistant message 的 path。供 regenerate 和 switchBranch test 使用，因为它们需要已有
+/// assistant 作为操作目标。
 void _stubPathLoadWithAssistant(_MockDio dio) {
   final data = <String, dynamic>{
     'conversation': _conversationJson(),
@@ -436,16 +440,18 @@ void _stubPathLoadWithAssistant(_MockDio dio) {
       },
     ],
   };
-  when(() => dio.get<Map<String, dynamic>>('/api/conversations/1/messages'))
-      .thenAnswer((_) async => Response<Map<String, dynamic>>(
-            data: data,
-            requestOptions:
-                RequestOptions(path: '/api/conversations/1/messages'),
-          ));
+  when(
+    () => dio.get<Map<String, dynamic>>('/api/conversations/1/messages'),
+  ).thenAnswer(
+    (_) async => Response<Map<String, dynamic>>(
+      data: data,
+      requestOptions: RequestOptions(path: '/api/conversations/1/messages'),
+    ),
+  );
 }
 
-/// Stubs `POST /api/conversations/1/messages/{parentId}/regenerate` to
-/// return a new empty assistant placeholder with the given id.
+/// Stub `POST /api/conversations/1/messages/{parentId}/regenerate`，返回具有给定 id 的新空
+/// assistant placeholder。
 void _stubRegenerate(
   _MockDio dio, {
   required int newAssistantId,
@@ -462,19 +468,22 @@ void _stubRegenerate(
     'is_complete': false,
     'created_at': '2026-07-01T00:00:00Z',
   };
-  when(() => dio.post<Map<String, dynamic>>(
-        '/api/conversations/1/messages/$parentId/regenerate',
-      )).thenAnswer((_) async => Response<Map<String, dynamic>>(
-        data: data,
-        requestOptions: RequestOptions(
-          path: '/api/conversations/1/messages/$parentId/regenerate',
-        ),
-      ));
+  when(
+    () => dio.post<Map<String, dynamic>>(
+      '/api/conversations/1/messages/$parentId/regenerate',
+    ),
+  ).thenAnswer(
+    (_) async => Response<Map<String, dynamic>>(
+      data: data,
+      requestOptions: RequestOptions(
+        path: '/api/conversations/1/messages/$parentId/regenerate',
+      ),
+    ),
+  );
 }
 
-/// Stubs `POST /api/conversations/1/messages/{leafId}/switch` to return a
-/// new conversation path whose last assistant has the given content and
-/// sibling ids.
+/// Stub `POST /api/conversations/1/messages/{leafId}/switch`，返回新的 conversation path，
+/// 其最后一条 assistant 具有给定 content 和 sibling id。
 void _stubSwitchBranch(
   _MockDio dio, {
   required int leafId,
@@ -520,12 +529,16 @@ void _stubSwitchBranch(
       },
     ],
   };
-  when(() => dio.post<Map<String, dynamic>>(
-        '/api/conversations/1/messages/$leafId/switch',
-      )).thenAnswer((_) async => Response<Map<String, dynamic>>(
-        data: data,
-        requestOptions: RequestOptions(
-          path: '/api/conversations/1/messages/$leafId/switch',
-        ),
-      ));
+  when(
+    () => dio.post<Map<String, dynamic>>(
+      '/api/conversations/1/messages/$leafId/switch',
+    ),
+  ).thenAnswer(
+    (_) async => Response<Map<String, dynamic>>(
+      data: data,
+      requestOptions: RequestOptions(
+        path: '/api/conversations/1/messages/$leafId/switch',
+      ),
+    ),
+  );
 }

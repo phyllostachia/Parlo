@@ -1,43 +1,49 @@
-# Claude — Style Reference
-> Warm parchment printed artifact — ink on bone paper, clay as the only chromatic breath.
+# Claude — 风格参考
+> 温暖的羊皮纸印刷品：骨纸上的墨迹，以 clay 作为唯一的彩色气息。
 
-**Theme:** light
+**Theme：** light
 
-Claude presents a warm-paper editorial interface: off-white parchment canvas (#f8f8f6) replaces the usual cold-white SaaS backdrop, paired with a near-black warm charcoal (#121212) for typography that reads as ink on paper rather than pixels on glass. The system is deliberately monochrome — the only chromatic accent is clay orange (#d97757), used sparingly as a signature mark rather than a call-to-action flood. Typography is the hero: Anthropic Serif sets the emotional headlines (the rare serif in tech), Anthropic Sans carries everything else at restrained weights (400-580), creating a hierarchy through size and weight contrast rather than color. Surfaces are flat with generous corner radii (16-24px on cards, 8px on controls), minimal shadow, and hairline borders — the aesthetic of a printed document rather than a digital product.
+Claude 呈现温暖纸张风格的 editorial interface：用米白色羊皮纸画布（`#f8f8f6`）替代常见的冷白色 SaaS 背景，并配合近黑色的暖 charcoal（`#121212`），让文字看起来像印在纸上的墨迹，而不是玻璃上的像素。整个系统有意保持 monochrome，唯一的彩色 accent 是 clay orange（`#d97757`），只作为标志性点缀使用，不用来铺满 call-to-action。Typography 是核心：Anthropic Serif 负责富有情绪的标题（科技产品中少见的 serif），Anthropic Sans 负责其他内容，并限制在 400-580 字重之间，通过字号和字重对比而非颜色建立层次。Surface 保持平面，使用较大的 corner radius（card 为 16-24px，control 为 8px）、极轻的 shadow 和 hairline border，整体更像印刷文档，而不是数字产品。
 
 ## Tokens — Colors
 
 | Name | Value | Token | Role |
 |------|-------|-------|------|
-| Bone Parchment | `#f8f8f6` | `--color-bone-parchment` | Page canvas, large background areas, nav bar, secondary cards |
-| Paper White | `#ffffff` | `--color-paper-white` | Elevated card surfaces, primary content surfaces above the canvas |
-| Soft Stone | `#efeeeb` | `--color-soft-stone` | Nested card surfaces, subtle background variation, alternate section bands |
-| Carbon Ink | `#121212` | `--color-carbon-ink` | Primary text, headings, icon fills — warm near-black rather than pure black |
-| Graphite | `#373734` | `--color-graphite` | Secondary headings, button text, nav text — softer than carbon |
-| Ashen | `#7b7974` | `--color-ashen` | Muted helper text, captions, fine print, disclaimer copy |
-| Pebble | `#9c9a92` | `--color-pebble` | Tertiary text, copyright, very low-priority labels |
-| Mist | `#b7b7b5` | `--color-mist` | Hairline nav dividers, subtle border lines |
-| Chalk | `#e7e6e1` | `--color-chalk` | Decorative illustration fills, soft background tints |
-| Obsidian | `#000000` | `--color-obsidian` | Footer background — only true black on the page |
-| Clay | `#d97757` | `--color-clay` | Orange decorative accent for icons, marks, and small graphic details. Do not promote it to the primary CTA color |
+| Bone Parchment | `#f8f8f6` | `--color-bone-parchment` | 页面画布、大面积背景、nav bar、次级 card |
+| Paper White | `#ffffff` | `--color-paper-white` | 高于画布的 raised card surface、主要 content surface |
+| Soft Stone | `#efeeeb` | `--color-soft-stone` | 嵌套 card surface、细微背景变化、交替 section band |
+| Carbon Ink | `#121212` | `--color-carbon-ink` | 主要文本、heading、icon fill；是暖近黑色而非纯黑 |
+| Graphite | `#373734` | `--color-graphite` | 次级 heading、button text、nav text；比 Carbon Ink 柔和 |
+| Ashen | `#7b7974` | `--color-ashen` | 弱化的 helper text、caption、fine print、免责声明 |
+| Pebble | `#9c9a92` | `--color-pebble` | 第三级文本、copyright、低优先级 label |
+| Mist | `#b7b7b5` | `--color-mist` | hairline nav divider、细微 border line |
+| Chalk | `#e7e6e1` | `--color-chalk` | 装饰插图 fill、柔和背景 tint |
+| Obsidian | `#000000` | `--color-obsidian` | footer background；页面中唯一的纯黑色 |
+| Clay | `#d97757` | `--color-clay` | icon、mark 和小型图形细节使用的橙色装饰 accent，不要将其提升为主要 CTA 颜色 |
 
 ## Tokens — Typography
 
-### Anthropic Serif — Display and editorial headlines (Explore plans, Think fast build faster). The serif is the brand signature — rare in AI/tech product UI; here it signals thoughtfulness and editorial confidence rather than software utility. · `--font-anthropic-serif`
-- **Substitute:** Source Serif 4, Charter, Georgia
-- **Weights:** 400
-- **Sizes:** 24px, 30px
-- **Line height:** 1.20-1.33
-- **Letter spacing:** normal
-- **Role:** Display and editorial headlines (Explore plans, Think fast build faster). The serif is the brand signature — rare in AI/tech product UI; here it signals thoughtfulness and editorial confidence rather than software utility.
+### Anthropic Serif — Display 和 editorial headline（Explore plans、Think fast build faster）
 
-### Anthropic Sans — All interface text: body copy, nav, buttons, cards, links, labels. Weight 580 is the heaviest; weight 400 dominates. The whisper-to-medium weight range creates hierarchy through contrast rather than heaviness — headlines don't shout at 800, they speak at 580. · `--font-anthropic-sans`
-- **Substitute:** Inter, IBM Plex Sans, system-ui
-- **Weights:** 400, 500, 550, 580, 600
-- **Sizes:** 11px, 12px, 14px, 15px, 16px, 24px
-- **Line height:** 1.33-1.63
-- **Letter spacing:** normal
-- **Role:** All interface text: body copy, nav, buttons, cards, links, labels. Weight 580 is the heaviest; weight 400 dominates. The whisper-to-medium weight range creates hierarchy through contrast rather than heaviness — headlines don't shout at 800, they speak at 580.
+Serif 是品牌标志，在 AI/tech product UI 中较少见；这里用它表达思考感和 editorial confidence，而不是 software utility。· `--font-anthropic-serif`
+
+- **Substitute：** Source Serif 4、Charter、Georgia
+- **Weights：** 400
+- **Sizes：** 24px、30px
+- **Line height：** 1.20-1.33
+- **Letter spacing：** normal
+- **Role：** Display 和 editorial headline。Serif 是品牌标志，通过字体风格而不是软件感传达思考感和编辑式自信。
+
+### Anthropic Sans — 所有 interface text：body copy、nav、button、card、link、label
+
+580 是最大字重，400 最常用。轻到中等的字重范围通过对比而不是厚重感建立层次；headline 不使用 800 级别的强烈字重，而使用 580。· `--font-anthropic-sans`
+
+- **Substitute：** Inter、IBM Plex Sans、system-ui
+- **Weights：** 400、500、550、580、600
+- **Sizes：** 11px、12px、14px、15px、16px、24px
+- **Line height：** 1.33-1.63
+- **Letter spacing：** normal
+- **Role：** 所有 interface text：body copy、nav、button、card、link、label。580 是最大字重，400 最常用。
 
 ### Type Scale
 
@@ -50,9 +56,9 @@ Claude presents a warm-paper editorial interface: off-white parchment canvas (#f
 
 ## Tokens — Spacing & Shapes
 
-**Base unit:** 8px
+**Base unit：** 8px
 
-**Density:** compact
+**Density：** compact
 
 ### Spacing Scale
 
@@ -86,148 +92,148 @@ Claude presents a warm-paper editorial interface: off-white parchment canvas (#f
 
 ### Layout
 
-- **Page max-width:** 1200px
-- **Section gap:** 64-80px
-- **Card padding:** 32px
-- **Element gap:** 8-12px
+- **Page max-width：** 1200px
+- **Section gap：** 64-80px
+- **Card padding：** 32px
+- **Element gap：** 8-12px
 
 ## Components
 
 ### Filled Dark Button
-**Role:** Primary call-to-action on light surfaces
+**Role：** 浅色 surface 上的主要 call-to-action。
 
-Dark carbon fill (#121212 or near-black), warm white text (#f8f8f6 or #fff), 8px radius, 8px vertical / 20px horizontal padding, 15px Anthropic Sans weight 500. The warmth of the text color on dark fill (f8f8f6, not pure white) keeps the button from feeling like a generic dark UI element.
+使用深色 carbon fill（`#121212` 或近黑色）、暖白色 text（`#f8f8f6` 或 `#fff`）、8px radius、垂直 8px / 水平 20px padding，以及 15px Anthropic Sans、500 字重。深色 fill 上使用暖色文字（`#f8f8f6` 而非纯白）可以避免 button 看起来像普通的深色 UI 元素。
 
 ### Pill Navigation Button
-**Role:** Top-level nav links in header bar
+**Role：** header bar 中的顶层 nav link。
 
-Transparent background, Graphite (#373734) text, no border, 8px radius, 15px sans weight 500. Sits on the Bone Parchment canvas (#f8f8f6) with generous horizontal padding. The nav bar is minimal — logo left, links centered or right, no heavy borders or fills.
+使用透明 background、Graphite（`#373734`）text、无 border、8px radius 和 15px sans、500 字重。它位于 Bone Parchment 画布（`#f8f8f6`）上，并保留充足的水平 padding。Nav bar 应保持简洁：logo 在左侧，link 居中或靠右，不使用厚重 border 或 fill。
 
 ### Pricing Tier Card
-**Role:** Plan comparison card (Free, Pro, Max)
+**Role：** plan comparison card（Free、Pro、Max）。
 
-White (#ffffff) surface on Bone Parchment canvas, 24px radius, 32px padding all sides. Heading uses Anthropic Serif 24-30px. Price in Carbon Ink (#121212), description in Ashen (#7b7974). No shadow by default — a soft 4px 24px shadow at oklab warmth appears on hover or featured tiers. Hairline 1px border at #e7e6e1 optional.
+在 Bone Parchment 画布上使用白色（`#ffffff`）surface、24px radius 和四边 32px padding。Heading 使用 24-30px Anthropic Serif。Price 使用 Carbon Ink（`#121212`），description 使用 Ashen（`#7b7974`）。默认不使用 shadow；hover 或 featured tier 可以显示带有暖色 oklab 的柔和 4px 24px shadow。可选用 `#e7e6e1` 的 1px hairline border。
 
 ### Feature Benefit Card
-**Role:** Compact card for feature lists within a plan
+**Role：** plan 内部 feature list 使用的紧凑 card。
 
-Soft Stone (#efeeeb) or Paper White (#ffffff) surface, 16px radius, generous internal padding (24-32px). Checkmark icons in Carbon Ink, body text at 14px in Graphite. Flat — no shadow. Creates a layered paper effect against the canvas.
+使用 Soft Stone（`#efeeeb`）或 Paper White（`#ffffff`）surface、16px radius 和充足的内部 padding（24-32px）。Checkmark icon 使用 Carbon Ink，14px body text 使用 Graphite。保持平面，不使用 shadow，在画布上形成层叠的纸张效果。
 
 ### Editorial Section Header
-**Role:** Section title with the Anthropic Serif treatment
+**Role：** 使用 Anthropic Serif 风格的 section title。
 
-Anthropic Serif 30px weight 400, line-height 1.2, Carbon Ink (#121212). Followed immediately by a short Ashen (#7b7974) body sentence at 16px. Generous 64-80px margin-top from the previous section.
+使用 Anthropic Serif、30px、400 字重、1.2 line-height 和 Carbon Ink（`#121212`）。标题后紧跟一条 16px 的简短 Ashen（`#7b7974`）body sentence。与上一个 section 保持 64-80px 的上边距。
 
 ### Footer Band
-**Role:** Dark site footer
+**Role：** 深色 site footer。
 
-Obsidian (#000000) background — the only true black on the page, creating a deliberate tonal break. Text in muted gray (#9c9a92), links in Pebble or lighter. Multi-column grid with product/resource/company groupings. Compact 14px sans throughout.
+使用 Obsidian（`#000000`）background，这是页面中唯一的纯黑色，用来形成明确的色调断层。Text 使用 muted gray（`#9c9a92`），link 使用 Pebble 或更亮的颜色。使用按 product/resource/company 分组的多列 grid，整体使用紧凑的 14px sans。
 
 ### Inline Link
-**Role:** Text links within body copy
+**Role：** body copy 中的 text link。
 
-Color shifts between default (Graphite #373734) and hover (Carbon Ink #121212) with underline. No chromatic color — the system treats links as typography, not as colored emphasis. Transitions on color/background-color at 0.2s ease.
+默认使用 Graphite（`#373734`），hover 时变为 Carbon Ink（`#121212`）并带 underline。不使用彩色；系统将 link 视为 typography，而不是彩色 emphasis。对 color/background-color 使用 0.2s ease 的 transition。
 
 ### Input Field
-**Role:** Email input on sign-in and signup forms
+**Role：** sign-in 和 signup form 中的 email input。
 
-Transparent or Paper White fill, 1px border at Pebble (#b7b7b5) or Mist, 8px radius, 14px sans. Focus ring uses the cds-focus-shadow pattern: inset page-color ring + outer accent ring + blue glow. No dramatic state color shift.
+使用透明或 Paper White fill、Pebble（`#b7b7b5`）或 Mist 的 1px border、8px radius 和 14px sans。Focus ring 使用 cds-focus-shadow pattern：inset page-color ring + outer accent ring + blue glow。不要让状态发生过于明显的颜色变化。
 
 ### FAQ Accordion Item
-**Role:** Expandable question in FAQ section
+**Role：** FAQ section 中可展开的问题。
 
-Borderless or hairline divider between items, question text in Graphite (#373734) at 14-16px sans, body expands below in Carbon Ink (#121212). Anthropic Sans carries the entire interaction — no serif in the FAQ body. Generous 24px vertical padding per item.
+Item 之间使用无 border 或 hairline divider；question text 使用 Graphite（`#373734`）和 14-16px sans，body 在下方展开并使用 Carbon Ink（`#121212`）。整个 interaction 使用 Anthropic Sans，FAQ body 不使用 serif。每个 item 保留 24px 的垂直 padding。
 
 ### Clay Accent Mark
-**Role:** Decorative brand flourish, not an interactive element
+**Role：** 装饰性的 brand flourish，不是 interactive element。
 
-Small Clay orange (#d97757) marks — dots, ornaments, illustration accents — that serve as the single chromatic breath in an otherwise monochrome system. Never used for button fills or large backgrounds.
+使用小型 Clay orange（`#d97757`）mark，例如 dot、ornament 和 illustration accent，作为 monochrome system 中唯一的彩色气息。绝不用于 button fill 或大面积 background。
 
 ### Status Badge
-**Role:** Small inline status indicators
+**Role：** 小型 inline status indicator。
 
-8px radius, 11-12px sans weight 500, low-contrast background tint with Carbon Ink or Graphite text. Rarely chromatic — stays in the warm-gray family to match the editorial tone.
+使用 8px radius、11-12px sans、500 字重和低对比度 background tint，text 使用 Carbon Ink 或 Graphite。很少使用彩色，保持 warm-gray family，以匹配 editorial tone。
 
-## Do's and Don'ts
+## Do 和 Don't
 
 ### Do
-- Use Bone Parchment (#f8f8f6) as the default page canvas — never pure white for large backgrounds.
-- Set display headlines in Anthropic Serif weight 400 at 30px with line-height 1.2; let the serif do the work, not weight.
-- Keep the palette monochrome — the only chromatic color is Clay (#d97757), reserved for decorative marks and editorial accents, never button fills.
-- Use 24px radius for elevated cards and 16px for nested/secondary cards; 8px for all buttons, inputs, and nav controls.
-- Maintain generous section spacing: 64-80px between major sections, 32px card padding, 8-12px between elements within a component.
-- Pair Carbon Ink (#121212) text with Paper White (#ffffff) cards on Bone Parchment (#f8f8f6) for the layered paper effect.
-- Reference warm grays (Graphite, Ashen, Pebble) for text hierarchy — never introduce a second chromatic for emphasis.
+- 使用 Bone Parchment（`#f8f8f6`）作为默认页面画布，大面积 background 不要使用纯白。
+- 使用 30px、400 字重、1.2 line-height 的 Anthropic Serif 作为 display headline，让 serif 而不是字重承担表现力。
+- 保持 palette monochrome，唯一彩色是 Clay（`#d97757`），只用于装饰 mark 和 editorial accent，绝不用于 button fill。
+- Elevated card 使用 24px radius，嵌套或次级 card 使用 16px，所有 button、input 和 nav control 使用 8px。
+- 保持充足的 section spacing：major section 之间 64-80px，card padding 32px，component 内 element 之间 8-12px。
+- 在 Bone Parchment（`#f8f8f6`）上使用 Carbon Ink（`#121212`）text 和 Paper White（`#ffffff`）card，形成层叠纸张效果。
+- 使用暖灰色（Graphite、Ashen、Pebble）建立 text hierarchy，不要引入第二种彩色来强调内容。
 
 ### Don't
-- Don't introduce button fills in Clay orange or any chromatic color — actions stay dark on light or light on dark.
-- Don't use pure black (#000000) for body text — Carbon Ink (#121212) is warmer and reads as ink, not void.
-- Don't set headlines at weight 700+ — the system speaks at weight 580 max for sans and 400 for serif.
-- Don't apply heavy shadows to cards — shadow appears only as a soft 4px 20-24px wash at low opacity, or not at all.
-- Don't use cool blues or greens for accent or brand — the system is deliberately warm monochrome.
-- Don't set large display headlines in Anthropic Sans — the serif is the signature, the sans is the utility.
-- Don't add decorative gradients — the design rejects them in favor of flat, printed-paper surfaces.
+- 不要使用 Clay orange 或其他彩色作为 button fill；action 在浅色上保持深色，在深色上保持浅色。
+- 不要使用纯黑（`#000000`）作为 body text；Carbon Ink（`#121212`）更温暖，呈现的是墨迹而不是虚空。
+- 不要将 headline 设为 700 及以上字重；系统对 sans 使用最高 580，对 serif 使用 400。
+- 不要给 card 使用厚重 shadow；shadow 只能是低不透明度的柔和 4px、20-24px wash，也可以完全不使用。
+- 不要使用冷色 blue 或 green 作为 accent 或 brand color；系统有意保持 warm monochrome。
+- 不要使用 Anthropic Sans 设置大型 display headline；serif 是标志，sans 用于功能性文字。
+- 不要添加 decorative gradient；设计偏好平面、印刷纸张式的 surface。
 
 ## Surfaces
 
 | Level | Name | Value | Purpose |
 |-------|------|-------|---------|
-| 1 | Page Canvas | `#f8f8f6` | Base background for all pages — warm off-white parchment |
-| 2 | Card Surface | `#ffffff` | Primary content cards elevated above the canvas |
-| 3 | Nested Surface | `#efeeeb` | Secondary cards or sub-sections within a card |
-| 4 | Dark Band | `#000000` | Footer — only dark surface, creates deliberate tonal break |
+| 1 | Page Canvas | `#f8f8f6` | 所有页面的基础 background，即暖米白色羊皮纸 |
+| 2 | Card Surface | `#ffffff` | 高于画布的主要 content card |
+| 3 | Nested Surface | `#efeeeb` | card 内部的次级 card 或 subsection |
+| 4 | Dark Band | `#000000` | footer，唯一的深色 surface，用来形成明确的色调断层 |
 
 ## Elevation
 
-- **Feature Card (hover state):** `rgba(0, 0, 0, 0.04) 0px 4px 20px 0px`
-- **Pricing Tier Card (featured/hover):** `oklab(0.431435 -0.02915 -0.125723 / 0.1) 0px 4px 24px 0px`
+- **Feature Card（hover state）：** `rgba(0, 0, 0, 0.04) 0px 4px 20px 0px`
+- **Pricing Tier Card（featured/hover）：** `oklab(0.431435 -0.02915 -0.125723 / 0.1) 0px 4px 24px 0px`
 
 ## Imagery
 
-Imagery is sparse and editorial in tone. Product photography and illustrations appear full-bleed within hero or feature sections, treated with generous corner radii (16-24px) and no decorative borders. The Clay orange accent (#d97757) appears in select illustration details — hands, objects, ornamental marks — reinforcing the warm paper aesthetic. Icons are mono Carbon Ink, outlined or filled at consistent weight, never multicolor. The overall density is low: most sections are text-dominant with imagery appearing as punctuation rather than spectacle. No gradients, no glow effects, no 3D renders.
+Imagery 应当稀疏并保持 editorial tone。Product photography 和 illustration 可以在 hero 或 feature section 中 full-bleed 展示，使用充足的 corner radius（16-24px），不添加 decorative border。Clay orange accent（`#d97757`）只出现在部分 illustration detail 中，例如手、物体和 ornament mark，以强化 warm paper aesthetic。Icon 使用单色 Carbon Ink，以一致的 weight outline 或 fill 展示，不使用多色。整体 density 应较低：大多数 section 以 text 为主，imagery 只作为标点而不是视觉 spectacle。不使用 gradient、glow effect 或 3D render。
 
 ## Layout
 
-Claude uses a max-width contained layout centered around 1200px on the Bone Parchment canvas. The hero pattern is a centered editorial headline in Anthropic Serif over generous whitespace, often paired with a full-bleed product image below the fold. Sections flow as alternating light bands — Bone Parchment canvas with white cards floating on it, occasional Soft Stone (#efeeeb) bands for visual rhythm. Content arrangement alternates between centered stacks (headlines, FAQs, CTAs) and asymmetric 2-column layouts (text-left/image-right feature blocks). Pricing uses a 3-column card grid (Free, Pro, Max) with elevated featured tier. Navigation is a minimal top bar: logo left, link cluster right, no heavy borders or fills. Vertical spacing is generous — 64-80px between sections, 32px within cards — creating a printed-page cadence rather than a dense product UI.
+在 Bone Parchment 画布上使用以 1200px 为 max-width、居中的 contained layout。Hero pattern 是位于大量留白中的居中 editorial headline，使用 Anthropic Serif，首屏下方通常配一张 full-bleed product image。Section 以交替的浅色 band 展开：Bone Parchment 画布上浮动白色 card，偶尔使用 Soft Stone（`#efeeeb`）band 调节视觉节奏。Content arrangement 在居中 stack（headline、FAQ、CTA）和不对称两列布局（左侧 text、右侧 image 的 feature block）之间交替。Pricing 使用三列 card grid（Free、Pro、Max），其中 featured tier elevation 更高。Navigation 是简洁的 top bar：logo 在左，link cluster 在右，不使用厚重 border 或 fill。垂直 spacing 应充足：section 之间 64-80px，card 内 32px，形成印刷页面的节奏，而不是密集的 product UI。
 
 ## Agent Prompt Guide
 
 **Quick Color Reference**
-- Text (primary): #121212
-- Text (secondary): #373734
-- Text (muted): #7b7974
-- Background (canvas): #f8f8f6
-- Background (card): #ffffff
-- Border (hairline): #b7b7b5 or #e7e6e1
-- Accent (decorative only): #d97757
-- primary action: no distinct CTA color
+- Text（primary）：`#121212`
+- Text（secondary）：`#373734`
+- Text（muted）：`#7b7974`
+- Background（canvas）：`#f8f8f6`
+- Background（card）：`#ffffff`
+- Border（hairline）：`#b7b7b5` 或 `#e7e6e1`
+- Accent（仅用于装饰）：`#d97757`
+- primary action：不设置独立的 CTA color
 
 **Example Component Prompts**
 
-1. *Pricing tier card*: White surface (#ffffff) on Bone Parchment canvas (#f8f8f6). 24px radius, 32px padding. Plan name in Anthropic Serif 24px weight 400 (#121212). Price in Anthropic Sans 24px weight 580 (#121212). Description in 14px sans (#7b7974). Filled dark button at bottom: #121212 background, #f8f8f6 text, 8px radius, 8px/20px padding, 15px sans weight 500.
+1. *Pricing tier card*：在 Bone Parchment 画布（`#f8f8f6`）上使用白色 surface（`#ffffff`）。24px radius，32px padding。Plan name 使用 24px、400 字重的 Anthropic Serif（`#121212`）。Price 使用 24px、580 字重的 Anthropic Sans（`#121212`）。Description 使用 14px sans（`#7b7974`）。底部使用 filled dark button：background `#121212`，text `#f8f8f6`，8px radius，8px/20px padding，15px sans、500 字重。
 
-2. *Editorial hero section*: Bone Parchment (#f8f8f6) background, no border. Headline in Anthropic Serif 30px weight 400 (#121212), line-height 1.2. Subtext in Anthropic Sans 16px weight 400 (#373734). 64-80px vertical padding above and below. Optional Clay (#d97757) accent dot or mark beside the headline.
+2. *Editorial hero section*：使用 Bone Parchment（`#f8f8f6`）background，不使用 border。Headline 使用 Anthropic Serif、30px、400 字重（`#121212`），line-height 1.2。Subtext 使用 Anthropic Sans、16px、400 字重（`#373734`）。上下各使用 64-80px vertical padding。Headline 旁可以选择性添加 Clay（`#d97757`）accent dot 或 mark。
 
-3. *FAQ accordion item*: Transparent background, no card. Question in Anthropic Sans 16px weight 500 (#373734). Body answer in 14px weight 400 (#121212). Hairline 1px bottom border at #e7e6e1. 24px vertical padding. No chevron icon color — use Carbon Ink (#121212).
+3. *FAQ accordion item*：使用透明 background，不使用 card。Question 使用 Anthropic Sans、16px、500 字重（`#373734`）。Body answer 使用 14px、400 字重（`#121212`）。底部使用 `#e7e6e1` 的 1px hairline border。使用 24px vertical padding。不为 chevron icon 设置彩色，使用 Carbon Ink（`#121212`）。
 
-4. *Footer band*: Obsidian (#000000) full-width background. Three or four columns of links. Link text in Pebble (#9c9a92), 14px sans. Copyright in 12px sans (#9c9a92). 64px vertical padding. No icons in footer link rows.
+4. *Footer band*：使用 Obsidian（`#000000`）全宽 background。使用三或四列 link。Link text 使用 Pebble（`#9c9a92`）和 14px sans。Copyright 使用 12px sans（`#9c9a92`）。使用 64px vertical padding。Footer link row 中不使用 icon。
 
-5. *Dark navigation button*: Transparent fill, Graphite (#373734) text, 8px radius, 15px Anthropic Sans weight 500, 20px horizontal padding. Hover transitions to Carbon Ink (#121212) at 0.2s ease. No border, no background fill.
+5. *Dark navigation button*：使用透明 fill、Graphite（`#373734`）text、8px radius、15px Anthropic Sans、500 字重和 20px horizontal padding。Hover 时以 0.2s ease 过渡到 Carbon Ink（`#121212`）。不使用 border 或 background fill。
 
 ## Editorial Typography System
 
-The defining signature of this design system is the deliberate pairing of Anthropic Serif (headlines only, weight 400) with Anthropic Sans (everything else, weight 400-580). The serif appears at exactly two sizes: 24px and 30px, used exclusively for section titles, plan names, and editorial hero copy. The sans carries 11px through 24px across all UI roles — body, nav, buttons, labels, captions. Weight 580 is the heaviest weight in use; the system never reaches 600+. This creates a visual language where the serif whispers authority through typographic contrast alone, and the sans does all the functional heavy lifting. When rebuilding pages, resist the urge to bold up — let size and weight differential create hierarchy.
+该 design system 的核心特征是有意将 Anthropic Serif（仅用于 headline，400 字重）与 Anthropic Sans（其他所有内容，400-580 字重）配对。Serif 只出现两个字号：24px 和 30px，并且仅用于 section title、plan name 和 editorial hero copy。Sans 覆盖所有 UI role 的 11px 到 24px：body、nav、button、label 和 caption。580 是使用的最大字重，系统不会达到 600 以上。这形成一种只通过 typography contrast 表达权威感的视觉语言，sans 则负责所有功能性表达。重建页面时不要急于增加粗体，应让字号和字重差异建立层次。
 
 ## Warm Monochrome Philosophy
 
-Claude's palette is deliberately restricted to warm neutrals plus one chromatic accent. The near-black text colors (#121212, #373734) carry a subtle warmth that distinguishes them from clinical SaaS blacks. The canvas (#f8f8f6) and card surfaces (#ffffff, #efeeeb) form a paper-like progression: parchment → paper → vellum. The single accent — Clay (#d97757) — appears only in decorative contexts: small marks, illustration details, editorial flourishes. It is never used to fill buttons, highlight links, or draw attention to data. This restraint is the brand. Adding additional chromatic colors (blues for links, greens for success, reds for error) would break the system's editorial integrity.
+Claude 的 palette 有意限制为暖色中性色和一种彩色 accent。近黑色 text color（`#121212`、`#373734`）带有细微暖意，使它们区别于临床感的 SaaS 黑色。Canvas（`#f8f8f6`）和 card surface（`#ffffff`、`#efeeeb`）形成类似纸张的渐变层次：羊皮纸 → 纸张 → vellum。唯一的 accent Clay（`#d97757`）只出现在装饰场景中：小型 mark、illustration detail 和 editorial flourish。它绝不用于填充 button、突出 link 或吸引注意力到数据上。这种克制就是品牌特征。增加其他彩色（例如 link 使用 blue、success 使用 green、error 使用 red）会破坏系统的 editorial integrity。
 
 ## Similar Brands
 
-- **Stripe** — Same warm off-white canvas (#fbf9f6 territory), generous whitespace, flat card surfaces with soft radii, and restraint in using color — Stripe also keeps its palette nearly monochrome in marketing surfaces.
-- **Linear** — Dark and light mode mastery with minimal chromatic accents, generous card radii (16-24px), and tight typographic hierarchy — though Linear skews darker while Claude skews warm-paper.
-- **Notion** — Editorial restraint: monochrome palette, generous spacing, serif-optional typography that prioritizes readability over visual spectacle.
-- **Arc Browser** — Warm-paper aesthetic with clay-adjacent accent palette, editorial typographic confidence, and a refusal to use typical SaaS blue as a brand color.
+- **Stripe** — 同样使用暖米白画布（约 `#fbf9f6`）、充足留白、带柔和 radius 的平面 card，并克制使用颜色；Stripe 在 marketing surface 中也几乎保持 monochrome palette。
+- **Linear** — 擅长 dark/light mode，使用极少彩色 accent、较大的 card radius（16-24px）和紧凑的 typographic hierarchy；但 Linear 更偏深色，而 Claude 更偏 warm-paper。
+- **Notion** — editorial restraint：monochrome palette、充足 spacing，以及优先考虑可读性而非视觉 spectacle 的可选 serif typography。
+- **Arc Browser** — warm-paper aesthetic、接近 clay 的 accent palette、具有 editorial confidence 的 typography，并拒绝将典型 SaaS blue 作为 brand color。
 
 ## Quick Start
 
@@ -235,7 +241,7 @@ Claude's palette is deliberately restricted to warm neutrals plus one chromatic 
 
 ```css
 :root {
-  /* Colors */
+  /* 颜色 */
   --color-bone-parchment: #f8f8f6;
   --color-paper-white: #ffffff;
   --color-soft-stone: #efeeeb;
@@ -269,7 +275,7 @@ Claude's palette is deliberately restricted to warm neutrals plus one chromatic 
   --font-weight-w580: 580;
   --font-weight-semibold: 600;
 
-  /* Spacing */
+  /* 间距 */
   --spacing-unit: 8px;
   --spacing-8: 8px;
   --spacing-16: 16px;
@@ -280,7 +286,7 @@ Claude's palette is deliberately restricted to warm neutrals plus one chromatic 
   --spacing-80: 80px;
   --spacing-96: 96px;
 
-  /* Layout */
+  /* 布局 */
   --page-max-width: 1200px;
   --section-gap: 64-80px;
   --card-padding: 32px;
@@ -298,11 +304,11 @@ Claude's palette is deliberately restricted to warm neutrals plus one chromatic 
   --radius-buttons: 8px;
   --radius-elevatedcards: 24px;
 
-  /* Shadows */
+  /* 阴影 */
   --shadow-lg: rgba(0, 0, 0, 0.04) 0px 4px 20px 0px;
   --shadow-lg-2: oklab(0.431435 -0.02915 -0.125723 / 0.1) 0px 4px 24px 0px;
 
-  /* Surfaces */
+  /* Surface */
   --surface-page-canvas: #f8f8f6;
   --surface-card-surface: #ffffff;
   --surface-nested-surface: #efeeeb;
@@ -314,7 +320,7 @@ Claude's palette is deliberately restricted to warm neutrals plus one chromatic 
 
 ```css
 @theme {
-  /* Colors */
+  /* 颜色 */
   --color-bone-parchment: #f8f8f6;
   --color-paper-white: #ffffff;
   --color-soft-stone: #efeeeb;
@@ -341,7 +347,7 @@ Claude's palette is deliberately restricted to warm neutrals plus one chromatic 
   --text-heading: 30px;
   --leading-heading: 1.2;
 
-  /* Spacing */
+  /* 间距 */
   --spacing-8: 8px;
   --spacing-16: 16px;
   --spacing-24: 24px;
@@ -356,7 +362,7 @@ Claude's palette is deliberately restricted to warm neutrals plus one chromatic 
   --radius-2xl: 16px;
   --radius-3xl: 24px;
 
-  /* Shadows */
+  /* 阴影 */
   --shadow-lg: rgba(0, 0, 0, 0.04) 0px 4px 20px 0px;
   --shadow-lg-2: oklab(0.431435 -0.02915 -0.125723 / 0.1) 0px 4px 24px 0px;
 }

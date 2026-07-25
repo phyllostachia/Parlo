@@ -1,15 +1,14 @@
-/// The web implementation of [PlatformCapabilities].
+/// [PlatformCapabilities] 的 Web 实现。
 ///
-/// On the web the mouse can drag images onto the input, and messages reveal
-/// their action bar on hover. The backend address is collected by the token
-/// dialog on every platform, so there is no web-specific flag for it.
+/// Web 上 mouse 可以将图片拖到 input，message 会在 hover 时显示 action bar。所有 platform
+/// 都由 token dialog 收集 backend address，因此不需要 Web-specific flag。
 library;
 
 import 'platform_capabilities.dart';
 
-/// Web platform capabilities.
+/// Web platform capabilities。
 class WebPlatformCapabilities implements PlatformCapabilities {
-  /// Creates web capabilities.
+  /// 创建 Web capabilities。
   const WebPlatformCapabilities();
 
   @override

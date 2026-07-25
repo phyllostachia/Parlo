@@ -1,21 +1,19 @@
-/// The color palette from `design.md`, exposed both as a [ThemeExtension] and
-/// as a standard [ColorScheme].
+/// `design.md` 中的 color palette，同时以 [ThemeExtension] 和标准 [ColorScheme] 暴露。
 ///
-/// The design uses warm neutrals plus one decorative accent (clay). v1 ships
-/// only the light palette; a dark palette will follow in Phase 9 once the
-/// designer adds the dark tokens.
+/// Design 使用暖色中性色和一个装饰 accent（clay）。v1 只提供 light palette；设计师补充
+/// dark token 后，dark palette 会在阶段 9 加入。
 library;
 
 import 'package:flutter/material.dart';
 
-/// The 11 design colors, plus clay, available on [ThemeData] as an extension.
+/// 11 个 design color 加上 clay，以 extension 形式在 [ThemeData] 上提供。
 ///
-/// Widgets read these via `Theme.of(context).extension<ParloColors>()!` so the
-/// hex values live in one place. The [ColorScheme] below carries the few of
-/// these that map cleanly onto Material's slots; everything else lives here.
+/// Widget 通过 `Theme.of(context).extension<ParloColors>()!` 读取这些 value，使 hex value
+/// 只保存在一个位置。下面的 [ColorScheme] 携带其中能够自然映射到 Material slot 的 value，
+/// 其余 value 都保存在这里。
 @immutable
 class ParloColors extends ThemeExtension<ParloColors> {
-  /// Creates the full palette.
+  /// 创建完整 palette。
   const ParloColors({
     required this.boneParchment,
     required this.paperWhite,
@@ -30,10 +28,9 @@ class ParloColors extends ThemeExtension<ParloColors> {
     required this.clay,
   });
 
-  /// The light palette from `design.md`.
+  /// `design.md` 中的 light palette。
   ///
-  /// `obsidian` is included for completeness but is unused in v1 (the design
-  /// only uses it for the footer, and Parlo has no footer).
+  /// `obsidian` 为完整性而保留，但 v1 未使用（design 只将它用于 footer，而 Parlo 没有 footer）。
   static const light = ParloColors(
     boneParchment: Color(0xFFF8F8F6),
     paperWhite: Color(0xFFFFFFFF),
@@ -48,38 +45,38 @@ class ParloColors extends ThemeExtension<ParloColors> {
     clay: Color(0xFFD97757),
   );
 
-  /// Page canvas, sidebar background, large flat areas.
+  /// Page canvas、sidebar background、大面积 flat area。
   final Color boneParchment;
 
-  /// Elevated card surfaces that sit on the parchment canvas.
+  /// 位于 parchment canvas 上方的 elevated card surface。
   final Color paperWhite;
 
-  /// Nested cards and alternate section bands.
+  /// Nested card 和 alternate section band。
   final Color softStone;
 
-  /// Primary text, headings, icon fills. A warm near-black, not pure black.
+  /// Primary text、heading、icon fill。是暖近黑色，而不是纯黑。
   final Color carbonInk;
 
-  /// Secondary text, button text, nav text.
+  /// Secondary text、button text、nav text。
   final Color graphite;
 
-  /// Muted helper text, captions, fine print.
+  /// Muted helper text、caption、fine print。
   final Color ashen;
 
-  /// Tertiary text, copyright, low-priority labels.
+  /// Tertiary text、copyright、低优先级 label。
   final Color pebble;
 
-  /// Hairline dividers and subtle border lines.
+  /// Hairline divider 和细微 border line。
   final Color mist;
 
-  /// Decorative illustration fills and soft background tints.
+  /// Decorative illustration fill 和柔和 background tint。
   final Color chalk;
 
-  /// The only true black in the palette. Footer-only; unused in v1.
+  /// Palette 中唯一的纯黑色。只用于 footer；v1 未使用。
   final Color obsidian;
 
-  /// Orange decorative accent for icons and small marks. Never used as a
-  /// primary button or link color (design "Don'ts").
+  /// 用于 icon 和 small mark 的橙色 decorative accent。绝不作为 primary button 或 link
+  /// color（design “Don'ts”）。
   final Color clay;
 
   @override
@@ -114,33 +111,32 @@ class ParloColors extends ThemeExtension<ParloColors> {
   @override
   ParloColors lerp(ParloColors? other, double t) {
     if (other is! ParloColors) return this;
-    // No dark theme yet, so no interpolation is needed. When a dark palette
-    // arrives in Phase 9, replace this with Color.lerp on every field.
+    // 当前还没有 dark theme，因此不需要 interpolation。阶段 9 加入 dark palette 后，
+    // 将这里替换为每个 field 的 Color.lerp。
     return this;
   }
 }
 
-/// Builds the v1 light [ColorScheme].
+/// 构建 v1 light [ColorScheme]。
 ///
-/// The mapping follows the architecture (section 9): the parchment canvas is
-/// `surface`, the warm near-black is `onSurface` and `primary`, and the white
-/// is `onPrimary`. The remaining palette colors live on [ParloColors].
+/// 映射遵循架构（第 9 节）：parchment canvas 是 `surface`，暖近黑色是 `onSurface` 和
+/// `primary`，白色是 `onPrimary`。其余 palette color 位于 [ParloColors] 上。
 ColorScheme buildLightColorScheme() {
   const c = ParloColors.light;
   return ColorScheme.light(
-    // The warm parchment page canvas.
+    // 暖色 parchment page canvas。
     surface: c.boneParchment,
-    // A slightly darker variant of the surface, used by some Material widgets
-    // for nested areas. Soft stone matches the design's nested card color.
+    // 稍深的 surface variant，供一些 Material widget 用于 nested area。Soft stone 匹配
+    // design 的 nested card color。
     surfaceContainerHighest: c.softStone,
-    // Text and icons on the parchment surface.
+    // Parchment surface 上的 text 和 icon。
     onSurface: c.carbonInk,
-    // Secondary text (captions, helper text).
+    // Secondary text（caption、helper text）。
     onSurfaceVariant: c.graphite,
-    // The "filled dark button" from the design: carbon-ink fill, white text.
+    // Design 中的“filled dark button”：carbon-ink fill、white text。
     primary: c.carbonInk,
     onPrimary: c.paperWhite,
-    // Outlined buttons and hairline borders use mist.
+    // Outlined button 和 hairline border 使用 mist。
     outline: c.mist,
     outlineVariant: c.chalk,
   );

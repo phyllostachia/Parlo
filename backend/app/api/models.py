@@ -1,10 +1,8 @@
-"""Model registry endpoint.
+"""模型注册表 endpoint。
 
-``GET /api/models`` returns the list of models declared in ``config.yaml``
-together with the configured default, so the client can populate its model
-and thinking-effort selectors without any protocol knowledge baked in. The
-endpoint is authenticated like every other API route; the response carries
-no secrets (``api_key`` and ``base_url`` are stripped).
+``GET /api/models`` 返回 ``config.yaml`` 中声明的模型列表和已配置的默认模型，使客户端
+无需内置 protocol knowledge 就能填充 model 和 thinking-effort selector。该 endpoint
+与其他 API route 一样需要鉴权；响应不包含密钥（会移除 ``api_key`` 和 ``base_url``）。
 """
 
 from __future__ import annotations
@@ -20,7 +18,7 @@ router = APIRouter(prefix="/models", dependencies=[Depends(verify_token)])
 
 @router.get("", response_model=ModelsResponse)
 async def list_models(settings=Depends(get_settings)) -> ModelsResponse:
-    """Return the default model id and every model's client-facing metadata."""
+    """返回默认 model id 和每个模型面向客户端的 metadata。"""
     app_config = settings.app_config
     return ModelsResponse(
         default_model=app_config.default_model,
