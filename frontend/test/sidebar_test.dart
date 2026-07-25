@@ -113,11 +113,18 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    final row = find.ancestor(
+      of: find.text('Learning'),
+      matching: find.byType(GestureDetector),
+    );
+    expect(row, findsOneWidget);
+    final originalHeight = tester.getSize(row).height;
     final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await mouse.addPointer();
     await mouse.moveTo(tester.getCenter(find.text('Learning')));
     await tester.pump();
     expect(find.byTooltip('More'), findsOneWidget);
+    expect(tester.getSize(row).height, originalHeight);
 
     await tester.tap(find.byTooltip('More'));
     await tester.pumpAndSettle();

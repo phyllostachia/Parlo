@@ -508,9 +508,12 @@ class _TreeRowState extends State<_TreeRow> {
               // its callback before it can run.
               if ((_isHovered || _isMenuOpen) && widget.menuItems.isNotEmpty)
                 PopupMenuButton<_MenuItem>(
-                  icon: const Icon(Icons.more_horiz, size: 18),
+                  child: const SizedBox(
+                    width: 24,
+                    height: 20,
+                    child: Center(child: Icon(Icons.more_horiz, size: 18)),
+                  ),
                   tooltip: 'More',
-                  padding: EdgeInsets.zero,
                   onOpened: () => setState(() => _isMenuOpen = true),
                   onCanceled: () => setState(() => _isMenuOpen = false),
                   itemBuilder: (_) => [
