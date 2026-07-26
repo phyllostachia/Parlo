@@ -20,6 +20,43 @@ import '../../features/chat/chat_screen.dart';
 import '../../features/chat/empty_state.dart';
 import 'app_shell.dart';
 
+/// 主内容页面切换的总时长。前半段淡出当前页面，后半段再淡入目标页面。
+const _kContentTransitionDuration = Duration(milliseconds: 240);
+
+/// 为主内容 route 创建不重叠的淡出、淡入过渡。
+///
+/// 旧 route 的 [secondaryAnimation] 在前半段从不透明变为透明；新 route 的 [animation]
+/// 在后半段才从透明变为不透明。因此两个页面之间会短暂留出空白，而不会让新旧内容叠在
+/// 一起。使用完整 path 作为 key，确保 `/c/1` 与 `/c/2` 是不同页面，能触发过渡并完整
+/// 重建会话相关 state。
+CustomTransitionPage<void> _contentTransitionPage({
+  required GoRouterState state,
+  required Widget child,
+}) {
+  return CustomTransitionPage<void>(
+    key: ValueKey<String>(state.uri.path),
+    transitionDuration: _kContentTransitionDuration,
+    reverseTransitionDuration: _kContentTransitionDuration,
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final incomingOpacity = CurvedAnimation(
+        parent: animation,
+        curve: const Interval(0.5, 1, curve: Curves.easeOut),
+      );
+      final outgoingOpacity = Tween<double>(begin: 1, end: 0).animate(
+        CurvedAnimation(
+          parent: secondaryAnimation,
+          curve: const Interval(0, 0.5, curve: Curves.easeIn),
+        ),
+      );
+      return FadeTransition(
+        opacity: outgoingOpacity,
+        child: FadeTransition(opacity: incomingOpacity, child: child),
+      );
+    },
+  );
+}
+
 /// 应用使用的 go_router instance。
 ///
 /// 使用 [Provider]（而不是 autoDispose），使 router 在整个 app session 内存活并保留
@@ -59,18 +96,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: '/',
-            builder: (context, state) =>
-                EmptyState(onNavigate: (path) => context.go(path)),
+            pageBuilder: (context, state) => _contentTransitionPage(
+              state: state,
+              child: EmptyState(onNavigate: (path) => context.go(path)),
+            ),
           ),
           GoRoute(
             path: '/c/:id',
-            builder: (context, state) {
+            pageBuilder: (context, state) {
               final idParam = state.pathParameters['id'] ?? '';
               final conversationId = int.tryParse(idParam);
-              if (conversationId == null) {
-                return const Center(child: Text('Invalid conversation id.'));
-              }
-              return ChatScreen(conversationId: conversationId);
+              return _contentTransitionPage(
+                state: state,
+                child: conversationId == null
+                    ? const Center(child: Text('Invalid conversation id.'))
+                    : ChatScreen(conversationId: conversationId),
+              );
             },
           ),
         ],
