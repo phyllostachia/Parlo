@@ -58,6 +58,7 @@ dependencies:
   # `file_picker` 和 `desktop_drop` 使用的跨平台 `XFile` abstraction。由于图片附件
   # helper 在 public signature 中导入 `XFile`，因此将其声明为直接依赖。
   cross_file: ^0.3.4+1
+  google_fonts: ^8.2.0
 
 dev_dependencies:
   flutter_test:
@@ -81,28 +82,18 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # 自托管字体文件（参见架构文档第 9 节）。将 TTF 放入应用 bundle，使应用运行时
-  # 不需要从网络获取字体，这对访问 fonts.gstatic.com 较慢的用户很重要。
+  # 自托管 UI 和自然语言字体文件（参见架构文档第 9 节）。将字体放入应用 bundle，使
+  # 应用运行时不需要从网络获取字体。
   assets:
     - assets/fonts/
 
   fonts:
-    # Source Serif 4 作为私有 Anthropic Serif 的替代字体。仅用于 display headline
-    # （UI 中少量使用的衬线文字）。
-    - family: SourceSerif4
+    # Source Han Serif SC 作为私有 Anthropic Serif 的替代字体，用于 display headline
+    # 和对话中的自然语言文本。只保留设计系统实际需要的 Medium/Bold 两个字重。
+    - family: SourceHanSerifSC
       fonts:
-        - asset: assets/fonts/SourceSerif4-Regular.ttf
+        - asset: assets/fonts/SourceHanSerifSC-Medium.otf
           weight: 400
+        - asset: assets/fonts/SourceHanSerifSC-Bold.otf
+          weight: 700
 
-    # Inter 作为私有 Anthropic Sans 的替代字体，承载其他所有 UI 文本。设计使用 400、
-    # 500、550、580 和 600 字重，其中 580 是设计使用的最大字重。Flutter 的 pubspec
-    # 只接受标准的 100 步进字重，因此将 580 字重文件放在 600 插槽中。应用不会使用
-    # FontWeight.w700 及以上字重，因此视觉上的最大字重仍符合设计。
-    - family: Inter
-      fonts:
-        - asset: assets/fonts/Inter-Regular.ttf
-          weight: 400
-        - asset: assets/fonts/Inter-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Inter-W580.ttf
-          weight: 600

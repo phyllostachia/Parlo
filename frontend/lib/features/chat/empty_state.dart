@@ -16,6 +16,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/model.dart';
 import '../../core/theme/colors.dart';
+import '../../core/theme/fonts.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/util/image_data_url.dart';
 import '../../core/widgets/error_banner.dart';
@@ -387,7 +388,6 @@ class _LargeInputField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<ParloColors>()!;
-    final textTheme = Theme.of(context).textTheme;
 
     return Shortcuts(
       shortcuts: <ShortcutActivator, Intent>{
@@ -437,12 +437,12 @@ class _LargeInputField extends StatelessWidget {
                     isCollapsed: true,
                     contentPadding: EdgeInsets.zero,
                     isDense: true,
-                    hintStyle: textTheme.bodyLarge?.copyWith(
+                    hintStyle: ParloFonts.naturalLanguageStyle.copyWith(
                       color: colors.pebble,
                       fontSize: 16,
                     ),
                   ),
-                  style: textTheme.bodyLarge?.copyWith(
+                  style: ParloFonts.naturalLanguageStyle.copyWith(
                     color: colors.carbonInk,
                     fontSize: 16,
                   ),

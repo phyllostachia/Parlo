@@ -13,7 +13,7 @@ Parlo 的 Flutter 客户端。Parlo 是一款自托管、单用户的 BYOK（自
 
 | 阶段 | 完成的内容 |
 |------|-----------|
-| 0 — 项目骨架 | `flutter create` 创建的 Web 项目、依赖声明、`build.yaml`、严格的 `analysis_options.yaml`、自托管的 Source Serif 4 与 Inter 字体、`main.dart` 和 `app.dart` |
+| 0 — 项目骨架 | `flutter create` 创建的 Web 项目、依赖声明、`build.yaml`、严格的 `analysis_options.yaml`、自托管的 Source Han Serif SC 字体、`main.dart` 和 `app.dart` |
 | 1 — 核心层 | Freezed 数据模型、`AuthStore`、带鉴权拦截器的 `dio` 实例、SSE 字节流解析器、`PlatformCapabilities` 抽象及其 Web 实现、暖纸色浅色主题、带鉴权重定向的 `go_router` ShellRoute |
 | 2 — 侧栏 | Profile 文件夹树（展开与折叠、悬停显示的「...」菜单、行内重命名、带确认的删除）、每个 profile 下的对话列表、设置入口 |
 | 3 — 聊天基础 | 空状态页面（模型选择器 + 居中大输入框）、聊天页面（顶栏 + 消息列表 + 输入框）、消息气泡、`CurrentConversationNotifier` 的完整状态机以及 `stop()` |
@@ -81,14 +81,14 @@ flutter test
 
 ## 字体
 
-Source Serif 4 与 Inter 字体从 `github.com/google/fonts` 一次性下载，并通过 `fonttools` 实例化为静态粗细的 TTF 文件。生成的字体文件存放在 `assets/fonts/` 目录中，并在 `pubspec.yaml` 中声明。应用在运行时不会发起任何网络请求来获取字体。
+字体配置集中在 `lib/core/theme/fonts.dart`，分为三类：固定的 UI 字体、对话用户消息与 AI 自然语言使用的自然语言字体，以及 Markdown 代码块和行内代码使用的代码字体。Source Han Serif SC 直接存放在 `assets/fonts/` 目录中，并在 `pubspec.yaml` 中声明。Source Han Serif SC 只包含设计系统需要的 Regular 和 Bold 字重。代码字体复用 `gpt_markdown` 自带的 JetBrains Mono 字体。应用在运行时不会发起任何网络请求来获取字体。
 
 重新生成字体文件的命令：
 
 ```bash
 python3 -m venv /tmp/fontenv && /tmp/fontenv/bin/pip install fonttools
 # 具体的字体生成脚本请参考第 0 阶段的构建步骤，该脚本通过 varLib instancer
-# 生成 SourceSerif4-Regular.ttf 和 Inter-{Regular,Medium,W580}.ttf
+# 生成 SourceHanSerifSC-{Regular,Bold}.otf
 ```
 
 ## 已知限制

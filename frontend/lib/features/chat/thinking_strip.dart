@@ -12,6 +12,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../core/theme/colors.dart';
+import '../../core/theme/fonts.dart';
 
 /// 单条 assistant message reasoning 的 collapsible view。
 class ThinkingStrip extends StatefulWidget {
@@ -173,9 +174,10 @@ class _ReasoningBodyState extends State<_ReasoningBody> {
         controller: _scrollController,
         child: SelectableText(
           widget.reasoning,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: colors.graphite, height: 1.5),
+          style: ParloFonts.naturalLanguageStyle.copyWith(
+            color: colors.graphite,
+            fontSize: 12,
+          ),
         ),
       ),
     );

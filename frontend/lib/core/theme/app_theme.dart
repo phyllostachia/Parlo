@@ -8,6 +8,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'colors.dart';
+import 'fonts.dart';
 import 'spacing.dart';
 import 'typography.dart';
 
@@ -35,8 +36,8 @@ ThemeData buildAppTheme() {
   return ThemeData(
     useMaterial3: true,
     colorScheme: colorScheme,
-    // Inter 是所有 text 的 default；serif 按 style 覆盖。
-    fontFamily: kSansFamily,
+    // UI 字体固定；display serif 和对话正文/代码字体由各自的 TextStyle 覆盖。
+    fontFamily: ParloFonts.uiFamily,
     textTheme: textTheme,
     scaffoldBackgroundColor: colors.boneParchment,
     // 通过 ThemeData extension 将 spacing 和 radius scale 提供给 widget。

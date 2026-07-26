@@ -18,11 +18,29 @@ import '../../core/network/api_client.dart';
 import '../../core/platform/platform_capabilities.dart';
 import '../../core/platform/platform_providers.dart';
 import '../../core/theme/colors.dart';
+import '../../core/theme/fonts.dart';
 import '../../core/theme/spacing.dart';
 import 'chat_providers.dart';
 import 'message_actions.dart';
 import 'thinking_strip.dart';
 import 'version_switcher.dart';
+
+/// 使用对话字体渲染 Markdown，同时为 fenced code 和 inline code 使用代码字体。
+Widget _conversationMarkdown(String content, Color textColor) {
+  return GptMarkdown(
+    content,
+    style: ParloFonts.naturalLanguageStyle.copyWith(color: textColor),
+    codeBuilder: (context, name, code, _) =>
+        _MarkdownCodeBlock(name: name, code: code),
+    highlightBuilder: (context, text, inheritedStyle) => Text(
+      text,
+      style: ParloFonts.codeStyle.copyWith(
+        color: inheritedStyle.color ?? textColor,
+        backgroundColor: inheritedStyle.backgroundColor,
+      ),
+    ),
+  );
+}
 
 /// 单条 message row。
 class MessageBubble extends ConsumerWidget {
@@ -119,12 +137,7 @@ class _UserBubble extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (message.content.isNotEmpty)
-                Text(
-                  message.content,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(color: colors.carbonInk),
-                ),
+                _conversationMarkdown(message.content, colors.carbonInk),
               if (imageUrl != null) ...[
                 SizedBox(height: spacing.s8),
                 ClipRRect(
@@ -221,12 +234,7 @@ class _AssistantBlockState extends ConsumerState<_AssistantBlock> {
             if (widget.message.content.isEmpty && widget.isStreaming)
               _StreamingPlaceholder()
             else
-              GptMarkdown(
-                widget.message.content,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyLarge?.copyWith(color: colors.carbonInk),
-              ),
+              _conversationMarkdown(widget.message.content, colors.carbonInk),
             if (widget.isStreaming && widget.message.content.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
@@ -315,6 +323,49 @@ class _StreamingPlaceholder extends StatelessWidget {
         const SizedBox(width: 12),
         Text('Thinking…', style: Theme.of(context).textTheme.bodySmall),
       ],
+    );
+  }
+}
+
+/// Markdown fenced code block，使用集中配置的代码字体。
+class _MarkdownCodeBlock extends StatelessWidget {
+  const _MarkdownCodeBlock({required this.name, required this.code});
+
+  final String name;
+  final String code;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<ParloColors>()!;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.softStone,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (name.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Text(
+                name,
+                style: textTheme.labelSmall?.copyWith(color: colors.ashen),
+              ),
+            ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.all(16),
+            child: SelectableText(
+              code,
+              style: ParloFonts.codeStyle.copyWith(color: colors.carbonInk),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

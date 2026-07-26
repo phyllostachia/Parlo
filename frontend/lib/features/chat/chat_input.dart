@@ -14,6 +14,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/colors.dart';
+import '../../core/theme/fonts.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/util/image_data_url.dart';
 import 'chat_providers.dart';
@@ -126,7 +127,6 @@ class _ChatInputState extends ConsumerState<ChatInput> {
     final spacing = Theme.of(context).extension<ParloSpacing>()!;
     final colors = Theme.of(context).extension<ParloColors>()!;
     final canAttachImage = _canAttachImage;
-    final textTheme = Theme.of(context).textTheme;
 
     return DropTarget(
       onDragDone: _handleDrop,
@@ -225,12 +225,13 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                                   isCollapsed: true,
                                   contentPadding: EdgeInsets.zero,
                                   isDense: true,
-                                  hintStyle: textTheme.bodyLarge?.copyWith(
-                                    color: colors.pebble,
-                                    fontSize: 15,
-                                  ),
+                                  hintStyle: ParloFonts.naturalLanguageStyle
+                                      .copyWith(
+                                        color: colors.pebble,
+                                        fontSize: 15,
+                                      ),
                                 ),
-                                style: textTheme.bodyLarge?.copyWith(
+                                style: ParloFonts.naturalLanguageStyle.copyWith(
                                   color: colors.carbonInk,
                                   fontSize: 15,
                                 ),
