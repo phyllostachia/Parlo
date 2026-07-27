@@ -40,7 +40,7 @@ class _ThinkingStripState extends State<ThinkingStrip> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
 
     return Container(
       decoration: BoxDecoration(
@@ -88,7 +88,7 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -165,7 +165,7 @@ class _ReasoningBodyState extends State<_ReasoningBody> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     // 限制 height，避免较长 reasoning trace 将 reply body 推出 screen；user 改为在此 box
     // 内滚动。
     return ConstrainedBox(
@@ -174,7 +174,7 @@ class _ReasoningBodyState extends State<_ReasoningBody> {
         controller: _scrollController,
         child: SelectableText(
           widget.reasoning,
-          style: ParloFonts.naturalLanguageStyle.copyWith(
+          style: TanFonts.naturalLanguageStyle.copyWith(
             color: colors.graphite,
             fontSize: 12,
           ),

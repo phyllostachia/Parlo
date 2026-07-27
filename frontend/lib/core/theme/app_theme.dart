@@ -1,4 +1,4 @@
-/// Parlo 应用组装后的 v1 light [ThemeData]。
+/// Tan 应用组装后的 v1 light [ThemeData]。
 ///
 /// 组合 [ColorScheme]（colors.dart）、[TextTheme]（typography.dart）以及 spacing/radius
 /// extension（spacing.dart）。Component theme（Card、AppBar 等）经过调整，以匹配
@@ -15,7 +15,7 @@ import 'typography.dart';
 /// Card 在 hover 或 featured 时使用的 shadow。
 ///
 /// 来自 `design.md` 的“Shadows”：4% opacity 的柔和 4px-20px wash。设计不会使用更厚重的 shadow。
-const List<BoxShadow> kParloCardShadow = [
+const List<BoxShadow> kTanCardShadow = [
   BoxShadow(
     color: Color.fromRGBO(0, 0, 0, 0.04),
     blurRadius: 20,
@@ -25,7 +25,7 @@ const List<BoxShadow> kParloCardShadow = [
 
 /// 构建 v1 light [ThemeData]。
 ThemeData buildAppTheme() {
-  const colors = ParloColors.light;
+  const colors = TanColors.light;
   final colorScheme = buildLightColorScheme();
   final textTheme = buildTextTheme(
     colors.carbonInk,
@@ -37,22 +37,18 @@ ThemeData buildAppTheme() {
     useMaterial3: true,
     colorScheme: colorScheme,
     // UI 字体固定；display serif 和对话正文/代码字体由各自的 TextStyle 覆盖。
-    fontFamily: ParloFonts.uiFamily,
+    fontFamily: TanFonts.uiFamily,
     textTheme: textTheme,
     scaffoldBackgroundColor: colors.boneParchment,
     // 通过 ThemeData extension 将 spacing 和 radius scale 提供给 widget。
-    extensions: const [
-      ParloColors.light,
-      ParloSpacing.light,
-      ParloRadius.light,
-    ],
+    extensions: const [TanColors.light, TanSpacing.light, TanRadius.light],
     // Card：paper-white surface、16px radius，默认无 shadow，使用 hairline border。匹配
     // design 的 flat printed-paper look。
     cardTheme: CardThemeData(
       color: colors.paperWhite,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(ParloRadius.light.card),
+        borderRadius: BorderRadius.circular(TanRadius.light.card),
         side: BorderSide(color: colors.chalk, width: 1),
       ),
       margin: EdgeInsets.zero,
@@ -71,7 +67,7 @@ ThemeData buildAppTheme() {
         backgroundColor: colors.carbonInk,
         foregroundColor: colors.paperWhite,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(ParloRadius.light.button),
+          borderRadius: BorderRadius.circular(TanRadius.light.button),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         textStyle: textTheme.labelLarge,
@@ -81,7 +77,7 @@ ThemeData buildAppTheme() {
       style: OutlinedButton.styleFrom(
         foregroundColor: colors.graphite,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(ParloRadius.light.button),
+          borderRadius: BorderRadius.circular(TanRadius.light.button),
         ),
         side: BorderSide(color: colors.mist, width: 1),
       ),
@@ -90,7 +86,7 @@ ThemeData buildAppTheme() {
       style: TextButton.styleFrom(
         foregroundColor: colors.graphite,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(ParloRadius.light.button),
+          borderRadius: BorderRadius.circular(TanRadius.light.button),
         ),
       ),
     ),
@@ -99,15 +95,15 @@ ThemeData buildAppTheme() {
       filled: true,
       fillColor: colors.paperWhite,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(ParloRadius.light.input),
+        borderRadius: BorderRadius.circular(TanRadius.light.input),
         borderSide: BorderSide(color: colors.mist, width: 1),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(ParloRadius.light.input),
+        borderRadius: BorderRadius.circular(TanRadius.light.input),
         borderSide: BorderSide(color: colors.mist, width: 1),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(ParloRadius.light.input),
+        borderRadius: BorderRadius.circular(TanRadius.light.input),
         borderSide: BorderSide(color: colors.graphite, width: 1),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

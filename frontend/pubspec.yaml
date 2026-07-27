@@ -1,9 +1,9 @@
-# Parlo Flutter 前端。
+# Tan Flutter 前端。
 #
 # 这是 `frontend/design.md` 和架构文档中描述的单页 AI chatbot。当前优先支持 Web；
 # 移动端平台将在后续阶段加入（参见开发计划）。
-name: parlo
-description: "Parlo AI 聊天应用"
+name: tan
+description: "Tan AI 聊天应用"
 publish_to: "none"
 version: 1.0.0+1
 

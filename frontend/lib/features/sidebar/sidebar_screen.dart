@@ -44,7 +44,7 @@ class SidebarScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     final contentWidth = collapsed ? 56.0 : 248.0;
 
     // Design “Sidebar”：expanded 时宽 280px，collapsed 时宽 80px；使用 soft-stone fill、
@@ -137,7 +137,7 @@ class _SidebarHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     if (collapsed) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -176,7 +176,7 @@ class _SidebarHeader extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Parlo',
+                  'Tan',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontSize: 20,
                     color: colors.carbonInk,
@@ -248,7 +248,7 @@ class _SidebarActionButtonState extends State<_SidebarActionButton> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     final child = Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
@@ -333,7 +333,7 @@ class _SidebarIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       icon: icon,
-      color: Theme.of(context).extension<ParloColors>()!.ashen,
+      color: Theme.of(context).extension<TanColors>()!.ashen,
       tooltip: tooltip,
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints(minWidth: 56, minHeight: 36),

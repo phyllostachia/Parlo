@@ -1,6 +1,6 @@
-# Parlo 后端
+# Tan 后端
 
-Parlo BYOK AI Chatbot 的自托管、单用户后端。
+Tan BYOK AI Chatbot 的自托管、单用户后端。
 它负责管理 SQLite 数据库，并将流式聊天请求代理到两种上游 model-provider protocol 之一。
 
 ## 配置
@@ -47,7 +47,8 @@ cp config.yaml.example config.yaml   # 按需编辑模型和来源
 cp .env.example .env                 # 填写 AUTH_TOKEN 和 *_API_KEY
 ```
 
-配置文件路径默认为当前工作目录中的 `config.yaml`；可以通过 `PARLO_CONFIG_PATH` 环境变量覆盖。
+配置文件路径默认为当前工作目录中的 `config.yaml`；可以通过 `TAN_CONFIG_PATH` 环境变量覆盖。
+为兼容旧部署，如果未设置该变量，也会读取 `PARLO_CONFIG_PATH`。
 
 ## 运行
 

@@ -63,7 +63,7 @@ class _MessageListState extends ConsumerState<MessageList> {
     final pathAsync = ref.watch(
       currentConversationProvider(widget.conversationId),
     );
-    final spacing = Theme.of(context).extension<ParloSpacing>()!;
+    final spacing = Theme.of(context).extension<TanSpacing>()!;
 
     return pathAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),

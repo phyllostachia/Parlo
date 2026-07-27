@@ -12,7 +12,10 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// base URL 在 `shared_preferences` 中存储时使用的 key。
-const String kBaseUrlKey = 'parlo_base_url';
+const String kBaseUrlKey = 'tan_base_url';
+
+// 兼容改名前已经保存的地址；首次读取后会迁移到新 key。
+const String _legacyBaseUrlKey = 'parlo_base_url';
 
 /// backend base URL 的 mutable holder。
 ///
@@ -40,9 +43,13 @@ class BaseUrlStore extends ChangeNotifier {
   /// 在启动时调用一次。如果之前持久化了非空 value，它会成为当前 value，并通知 listener，
   /// 使 dio provider 使用恢复的 host rebuild。
   Future<void> bootstrap() async {
-    final saved = _prefs.getString(kBaseUrlKey);
+    final saved =
+        _prefs.getString(kBaseUrlKey) ?? _prefs.getString(_legacyBaseUrlKey);
     if (saved != null && saved.isNotEmpty) {
       _value = saved;
+      if (_prefs.getString(kBaseUrlKey) == null) {
+        _prefs.setString(kBaseUrlKey, saved);
+      }
       notifyListeners();
     }
   }
@@ -63,5 +70,6 @@ class BaseUrlStore extends ChangeNotifier {
     _value = '';
     notifyListeners();
     _prefs.remove(kBaseUrlKey);
+    _prefs.remove(_legacyBaseUrlKey);
   }
 }

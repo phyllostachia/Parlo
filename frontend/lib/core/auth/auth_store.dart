@@ -10,7 +10,10 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// token 在 `shared_preferences` 中存储时使用的 key。
-const String kAuthTokenKey = 'parlo_token';
+const String kAuthTokenKey = 'tan_token';
+
+// 兼容改名前已经保存的 token；首次读取后会迁移到新 key。
+const String _legacyAuthTokenKey = 'parlo_token';
 
 /// bearer token 和“当前 token 是否已知未授权” flag 的 mutable holder。
 ///
@@ -47,10 +50,15 @@ class AuthStore extends ChangeNotifier {
   /// 在启动时调用一次。如果之前持久化了非空 token，它会成为当前 token，并通知 listener，
   /// 使 router 重新计算 redirect。
   Future<void> bootstrap() async {
-    final saved = _prefs.getString(kAuthTokenKey);
+    final saved =
+        _prefs.getString(kAuthTokenKey) ??
+        _prefs.getString(_legacyAuthTokenKey);
     if (saved != null && saved.isNotEmpty) {
       _token = saved;
       _isUnauthorized = false;
+      if (_prefs.getString(kAuthTokenKey) == null) {
+        _prefs.setString(kAuthTokenKey, saved);
+      }
       notifyListeners();
     }
   }
@@ -74,6 +82,7 @@ class AuthStore extends ChangeNotifier {
     _isUnauthorized = false;
     notifyListeners();
     _prefs.remove(kAuthTokenKey);
+    _prefs.remove(_legacyAuthTokenKey);
   }
 
   /// 将当前 token 标记为被 401 response 拒绝。

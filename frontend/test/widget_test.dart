@@ -1,6 +1,6 @@
 /// 阶段 3 smoke test。
 ///
-/// 验证 [ParloApp] 在 router 接入后可以 build，并渲染 empty-state headline。Sidebar 的
+/// 验证 [TanApp] 在 router 接入后可以 build，并渲染 empty-state headline。Sidebar 的
 /// profile list 和 model registry 都被 stub，使 test 不会发起真实 network call。
 library;
 
@@ -8,12 +8,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:parlo/app.dart';
-import 'package:parlo/core/auth/auth_providers.dart';
-import 'package:parlo/core/models/model.dart';
-import 'package:parlo/core/models/profile.dart';
-import 'package:parlo/features/chat/chat_providers.dart';
-import 'package:parlo/features/sidebar/sidebar_providers.dart';
+import 'package:tan/app.dart';
+import 'package:tan/core/auth/auth_providers.dart';
+import 'package:tan/core/models/model.dart';
+import 'package:tan/core/models/profile.dart';
+import 'package:tan/features/chat/chat_providers.dart';
+import 'package:tan/features/sidebar/sidebar_providers.dart';
 
 /// 返回 empty list 且不访问 network 的 [ProfilesNotifier]，仅供 test 使用。
 class _EmptyProfilesNotifier extends ProfilesNotifier {
@@ -28,7 +28,7 @@ class _EmptyModelsNotifier extends ModelsNotifier {
 }
 
 void main() {
-  testWidgets('ParloApp renders the empty-state headline', (tester) async {
+  testWidgets('TanApp renders the empty-state headline', (tester) async {
     // 使用 in-memory SharedPreferences，使 auth store 在 test 期间不触碰 platform channel。
     SharedPreferences.setMockInitialValues(<String, Object>{});
     final prefs = await SharedPreferences.getInstance();
@@ -43,7 +43,7 @@ void main() {
           // Stub model registry，使 empty state 也不会调用 GET /api/models。
           modelsProvider.overrideWith(() => _EmptyModelsNotifier()),
         ],
-        child: const ParloApp(),
+        child: const TanApp(),
       ),
     );
 

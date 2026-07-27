@@ -53,7 +53,7 @@ def create_app() -> FastAPI:
     """构建已配置的 FastAPI application instance。"""
     settings = get_settings()
     app = FastAPI(
-        title="Parlo Backend",
+        title="Tan Backend",
         version="0.1.0",
         lifespan=lifespan,
     )

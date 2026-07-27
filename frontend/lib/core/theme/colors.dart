@@ -8,13 +8,13 @@ import 'package:flutter/material.dart';
 
 /// 11 个 design color 加上 clay，以 extension 形式在 [ThemeData] 上提供。
 ///
-/// Widget 通过 `Theme.of(context).extension<ParloColors>()!` 读取这些 value，使 hex value
+/// Widget 通过 `Theme.of(context).extension<TanColors>()!` 读取这些 value，使 hex value
 /// 只保存在一个位置。下面的 [ColorScheme] 携带其中能够自然映射到 Material slot 的 value，
 /// 其余 value 都保存在这里。
 @immutable
-class ParloColors extends ThemeExtension<ParloColors> {
+class TanColors extends ThemeExtension<TanColors> {
   /// 创建完整 palette。
-  const ParloColors({
+  const TanColors({
     required this.boneParchment,
     required this.paperWhite,
     required this.softStone,
@@ -30,8 +30,8 @@ class ParloColors extends ThemeExtension<ParloColors> {
 
   /// `design.md` 中的 light palette。
   ///
-  /// `obsidian` 为完整性而保留，但 v1 未使用（design 只将它用于 footer，而 Parlo 没有 footer）。
-  static const light = ParloColors(
+  /// `obsidian` 为完整性而保留，但 v1 未使用（design 只将它用于 footer，而 Tan 没有 footer）。
+  static const light = TanColors(
     boneParchment: Color(0xFFF8F8F6),
     paperWhite: Color(0xFFFFFFFF),
     softStone: Color(0xFFEFEEEB),
@@ -80,7 +80,7 @@ class ParloColors extends ThemeExtension<ParloColors> {
   final Color clay;
 
   @override
-  ParloColors copyWith({
+  TanColors copyWith({
     Color? boneParchment,
     Color? paperWhite,
     Color? softStone,
@@ -93,7 +93,7 @@ class ParloColors extends ThemeExtension<ParloColors> {
     Color? obsidian,
     Color? clay,
   }) {
-    return ParloColors(
+    return TanColors(
       boneParchment: boneParchment ?? this.boneParchment,
       paperWhite: paperWhite ?? this.paperWhite,
       softStone: softStone ?? this.softStone,
@@ -109,8 +109,8 @@ class ParloColors extends ThemeExtension<ParloColors> {
   }
 
   @override
-  ParloColors lerp(ParloColors? other, double t) {
-    if (other is! ParloColors) return this;
+  TanColors lerp(TanColors? other, double t) {
+    if (other is! TanColors) return this;
     // 当前还没有 dark theme，因此不需要 interpolation。阶段 9 加入 dark palette 后，
     // 将这里替换为每个 field 的 Color.lerp。
     return this;
@@ -120,9 +120,9 @@ class ParloColors extends ThemeExtension<ParloColors> {
 /// 构建 v1 light [ColorScheme]。
 ///
 /// 映射遵循架构（第 9 节）：parchment canvas 是 `surface`，暖近黑色是 `onSurface` 和
-/// `primary`，白色是 `onPrimary`。其余 palette color 位于 [ParloColors] 上。
+/// `primary`，白色是 `onPrimary`。其余 palette color 位于 [TanColors] 上。
 ColorScheme buildLightColorScheme() {
-  const c = ParloColors.light;
+  const c = TanColors.light;
   return ColorScheme.light(
     // 暖色 parchment page canvas。
     surface: c.boneParchment,

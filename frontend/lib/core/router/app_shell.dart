@@ -18,7 +18,7 @@ import '../../features/sidebar/sidebar_screen.dart';
 /// 默认显示完整 sidebar 的宽度阈值。
 const double _kWideBreakpoint = 800;
 
-/// Parlo single-page app 的根 layout。
+/// Tan single-page app 的根 layout。
 ///
 /// `child` 是 [ShellRoute] 下 matched route 构建的 widget。`currentConversationId` 是 route
 /// 中的 conversation id（用户处于 empty state 时为 `null`），使 sidebar 可以高亮 active

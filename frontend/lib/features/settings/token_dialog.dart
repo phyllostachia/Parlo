@@ -85,8 +85,8 @@ class _TokenDialogState extends ConsumerState<TokenDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
-    final spacing = Theme.of(context).extension<ParloSpacing>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
+    final spacing = Theme.of(context).extension<TanSpacing>()!;
     final authStore = ref.watch(authStoreProvider);
     final baseUrlStore = ref.watch(baseUrlStoreProvider);
     final isUnauthorized = authStore.isUnauthorized;
@@ -98,10 +98,10 @@ class _TokenDialogState extends ConsumerState<TokenDialog> {
     final String headline;
     final String helper;
     if (isFirstUse) {
-      headline = 'Welcome to Parlo';
+      headline = 'Welcome to Tan';
       helper =
           'Enter the shared bearer token and backend address to connect '
-          'to your Parlo backend.';
+          'to your Tan backend.';
     } else if (isUnauthorized) {
       headline = 'Re-enter your token';
       helper =
@@ -111,18 +111,18 @@ class _TokenDialogState extends ConsumerState<TokenDialog> {
       headline = 'Set your backend address';
       helper =
           'No backend address is set. Enter the domain and port of your '
-          'Parlo backend to continue.';
+          'Tan backend to continue.';
     } else {
       headline = 'Re-enter your details';
       helper =
           'Enter the shared bearer token and backend address to connect '
-          'to your Parlo backend.';
+          'to your Tan backend.';
     }
 
     return AlertDialog(
       backgroundColor: colors.paperWhite,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(ParloRadius.light.elevatedCard),
+        borderRadius: BorderRadius.circular(TanRadius.light.elevatedCard),
       ),
       title: Text(headline),
       content: ConstrainedBox(

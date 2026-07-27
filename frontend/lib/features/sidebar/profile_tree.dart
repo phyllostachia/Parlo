@@ -192,7 +192,7 @@ class _ProfileFolderState extends ConsumerState<_ProfileFolder> {
         .watch(expandedProfilesProvider)
         .contains(widget.profile.id);
 
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -376,7 +376,7 @@ class _ConversationRowState extends ConsumerState<_ConversationRow> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     final title = widget.conversation.title.isEmpty
         ? 'New conversation'
         : widget.conversation.title;
@@ -467,7 +467,7 @@ class _TreeRowState extends State<_TreeRow> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     final background = widget.highlight
         ? (widget.highlightColor ?? colors.chalk)
         : Colors.transparent;
@@ -545,7 +545,7 @@ class _IndentedHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final spacing = Theme.of(context).extension<ParloSpacing>()!;
+    final spacing = Theme.of(context).extension<TanSpacing>()!;
     return Padding(
       padding: EdgeInsets.fromLTRB(
         spacing.s32,
@@ -576,7 +576,7 @@ class _CenteredHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final spacing = Theme.of(context).extension<ParloSpacing>()!;
+    final spacing = Theme.of(context).extension<TanSpacing>()!;
     return Center(
       child: Padding(
         padding: EdgeInsets.all(spacing.s16),
@@ -608,7 +608,7 @@ class _CollapsedHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     return Center(child: Icon(icon, size: 16, color: colors.ashen));
   }
 }
@@ -636,7 +636,7 @@ class _CollapsedTreeRowState extends State<_CollapsedTreeRow> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     return Tooltip(
       message: widget.tooltip,
       child: MouseRegion(

@@ -39,7 +39,7 @@ class VersionSwitcher extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     final activeIndex = siblings.siblings.indexOf(siblings.activeId);
     // Position 使用 1-based 显示，使 user 看到“2 / 3”，而不是带 zero-indexed number 的
     // “1 / 2”。

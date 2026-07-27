@@ -10,14 +10,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:parlo/app.dart';
-import 'package:parlo/core/auth/auth_providers.dart';
-import 'package:parlo/core/auth/auth_store.dart';
-import 'package:parlo/core/models/model.dart';
-import 'package:parlo/core/models/profile.dart';
-import 'package:parlo/core/network/base_url_store.dart';
-import 'package:parlo/features/chat/chat_providers.dart';
-import 'package:parlo/features/sidebar/sidebar_providers.dart';
+import 'package:tan/app.dart';
+import 'package:tan/core/auth/auth_providers.dart';
+import 'package:tan/core/auth/auth_store.dart';
+import 'package:tan/core/models/model.dart';
+import 'package:tan/core/models/profile.dart';
+import 'package:tan/core/network/base_url_store.dart';
+import 'package:tan/features/chat/chat_providers.dart';
+import 'package:tan/features/sidebar/sidebar_providers.dart';
 
 /// 返回 empty list 且不访问 network 的 [ProfilesNotifier]，仅供 test 使用。
 class _EmptyProfilesNotifier extends ProfilesNotifier {
@@ -45,13 +45,13 @@ void main() {
           profilesProvider.overrideWith(() => _EmptyProfilesNotifier()),
           modelsProvider.overrideWith(() => _EmptyModelsNotifier()),
         ],
-        child: const ParloApp(),
+        child: const TanApp(),
       ),
     );
     await tester.pumpAndSettle();
 
     // Dialog 因尚未设置 token 而打开。Headline 是“first use”variant。
-    expect(find.text('Welcome to Parlo'), findsOneWidget);
+    expect(find.text('Welcome to Tan'), findsOneWidget);
     expect(find.text('Bearer token'), findsOneWidget);
     expect(find.text('Backend domain'), findsOneWidget);
     expect(find.text('Port'), findsOneWidget);
@@ -68,19 +68,19 @@ void main() {
           profilesProvider.overrideWith(() => _EmptyProfilesNotifier()),
           modelsProvider.overrideWith(() => _EmptyModelsNotifier()),
         ],
-        child: const ParloApp(),
+        child: const TanApp(),
       ),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Welcome to Parlo'), findsOneWidget);
+    expect(find.text('Welcome to Tan'), findsOneWidget);
 
     // Dialog 有三个 text field：domain、port、token（按此顺序）。
     final fields = find.descendant(
       of: find.byType(AlertDialog),
       matching: find.byType(TextField),
     );
-    await tester.enterText(fields.at(0), 'parlo.example.com');
+    await tester.enterText(fields.at(0), 'tan.example.com');
     await tester.pump();
     await tester.enterText(fields.at(1), '8000');
     await tester.pump();
@@ -91,11 +91,11 @@ void main() {
     await tester.pumpAndSettle();
 
     // 两个 value 都写入且 store 通知 host 后，dialog 关闭。
-    expect(find.text('Welcome to Parlo'), findsNothing);
+    expect(find.text('Welcome to Tan'), findsNothing);
 
     // Token 和 base URL 都已持久化到 SharedPreferences。
     expect(prefs.getString(kAuthTokenKey), 'test-token');
-    expect(prefs.getString(kBaseUrlKey), 'https://parlo.example.com:8000');
+    expect(prefs.getString(kBaseUrlKey), 'https://tan.example.com:8000');
   });
 
   testWidgets(
@@ -105,7 +105,7 @@ void main() {
       // 不应打开 dialog。
       SharedPreferences.setMockInitialValues(<String, Object>{
         kAuthTokenKey: 'already-here',
-        kBaseUrlKey: 'https://parlo.example.com:8000',
+        kBaseUrlKey: 'https://tan.example.com:8000',
       });
       final prefs = await SharedPreferences.getInstance();
 
@@ -116,12 +116,12 @@ void main() {
             profilesProvider.overrideWith(() => _EmptyProfilesNotifier()),
             modelsProvider.overrideWith(() => _EmptyModelsNotifier()),
           ],
-          child: const ParloApp(),
+          child: const TanApp(),
         ),
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Welcome to Parlo'), findsNothing);
+      expect(find.text('Welcome to Tan'), findsNothing);
       expect(find.text('Set your backend address'), findsNothing);
     },
   );
@@ -143,12 +143,12 @@ void main() {
           profilesProvider.overrideWith(() => _EmptyProfilesNotifier()),
           modelsProvider.overrideWith(() => _EmptyModelsNotifier()),
         ],
-        child: const ParloApp(),
+        child: const TanApp(),
       ),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Welcome to Parlo'), findsNothing);
+    expect(find.text('Welcome to Tan'), findsNothing);
     expect(find.text('Set your backend address'), findsOneWidget);
     expect(find.text('Backend domain'), findsOneWidget);
     expect(find.text('Port'), findsOneWidget);
@@ -167,7 +167,7 @@ void main() {
           profilesProvider.overrideWith(() => _EmptyProfilesNotifier()),
           modelsProvider.overrideWith(() => _EmptyModelsNotifier()),
         ],
-        child: const ParloApp(),
+        child: const TanApp(),
       ),
     );
     await tester.pumpAndSettle();
@@ -187,7 +187,7 @@ void main() {
     expect(saveButton().onPressed, isNull);
 
     // 填写 domain；Save 仍禁用，因为 port 缺失。
-    await tester.enterText(fields.at(0), 'parlo.example.com');
+    await tester.enterText(fields.at(0), 'tan.example.com');
     await tester.pump();
     expect(saveButton().onPressed, isNull);
 

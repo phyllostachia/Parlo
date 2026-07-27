@@ -49,7 +49,7 @@
                       "id": "nQADD",
                       "name": "Brand Wordmark",
                       "fill": "$carbon-ink",
-                      "content": "Parlo",
+                      "content": "Tan",
                       "fontFamily": "$font-serif",
                       "fontSize": 20,
                       "fontWeight": "normal"
@@ -1197,7 +1197,7 @@
                       "id": "c1BwW",
                       "name": "Brand Wordmark",
                       "fill": "$carbon-ink",
-                      "content": "Parlo",
+                      "content": "Tan",
                       "fontFamily": "$font-serif",
                       "fontSize": 20,
                       "fontWeight": "normal"
@@ -1845,7 +1845,7 @@
                       "id": "b9Op8e",
                       "name": "Brand Wordmark",
                       "fill": "$carbon-ink",
-                      "content": "Parlo",
+                      "content": "Tan",
                       "fontFamily": "$font-serif",
                       "fontSize": 20,
                       "fontWeight": "normal"
@@ -2503,7 +2503,7 @@
                       "fill": "$ashen",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "请输入共享的 Bearer token 以继续使用 Parlo。",
+                      "content": "请输入共享的 Bearer token 以继续使用 Tan。",
                       "lineHeight": 1.5,
                       "fontFamily": "$font-sans",
                       "fontSize": 14,
@@ -2617,7 +2617,7 @@
                       "id": "d8tUf",
                       "name": "Brand Wordmark",
                       "fill": "$carbon-ink",
-                      "content": "Parlo",
+                      "content": "Tan",
                       "fontFamily": "$font-serif",
                       "fontSize": 20,
                       "fontWeight": "normal"

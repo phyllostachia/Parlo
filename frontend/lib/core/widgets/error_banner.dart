@@ -30,7 +30,7 @@ class ErrorBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),

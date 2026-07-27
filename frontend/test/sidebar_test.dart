@@ -11,17 +11,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:parlo/app.dart';
-import 'package:parlo/core/auth/auth_providers.dart';
-import 'package:parlo/core/auth/auth_store.dart';
-import 'package:parlo/core/models/model.dart';
-import 'package:parlo/core/models/profile.dart';
-import 'package:parlo/core/network/base_url_store.dart';
-import 'package:parlo/core/router/app_shell.dart';
-import 'package:parlo/core/theme/app_theme.dart';
-import 'package:parlo/features/chat/chat_providers.dart';
-import 'package:parlo/features/sidebar/sidebar_screen.dart';
-import 'package:parlo/features/sidebar/sidebar_providers.dart';
+import 'package:tan/app.dart';
+import 'package:tan/core/auth/auth_providers.dart';
+import 'package:tan/core/auth/auth_store.dart';
+import 'package:tan/core/models/model.dart';
+import 'package:tan/core/models/profile.dart';
+import 'package:tan/core/network/base_url_store.dart';
+import 'package:tan/core/router/app_shell.dart';
+import 'package:tan/core/theme/app_theme.dart';
+import 'package:tan/features/chat/chat_providers.dart';
+import 'package:tan/features/sidebar/sidebar_screen.dart';
+import 'package:tan/features/sidebar/sidebar_providers.dart';
 
 /// 返回固定 list 且不访问 network 的 [ProfilesNotifier]，供 sidebar test 使用。
 class _FixedProfilesNotifier extends ProfilesNotifier {
@@ -71,7 +71,7 @@ void main() {
           // Stub model registry，使 empty state 不会发起真实 network request。
           modelsProvider.overrideWith(() => _EmptyModelsNotifier()),
         ],
-        child: const ParloApp(),
+        child: const TanApp(),
       ),
     );
     await tester.pumpAndSettle();
@@ -104,7 +104,7 @@ void main() {
           profilesProvider.overrideWith(() => _FixedProfilesNotifier(profiles)),
           modelsProvider.overrideWith(() => _EmptyModelsNotifier()),
         ],
-        child: const ParloApp(),
+        child: const TanApp(),
       ),
     );
     await tester.pumpAndSettle();
@@ -150,7 +150,7 @@ void main() {
           profilesProvider.overrideWith(() => _EmptyProfilesNotifier()),
           modelsProvider.overrideWith(() => _EmptyModelsNotifier()),
         ],
-        child: const ParloApp(),
+        child: const TanApp(),
       ),
     );
     await tester.pumpAndSettle();
@@ -260,7 +260,7 @@ void main() {
     expect(find.byType(SidebarScreen), findsOneWidget);
     expect(tester.getSize(find.byType(SidebarScreen)).width, 80);
     expect(find.byTooltip('展开侧栏'), findsOneWidget);
-    expect(find.text('Parlo'), findsNothing);
+    expect(find.text('Tan'), findsNothing);
 
     await tester.tap(find.byTooltip('展开侧栏'));
     await tester.pumpAndSettle();

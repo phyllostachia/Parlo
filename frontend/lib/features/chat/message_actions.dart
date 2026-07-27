@@ -53,7 +53,7 @@ class _MessageActionsState extends State<MessageActions> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -100,7 +100,7 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     return IconButton(
       icon: Icon(icon),
       iconSize: 16,

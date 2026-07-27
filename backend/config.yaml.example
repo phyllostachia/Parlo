@@ -1,4 +1,4 @@
-# Parlo 后端配置文件。
+# Tan 后端配置文件。
 #
 # 将此文件复制为 `config.yaml`（放在启动服务器的同一目录中）并进行编辑。
 # 服务器启动时会通过 `load_config` 读取该文件。
@@ -20,6 +20,7 @@ server:
 
 # SQLite 数据库 URL。默认会将数据库文件存储在 ./data 下。
 database:
+  # 保留旧数据库文件名，以便已有部署在改名后继续使用原数据。
   url: sqlite+aiosqlite:///./data/parlo.db
 
 # 图片上传存储。

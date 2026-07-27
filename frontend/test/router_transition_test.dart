@@ -12,16 +12,16 @@ import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:parlo/app.dart';
-import 'package:parlo/core/auth/auth_providers.dart';
-import 'package:parlo/core/auth/auth_store.dart';
-import 'package:parlo/core/models/model.dart';
-import 'package:parlo/core/models/profile.dart';
-import 'package:parlo/core/network/api_client.dart';
-import 'package:parlo/core/network/base_url_store.dart';
-import 'package:parlo/core/router/app_shell.dart';
-import 'package:parlo/features/chat/chat_providers.dart';
-import 'package:parlo/features/sidebar/sidebar_providers.dart';
+import 'package:tan/app.dart';
+import 'package:tan/core/auth/auth_providers.dart';
+import 'package:tan/core/auth/auth_store.dart';
+import 'package:tan/core/models/model.dart';
+import 'package:tan/core/models/profile.dart';
+import 'package:tan/core/network/api_client.dart';
+import 'package:tan/core/network/base_url_store.dart';
+import 'package:tan/core/router/app_shell.dart';
+import 'package:tan/features/chat/chat_providers.dart';
+import 'package:tan/features/sidebar/sidebar_providers.dart';
 
 /// Router test 使用的 mock Dio。
 class _MockDio extends Mock implements Dio {}
@@ -61,7 +61,7 @@ void main() {
           modelsProvider.overrideWith(() => _EmptyModelsNotifier()),
           profilesProvider.overrideWith(() => _EmptyProfilesNotifier()),
         ],
-        child: const ParloApp(),
+        child: const TanApp(),
       ),
     );
     await tester.pumpAndSettle();

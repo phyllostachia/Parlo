@@ -70,13 +70,13 @@ class _SettingsPanelDialogState extends ConsumerState<SettingsPanelDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
-    final spacing = Theme.of(context).extension<ParloSpacing>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
+    final spacing = Theme.of(context).extension<TanSpacing>()!;
 
     return Dialog(
       backgroundColor: colors.paperWhite,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(ParloRadius.light.elevatedCard),
+        borderRadius: BorderRadius.circular(TanRadius.light.elevatedCard),
       ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 720, maxHeight: 700),
@@ -234,7 +234,7 @@ class _ThemeSection extends StatelessWidget {
           'v1 supports the light theme. Dark and system-follow arrive in a '
           'later phase.',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).extension<ParloColors>()!.ashen,
+            color: Theme.of(context).extension<TanColors>()!.ashen,
           ),
         ),
         const SizedBox(height: 8),
@@ -271,7 +271,7 @@ class _ThemeOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     final mutedColor = disabledColor ?? colors.pebble;
     final radioColor = disabled ? colors.mist : colors.graphite;
 

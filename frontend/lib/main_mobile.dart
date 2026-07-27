@@ -1,4 +1,4 @@
-/// Parlo 应用在 mobile（Android 和 iOS）上的 entry point。
+/// Tan 应用在 mobile（Android 和 iOS）上的 entry point。
 ///
 /// 使用 `flutter run -t lib/main_mobile.dart` 启动带有 mobile platform capabilities 的应用。
 /// 可以将 mobile build system（`android/` 和 `ios/`）配置为指向此 entry point，使设备上
@@ -27,7 +27,7 @@ import 'core/auth/auth_providers.dart';
 import 'core/platform/mobile_capabilities.dart';
 import 'core/platform/platform_providers.dart';
 
-/// 使用 mobile platform capabilities 启动 Parlo 应用。
+/// 使用 mobile platform capabilities 启动 Tan 应用。
 Future<void> main() async {
   // 在触碰 platform channel 的任何 async work（包括 `SharedPreferences.getInstance()`）
   // 之前都必须调用。
@@ -45,7 +45,7 @@ Future<void> main() async {
           const MobilePlatformCapabilities(),
         ),
       ],
-      child: const ParloApp(),
+      child: const TanApp(),
     ),
   );
 }

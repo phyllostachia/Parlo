@@ -6,11 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:parlo/core/auth/auth_providers.dart';
-import 'package:parlo/core/auth/auth_store.dart';
-import 'package:parlo/core/network/base_url_store.dart';
-import 'package:parlo/core/theme/app_theme.dart';
-import 'package:parlo/features/sidebar/settings_panel.dart';
+import 'package:tan/core/auth/auth_providers.dart';
+import 'package:tan/core/auth/auth_store.dart';
+import 'package:tan/core/network/base_url_store.dart';
+import 'package:tan/core/theme/app_theme.dart';
+import 'package:tan/features/sidebar/settings_panel.dart';
 
 void main() {
   testWidgets('matches the desktop panel layout and saves all settings', (

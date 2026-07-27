@@ -1,6 +1,6 @@
 /// Backend address 的共享 input，拆分为 domain field 和 port field。
 ///
-/// Backend URL 是 required value；每个平台都要求 user 告诉 Parlo 要通信的 host。没有
+/// Backend URL 是 required value；每个平台都要求 user 告诉 Tan 要通信的 host。没有
 /// same-origin fallback。为使 input 更宽容，会自动检测 scheme：包含 `localhost`、
 /// `127.0.0.1` 或 `0.0.0.0` 的 domain 使用 `http://`，其他 domain 使用 `https://`。如果
 /// user 已经输入 scheme，则保持原样。
@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 /// 将已存储的 base URL 解析为 domain 和 port。
 ///
 /// 当 [url] 为空或不包含 explicit port 时返回 `null`。Port 是 required，因此像
-/// `https://parlo.example.com` 这样不带 port 的 stored value 会被视为无法解析，field 从空值开始。
+/// `https://tan.example.com` 这样不带 port 的 stored value 会被视为无法解析，field 从空值开始。
 ({String domain, String port})? parseBackendUrl(String url) {
   if (url.isEmpty) return null;
   final uri = Uri.tryParse(url);
@@ -32,7 +32,7 @@ import 'package:flutter/material.dart';
 /// 输入无效时返回 `null`。调用方使用它决定 Save button 是否启用。
 ///
 /// 返回 URL 从不带 trailing slash，并且始终携带 explicit port，例如
-/// `https://parlo.example.com:8000`。
+/// `https://tan.example.com:8000`。
 String? buildBackendUrl(String domainRaw, String portRaw) {
   final domain = domainRaw.trim();
   final port = portRaw.trim();
@@ -147,7 +147,7 @@ class _BackendUrlFieldState extends State<BackendUrlField> {
             controller: widget.domainController,
             decoration: InputDecoration(
               labelText: 'Backend domain',
-              hintText: 'parlo.example.com',
+              hintText: 'tan.example.com',
               errorText: _domainError,
             ),
             keyboardType: TextInputType.url,

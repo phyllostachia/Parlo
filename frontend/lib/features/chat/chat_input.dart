@@ -124,8 +124,8 @@ class _ChatInputState extends ConsumerState<ChatInput> {
   Widget build(BuildContext context) {
     final streamState = ref.watch(streamStateProvider);
     final isStreaming = streamState == StreamState.streaming;
-    final spacing = Theme.of(context).extension<ParloSpacing>()!;
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final spacing = Theme.of(context).extension<TanSpacing>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     final canAttachImage = _canAttachImage;
 
     return DropTarget(
@@ -225,13 +225,13 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                                   isCollapsed: true,
                                   contentPadding: EdgeInsets.zero,
                                   isDense: true,
-                                  hintStyle: ParloFonts.naturalLanguageStyle
+                                  hintStyle: TanFonts.naturalLanguageStyle
                                       .copyWith(
                                         color: colors.pebble,
                                         fontSize: 15,
                                       ),
                                 ),
-                                style: ParloFonts.naturalLanguageStyle.copyWith(
+                                style: TanFonts.naturalLanguageStyle.copyWith(
                                   color: colors.carbonInk,
                                   fontSize: 15,
                                 ),
@@ -272,7 +272,7 @@ class _AttachButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     return IconButton(
       tooltip: 'Attach image',
       icon: const Icon(Icons.attach_file),
@@ -300,7 +300,7 @@ class _SendButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     return Material(
       color: colors.carbonInk,
       borderRadius: BorderRadius.circular(8),

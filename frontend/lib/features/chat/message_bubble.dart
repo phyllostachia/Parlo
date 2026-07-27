@@ -29,12 +29,12 @@ import 'version_switcher.dart';
 Widget _conversationMarkdown(String content, Color textColor) {
   return GptMarkdown(
     content,
-    style: ParloFonts.naturalLanguageStyle.copyWith(color: textColor),
+    style: TanFonts.naturalLanguageStyle.copyWith(color: textColor),
     codeBuilder: (context, name, code, _) =>
         _MarkdownCodeBlock(name: name, code: code),
     highlightBuilder: (context, text, inheritedStyle) => Text(
       text,
-      style: ParloFonts.codeStyle.copyWith(
+      style: TanFonts.codeStyle.copyWith(
         color: inheritedStyle.color ?? textColor,
         backgroundColor: inheritedStyle.backgroundColor,
       ),
@@ -113,8 +113,8 @@ class _UserBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
-    final spacing = Theme.of(context).extension<ParloSpacing>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
+    final spacing = Theme.of(context).extension<TanSpacing>()!;
     final baseUrl = ref.read(baseUrlProvider);
     final imageUrl = message.imageUrl == null || message.imageUrl!.isEmpty
         ? null
@@ -129,7 +129,7 @@ class _UserBubble extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color: colors.softStone,
-            borderRadius: BorderRadius.circular(ParloRadius.light.card),
+            borderRadius: BorderRadius.circular(TanRadius.light.card),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Column(
@@ -141,7 +141,7 @@ class _UserBubble extends StatelessWidget {
               if (imageUrl != null) ...[
                 SizedBox(height: spacing.s8),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(ParloRadius.light.card),
+                  borderRadius: BorderRadius.circular(TanRadius.light.card),
                   child: Image.network(imageUrl),
                 ),
               ],
@@ -197,8 +197,8 @@ class _AssistantBlockState extends ConsumerState<_AssistantBlock> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
-    final spacing = Theme.of(context).extension<ParloSpacing>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
+    final spacing = Theme.of(context).extension<TanSpacing>()!;
     final models = widget.ref.watch(modelListProvider);
     final modelName = _resolveModelName(models, widget.conversation.modelId);
     final capabilities = widget.ref.read(platformCapabilitiesProvider);
@@ -308,7 +308,7 @@ class _AssistantBlockState extends ConsumerState<_AssistantBlock> {
 class _StreamingPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -336,7 +336,7 @@ class _MarkdownCodeBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
@@ -361,7 +361,7 @@ class _MarkdownCodeBlock extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: SelectableText(
               code,
-              style: ParloFonts.codeStyle.copyWith(color: colors.carbonInk),
+              style: TanFonts.codeStyle.copyWith(color: colors.carbonInk),
             ),
           ),
         ],
@@ -441,7 +441,7 @@ class _SystemBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(

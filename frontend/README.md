@@ -1,6 +1,6 @@
-# Parlo — Flutter Frontend
+# Tan — Flutter Frontend
 
-Parlo 的 Flutter 客户端。Parlo 是一款自托管、单用户的 BYOK（自带密钥）AI 聊天应用。当前优先支持 Web 平台，移动端（Android 与 iOS）的入口与平台差异已在第 8 阶段落地，但尚未在真机上验证构建。
+Tan 的 Flutter 客户端。Tan 是一款自托管、单用户的 BYOK（自带密钥）AI 聊天应用。当前优先支持 Web 平台，移动端（Android 与 iOS）的入口与平台差异已在第 8 阶段落地，但尚未在真机上验证构建。
 
 本应用的产品文档位于
 [`../.codeflicker/discuss/2026-07-16/parlo-frontend-web/product.md`](../.codeflicker/discuss/2026-07-16/parlo-frontend-web/product.md)，
@@ -28,7 +28,7 @@ Parlo 的 Flutter 客户端。Parlo 是一款自托管、单用户的 BYOK（自
 架构文档第 9 节明确写道：「v1 只做浅色，深色后补」、「深色主题等设计师补充 `design.md` 深色令牌后跟进」。当前 `design.md` 只包含浅色令牌，没有给出深色配色。在没有设计依据的情况下自行编造深色色值，会违背项目「可信任的」价值取向，也会违反架构文档对该阶段的明确约束。
 
 为了在设计师补齐深色令牌后能低成本接入，相关基础设施已经就位：
-- `ParloColors` 是一个 `ThemeExtension`，新增一个 `ParloColors.dark` 常量并实现 `lerp` 即可。
+- `TanColors` 是一个 `ThemeExtension`，新增一个 `TanColors.dark` 常量并实现 `lerp` 即可。
 - `buildAppTheme()` 当前固定返回浅色 `ThemeData`，后续可改为根据主题选择返回浅色或深色。
 - 设置面板中「Dark」与「Follow system」两个选项已经渲染，但被禁用并标注「Coming soon」，不会对用户谎称可用。
 
@@ -44,7 +44,7 @@ SSE 流式是 `send()` 操作的副作用，而非独立的状态源。调用 `P
 
 ## 运行方式
 
-在生产环境中，应用可以与 Parlo 后端同域部署，也可以跨域部署——用户在应用内指定后端地址即可。本地开发时：
+在生产环境中，应用可以与 Tan 后端同域部署，也可以跨域部署——用户在应用内指定后端地址即可。本地开发时：
 
 ```bash
 cd frontend
@@ -53,7 +53,7 @@ dart run build_runner build --delete-conflicting-outputs   # 重新生成 *.free
 flutter run -d chrome
 ```
 
-首次启动时，应用会弹出弹窗要求输入 bearer token 和后端地址（域名 + 端口）。token 需要与后端 `.env` 文件中的 `AUTH_TOKEN` 一致；后端地址是 Parlo 后端的访问入口，例如 `localhost:8000`（本地开发）或 `parlo.example.com:443`（生产部署）。两个值都持久化在 `shared_preferences` 中，后续可以在侧栏齿轮的设置面板里随时修改。
+首次启动时，应用会弹出弹窗要求输入 bearer token 和后端地址（域名 + 端口）。token 需要与后端 `.env` 文件中的 `AUTH_TOKEN` 一致；后端地址是 Tan 后端的访问入口，例如 `localhost:8000`（本地开发）或 `tan.example.com:443`（生产部署）。两个值都持久化在 `shared_preferences` 中，改名后已有的 token 和地址会自动迁移，后续可以在侧栏齿轮的设置面板里随时修改。
 
 跨域部署时，后端需要开放 CORS（允许前端的来源域）。这是后端的配置，前端无法绕过。
 

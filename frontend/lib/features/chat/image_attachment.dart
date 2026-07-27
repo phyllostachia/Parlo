@@ -41,7 +41,7 @@ class ImageAttachmentBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(

@@ -1,4 +1,4 @@
-/// Parlo 应用的 UI typography。
+/// Tan 应用的 UI typography。
 ///
 /// 字体角色和对话正文/代码字体样式统一定义在 [fonts.dart]；本文件只负责把 UI
 /// 字体映射到 Flutter 的 [TextTheme]。
@@ -26,7 +26,7 @@ TextTheme buildTextTheme(Color carbonInk, Color graphite, Color ashen) {
   return TextTheme(
     // Display / editorial hero headline（serif）。
     displayLarge: TextStyle(
-      fontFamily: ParloFonts.displayFamily,
+      fontFamily: TanFonts.displayFamily,
       fontSize: 30,
       fontWeight: FontWeight.w400,
       height: 1.2,
@@ -34,7 +34,7 @@ TextTheme buildTextTheme(Color carbonInk, Color graphite, Color ashen) {
     ),
     // Section header 和 plan name（serif）。
     headlineMedium: TextStyle(
-      fontFamily: ParloFonts.displayFamily,
+      fontFamily: TanFonts.displayFamily,
       fontSize: 24,
       fontWeight: FontWeight.w400,
       height: 1.33,
@@ -42,7 +42,7 @@ TextTheme buildTextTheme(Color carbonInk, Color graphite, Color ashen) {
     ),
     // 较小字号的 serif 用法（例如强调 sidebar profile name）。
     headlineSmall: TextStyle(
-      fontFamily: ParloFonts.displayFamily,
+      fontFamily: TanFonts.displayFamily,
       fontSize: 24,
       fontWeight: FontWeight.w400,
       height: 1.33,
@@ -51,21 +51,21 @@ TextTheme buildTextTheme(Color carbonInk, Color graphite, Color ashen) {
 
     // Body text：16px 和 14px 是两个常用 size。
     bodyLarge: TextStyle(
-      fontFamily: ParloFonts.uiFamily,
+      fontFamily: TanFonts.uiFamily,
       fontSize: 16,
       fontWeight: FontWeight.w400,
       height: 1.5,
       color: graphite,
     ),
     bodyMedium: TextStyle(
-      fontFamily: ParloFonts.uiFamily,
+      fontFamily: TanFonts.uiFamily,
       fontSize: 14,
       fontWeight: FontWeight.w400,
       height: 1.5,
       color: graphite,
     ),
     bodySmall: TextStyle(
-      fontFamily: ParloFonts.uiFamily,
+      fontFamily: TanFonts.uiFamily,
       fontSize: 12,
       fontWeight: FontWeight.w400,
       height: 1.5,
@@ -74,14 +74,14 @@ TextTheme buildTextTheme(Color carbonInk, Color graphite, Color ashen) {
 
     // Button、nav link 和强调的 label。
     labelLarge: TextStyle(
-      fontFamily: ParloFonts.uiFamily,
+      fontFamily: TanFonts.uiFamily,
       fontSize: 15,
       fontWeight: FontWeight.w500,
       height: 1.33,
       color: graphite,
     ),
     labelMedium: TextStyle(
-      fontFamily: ParloFonts.uiFamily,
+      fontFamily: TanFonts.uiFamily,
       fontSize: 12,
       fontWeight: FontWeight.w500,
       height: 1.33,
@@ -89,7 +89,7 @@ TextTheme buildTextTheme(Color carbonInk, Color graphite, Color ashen) {
     ),
     // Caption / fine print。
     labelSmall: TextStyle(
-      fontFamily: ParloFonts.uiFamily,
+      fontFamily: TanFonts.uiFamily,
       fontSize: 11,
       fontWeight: FontWeight.w400,
       height: 1.5,
@@ -98,23 +98,23 @@ TextTheme buildTextTheme(Color carbonInk, Color graphite, Color ashen) {
 
     // Title：sans、medium weight。
     titleLarge: TextStyle(
-      fontFamily: ParloFonts.uiFamily,
+      fontFamily: TanFonts.uiFamily,
       fontSize: 18,
       fontWeight: FontWeight.w500,
       height: 1.33,
       color: carbonInk,
     ),
     titleMedium: TextStyle(
-      fontFamily: ParloFonts.uiFamily,
+      fontFamily: TanFonts.uiFamily,
       fontSize: 16,
       fontWeight: FontWeight.w500,
       height: 1.33,
       color: carbonInk,
     ),
     titleSmall: TextStyle(
-      fontFamily: ParloFonts.uiFamily,
+      fontFamily: TanFonts.uiFamily,
       fontSize: 14,
-      fontWeight: ParloFonts.uiHeavy,
+      fontWeight: TanFonts.uiHeavy,
       height: 1.33,
       color: carbonInk,
     ),

@@ -15,10 +15,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:parlo/core/auth/auth_providers.dart';
-import 'package:parlo/core/models/message.dart';
-import 'package:parlo/core/network/api_client.dart';
-import 'package:parlo/features/chat/chat_providers.dart';
+import 'package:tan/core/auth/auth_providers.dart';
+import 'package:tan/core/models/message.dart';
+import 'package:tan/core/network/api_client.dart';
+import 'package:tan/features/chat/chat_providers.dart';
 
 /// Notifier test 使用的 mock Dio。
 class _MockDio extends Mock implements Dio {}

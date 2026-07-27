@@ -1,4 +1,4 @@
-/// Parlo 的字体配置。
+/// Tan 的字体配置。
 ///
 /// 字体按使用场景分为三类：
 /// - [uiFamily]：应用 UI 字体。它是产品的一部分，不随用户设置变化。
@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 ///
 /// 所有字段和样式都是 [const]，避免字体配置在运行时被 widget 局部修改。UI 字体
 /// 尤其是固定的；自然语言和代码字体的入口集中在这里，后续如需更换字体只需修改本文件。
-abstract final class ParloFonts {
+abstract final class TanFonts {
   /// UI 字体：固定使用 Source Han Serif SC，不提供用户可变配置。
   static const String uiFamily = 'SourceHanSerifSC';
 

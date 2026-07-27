@@ -6,7 +6,7 @@
 的已鉴权 async HTTP client。
 
 这里需要 config file 而不只是 env var，因为 model definition 现在位于 ``config.yaml``；
-测试将 ``PARLO_CONFIG_PATH`` 指向 temp file，因此 test process 不会触碰 operator 的真实
+测试将 ``TAN_CONFIG_PATH`` 指向 temp file，因此 test process 不会触碰 operator 的真实
 ``config.yaml``。
 """
 
@@ -15,7 +15,7 @@ from __future__ import annotations
 import os
 import tempfile
 
-_tmp_dir = tempfile.mkdtemp(prefix="parlo-test-")
+_tmp_dir = tempfile.mkdtemp(prefix="tan-test-")
 os.environ.setdefault("AUTH_TOKEN", "test-token")
 os.environ.setdefault("OPENAI_API_KEY", "sk-test")
 os.environ.setdefault("ANTHROPIC_API_KEY", "sk-ant-test")
@@ -51,7 +51,7 @@ with open(_config_path, "w", encoding="utf-8") as _handle:
         "    thinking_effort: [high, medium, low, xhigh, max]\n"
         "    max_tokens: 16384\n"
     )
-os.environ.setdefault("PARLO_CONFIG_PATH", _config_path)
+os.environ.setdefault("TAN_CONFIG_PATH", _config_path)
 
 # 确保缓存的 Settings 使用测试 environment。
 from app.config import get_settings  # noqa: E402

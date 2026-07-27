@@ -36,7 +36,7 @@ class ChatScreen extends ConsumerWidget {
         Divider(
           height: 1,
           thickness: 1,
-          color: Theme.of(context).extension<ParloColors>()!.chalk,
+          color: Theme.of(context).extension<TanColors>()!.chalk,
         ),
         Expanded(child: MessageList(conversationId: conversationId)),
         ChatInput(conversationId: conversationId),
@@ -56,8 +56,8 @@ class _ChatTopBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final spacing = Theme.of(context).extension<ParloSpacing>()!;
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final spacing = Theme.of(context).extension<TanSpacing>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
 
     final pathAsync = ref.watch(currentConversationProvider(conversationId));
     final conversation = pathAsync.valueOrNull?.conversation;
@@ -194,7 +194,7 @@ class _RenameButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     return IconButton(
       tooltip: 'Rename',
       icon: Icon(Icons.edit_outlined, size: 13, color: colors.pebble),
@@ -252,7 +252,7 @@ class _ThinkingEffortBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     final label = currentLevel.isEmpty ? levels.first : currentLevel;
 
     return PopupMenuButton<String>(

@@ -1,4 +1,4 @@
-# Parlo 前端的静态分析配置。
+# Tan 前端的静态分析配置。
 #
 # 架构计划（阶段 0.4）要求启用 strict casts、strict inference 和禁止字面量 bool
 # 比较，并在推荐的 Flutter lint 集合之上增加这些规则。

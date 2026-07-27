@@ -1,5 +1,5 @@
 /// Spacing 和 corner-radius token，以 [ThemeExtension] 暴露，使 widget 可以写
-/// `Theme.of(context).extension<ParloSpacing>()!.s16`，而不是 hardcode 16。
+/// `Theme.of(context).extension<TanSpacing>()!.s16`，而不是 hardcode 16。
 ///
 /// Base unit 是 8px（design.md “Spacing & Shapes”）。Scale 中每个 value 都是 8 的倍数。
 /// Corner radius 单独保存，因为从语义上说它不是“spacing”。
@@ -9,9 +9,9 @@ import 'package:flutter/material.dart';
 
 /// `design.md` 中基于 8px 的 spacing scale。
 @immutable
-class ParloSpacing extends ThemeExtension<ParloSpacing> {
+class TanSpacing extends ThemeExtension<TanSpacing> {
   /// 创建 spacing scale。
-  const ParloSpacing({
+  const TanSpacing({
     required this.s8,
     required this.s16,
     required this.s24,
@@ -23,7 +23,7 @@ class ParloSpacing extends ThemeExtension<ParloSpacing> {
   });
 
   /// Design 的 spacing scale。
-  static const light = ParloSpacing(
+  static const light = TanSpacing(
     s8: 8,
     s16: 16,
     s24: 24,
@@ -59,7 +59,7 @@ class ParloSpacing extends ThemeExtension<ParloSpacing> {
   final double s96;
 
   @override
-  ParloSpacing copyWith({
+  TanSpacing copyWith({
     double? s8,
     double? s16,
     double? s24,
@@ -69,7 +69,7 @@ class ParloSpacing extends ThemeExtension<ParloSpacing> {
     double? s80,
     double? s96,
   }) {
-    return ParloSpacing(
+    return TanSpacing(
       s8: s8 ?? this.s8,
       s16: s16 ?? this.s16,
       s24: s24 ?? this.s24,
@@ -82,14 +82,14 @@ class ParloSpacing extends ThemeExtension<ParloSpacing> {
   }
 
   @override
-  ParloSpacing lerp(ParloSpacing? other, double t) => this;
+  TanSpacing lerp(TanSpacing? other, double t) => this;
 }
 
 /// `design.md` 中的 corner-radius scale。
 @immutable
-class ParloRadius extends ThemeExtension<ParloRadius> {
+class TanRadius extends ThemeExtension<TanRadius> {
   /// 创建 radius scale。
-  const ParloRadius({
+  const TanRadius({
     required this.nav,
     required this.input,
     required this.button,
@@ -98,7 +98,7 @@ class ParloRadius extends ThemeExtension<ParloRadius> {
   });
 
   /// Design 的 radius scale。
-  static const light = ParloRadius(
+  static const light = TanRadius(
     // Design 中 nav link、input、button 都使用 8px。
     nav: 8,
     input: 8,
@@ -124,14 +124,14 @@ class ParloRadius extends ThemeExtension<ParloRadius> {
   final double elevatedCard;
 
   @override
-  ParloRadius copyWith({
+  TanRadius copyWith({
     double? nav,
     double? input,
     double? button,
     double? card,
     double? elevatedCard,
   }) {
-    return ParloRadius(
+    return TanRadius(
       nav: nav ?? this.nav,
       input: input ?? this.input,
       button: button ?? this.button,
@@ -141,5 +141,5 @@ class ParloRadius extends ThemeExtension<ParloRadius> {
   }
 
   @override
-  ParloRadius lerp(ParloRadius? other, double t) => this;
+  TanRadius lerp(TanRadius? other, double t) => this;
 }

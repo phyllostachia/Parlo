@@ -109,6 +109,7 @@ class ServerConfig(BaseModel):
 class DatabaseConfig(BaseModel):
     """SQLite database 使用的 async SQLAlchemy URL。"""
 
+    # 保留旧数据库文件名，避免改名后默认创建一份空数据库。
     url: str = "sqlite+aiosqlite:///./data/parlo.db"
 
 
@@ -202,8 +203,9 @@ def load_config(path: str | Path = "config.yaml") -> AppConfig:
 def get_settings() -> Settings:
     """返回 process-wide :class:`Settings` instance。
 
-    config path 默认为当前 working directory 中的 ``config.yaml``，也可以通过
-    ``PARLO_CONFIG_PATH`` environment variable 覆盖，这方便测试指向临时文件。
+    config path 默认为当前 working directory 中的 ``config.yaml``，优先通过
+    ``TAN_CONFIG_PATH`` environment variable 覆盖；未设置时兼容读取旧的
+    ``PARLO_CONFIG_PATH``，这方便测试指向临时文件。
 
     在运行 :func:`load_config` 前，``.env`` 会被显式加载到 ``os.environ``，因此检查每个
     model 的 ``api_key`` environment variable 的 startup validation 可以看到 ``.env``
@@ -218,6 +220,8 @@ def get_settings() -> Settings:
     from dotenv import load_dotenv
 
     load_dotenv()
-    config_path = os.environ.get("PARLO_CONFIG_PATH", "config.yaml")
+    config_path = os.environ.get("TAN_CONFIG_PATH") or os.environ.get(
+        "PARLO_CONFIG_PATH", "config.yaml"
+    )
     app_config = load_config(config_path)
     return Settings(auth_token=os.environ.get("AUTH_TOKEN", ""), app_config=app_config)

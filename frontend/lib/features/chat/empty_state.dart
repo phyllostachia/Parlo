@@ -128,8 +128,8 @@ class _EmptyStateState extends ConsumerState<EmptyState> {
   @override
   Widget build(BuildContext context) {
     final modelsAsync = ref.watch(modelsProvider);
-    final spacing = Theme.of(context).extension<ParloSpacing>()!;
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final spacing = Theme.of(context).extension<TanSpacing>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
 
     return Center(
       child: Padding(
@@ -196,7 +196,7 @@ class _ModelPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
     if (models.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(16),
@@ -288,7 +288,7 @@ class _PickerAndInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
 
     return DropTarget(
       onDragDone: onDrop,
@@ -387,7 +387,7 @@ class _LargeInputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<ParloColors>()!;
+    final colors = Theme.of(context).extension<TanColors>()!;
 
     return Shortcuts(
       shortcuts: <ShortcutActivator, Intent>{
@@ -437,12 +437,12 @@ class _LargeInputField extends StatelessWidget {
                     isCollapsed: true,
                     contentPadding: EdgeInsets.zero,
                     isDense: true,
-                    hintStyle: ParloFonts.naturalLanguageStyle.copyWith(
+                    hintStyle: TanFonts.naturalLanguageStyle.copyWith(
                       color: colors.pebble,
                       fontSize: 16,
                     ),
                   ),
-                  style: ParloFonts.naturalLanguageStyle.copyWith(
+                  style: TanFonts.naturalLanguageStyle.copyWith(
                     color: colors.carbonInk,
                     fontSize: 16,
                   ),

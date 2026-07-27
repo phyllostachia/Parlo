@@ -10,7 +10,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:parlo/core/util/image_data_url.dart';
+import 'package:tan/core/util/image_data_url.dart';
 
 void main() {
   group('imageDataUrlFromBytes', () {

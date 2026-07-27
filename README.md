@@ -1,11 +1,7 @@
 # 开发计划
 
-- 优化 UI
-- 前端工程化、容器化
-- 后端容器化
-- 优化 `frontend/README.md` `backend/README.md`
 - 前端构建目标迁移到 WASM
-- 国际化
+- 客户端
 
 # 开发者如何部署本项目
 
@@ -13,21 +9,21 @@
 
 ```bash
 # 启动前端
-cd .\frontend
+Set-Location .\frontend
 flutter run
 ```
 
 ```bash
 # 配置 config.yaml 和 .env
-cp .\backend\config.yaml.example .\backend\config.yaml
-cp .\backend\.env.example .\backend\.env
+Copy-Item .\backend\config.yaml.example .\backend\config.yaml
+Copy-Item .\backend\.env.example .\backend\.env
 ```
 
 ```bash
 # 启动后端
-cd .\backend
+Set-Location .\backend
 python -m venv .venv
-python install -e ".[dev]"
 .\.venv\Scripts\activate.ps1
+python -m pip install -e ".[dev]"
 uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```

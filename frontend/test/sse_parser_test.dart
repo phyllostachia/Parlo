@@ -9,8 +9,8 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:parlo/core/models/sse_event.dart';
-import 'package:parlo/core/network/sse_parser.dart';
+import 'package:tan/core/models/sse_event.dart';
+import 'package:tan/core/network/sse_parser.dart';
 
 void main() {
   group('parseSseStream', () {
