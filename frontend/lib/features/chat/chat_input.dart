@@ -8,7 +8,7 @@
 /// image input 会被禁用。
 library;
 
-import 'package:desktop_drop/desktop_drop.dart';
+import 'package:cross_file/cross_file.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,6 +17,7 @@ import '../../core/theme/colors.dart';
 import '../../core/theme/fonts.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/util/image_data_url.dart';
+import '../../core/widgets/drop_target.dart';
 import 'chat_providers.dart';
 import 'image_attachment.dart';
 
@@ -87,11 +88,11 @@ class _ChatInputState extends ConsumerState<ChatInput> {
     }
   }
 
-  Future<void> _handleDrop(DropDoneDetails details) async {
+  Future<void> _handleDrop(List<XFile> files) async {
     setState(() => _isDropHovered = false);
     // 取 drop 中第一个 image-only file。虽然下面的 type filter 使 drop zone 只接受 image，
     // 但增加防御性处理的成本很低。
-    for (final file in details.files) {
+    for (final file in files) {
       final attachment = await imageDataUrlFromXFile(file);
       if (attachment != null) {
         _attachment.value = attachment;
@@ -128,10 +129,10 @@ class _ChatInputState extends ConsumerState<ChatInput> {
     final colors = Theme.of(context).extension<TanColors>()!;
     final canAttachImage = _canAttachImage;
 
-    return DropTarget(
-      onDragDone: _handleDrop,
-      onDragEntered: (_) => setState(() => _isDropHovered = true),
-      onDragExited: (_) => setState(() => _isDropHovered = false),
+    return TanDropTarget(
+      onDrop: _handleDrop,
+      onDragEntered: () => setState(() => _isDropHovered = true),
+      onDragExited: () => setState(() => _isDropHovered = false),
       child: Padding(
         // Design “Input Wrap”：上方 16px、下方 24px，居中的 720px column。
         padding: EdgeInsets.fromLTRB(

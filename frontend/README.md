@@ -9,7 +9,7 @@ Tan 的 Flutter 客户端。Tan 是一款自托管、单用户的 BYOK（自带�
 
 ## 当前状态
 
-开发计划的第 0 至第 8 阶段已经完成。应用在 Web 上编译运行，`flutter analyze` 无任何警告，25 个单元测试与 widget 测试全部通过。第 9 阶段（深色主题）被有意推迟，原因见下文。
+开发计划的第 0 至第 8 阶段已经完成。应用以 Flutter WASM 目标在 Web 上编译运行，`flutter analyze` 无任何警告，25 个单元测试与 widget 测试全部通过。第 9 阶段（深色主题）被有意推迟，原因见下文。
 
 | 阶段 | 完成的内容 |
 |------|-----------|
@@ -50,8 +50,47 @@ SSE 流式是 `send()` 操作的副作用，而非独立的状态源。调用 `P
 cd frontend
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs   # 重新生成 *.freezed.dart / *.g.dart
-flutter run -d chrome
+flutter run -d chrome --wasm
 ```
+
+Web 生产构建使用 Flutter 的 `--wasm` 目标：
+
+```bash
+flutter build web --wasm --release --base-href /
+```
+
+该目标会生成 WASM 主程序，并保留 JavaScript fallback。项目使用 Flutter 3.44 或更高版本；
+Web 依赖不能导入 `dart:html`，因此图片拖拽使用 `package:web` DOM bindings 实现。
+
+## Docker + Nginx 部署
+
+前端提供了一个 Flutter Web WASM 多阶段构建镜像：第一阶段使用 Flutter SDK 编译 WASM
+release 资源，第二阶段使用 Nginx 提供静态文件服务。Nginx 已配置 Flutter 单页路由回退，因此
+直接刷新 `/c/<conversation-id>` 等路径不会返回 404。
+
+请在项目根目录执行：
+
+```bash
+docker compose up -d --build
+```
+
+前端默认通过 `http://localhost:8080` 访问。打开页面后，在首次使用弹窗中填写后端地址，
+例如 `localhost:8000`。如果前后端跨域部署，请在后端 `config.yaml` 的
+`server.cors_origins` 中加入前端完整来源，例如 `http://localhost:8080`。
+
+检查前端容器和 Nginx 健康状态：
+
+```bash
+docker compose ps
+docker compose logs -f tan-frontend
+curl -i http://localhost:8080/healthz
+```
+
+停止服务时使用 `docker compose down`。如果只修改了 Nginx 配置，需要重新执行
+`docker compose up -d --build`；Flutter 代码或依赖变更也需要重新构建镜像。
+
+根目录 Compose 配置只负责让 Nginx 提供前端静态资源，不代理后端 API。生产环境建议在更上层的反向代理
+中配置 HTTPS，或让前端应用直接连接已部署的后端地址。
 
 首次启动时，应用会弹出弹窗要求输入 bearer token 和后端地址（域名 + 端口）。token 需要与后端 `.env` 文件中的 `AUTH_TOKEN` 一致；后端地址是 Tan 后端的访问入口，例如 `localhost:8000`（本地开发）或 `tan.example.com:443`（生产部署）。两个值都持久化在 `shared_preferences` 中，改名后已有的 token 和地址会自动迁移，后续可以在侧栏齿轮的设置面板里随时修改。
 

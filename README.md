@@ -1,7 +1,7 @@
 # 开发计划
 
-- 前端构建目标迁移到 WASM
-- 客户端
+- 小屏 UI (同时用于移动客户端和移动 Web)
+- 优化文档 `backend/README.md` `frontend/README.md`
 
 # 开发者如何部署本项目
 
@@ -10,7 +10,7 @@
 ```bash
 # 启动前端
 Set-Location .\frontend
-flutter run
+flutter run -d chrome --wasm
 ```
 
 ```bash

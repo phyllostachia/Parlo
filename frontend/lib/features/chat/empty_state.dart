@@ -8,7 +8,7 @@
 /// 所选 model 不支持 vision 时，image input 被禁用。
 library;
 
-import 'package:desktop_drop/desktop_drop.dart';
+import 'package:cross_file/cross_file.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,6 +19,7 @@ import '../../core/theme/colors.dart';
 import '../../core/theme/fonts.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/util/image_data_url.dart';
+import '../../core/widgets/drop_target.dart';
 import '../../core/widgets/error_banner.dart';
 import 'chat_providers.dart';
 import 'image_attachment.dart';
@@ -92,9 +93,9 @@ class _EmptyStateState extends ConsumerState<EmptyState> {
     }
   }
 
-  Future<void> _handleDrop(DropDoneDetails details) async {
+  Future<void> _handleDrop(List<XFile> files) async {
     setState(() => _isDropHovered = false);
-    for (final file in details.files) {
+    for (final file in files) {
       final attachment = await imageDataUrlFromXFile(file);
       if (attachment != null) {
         _attachment.value = attachment;
@@ -279,7 +280,7 @@ class _PickerAndInput extends StatelessWidget {
   final VoidCallback onRemoveAttachment;
   final VoidCallback onPickImage;
   final VoidCallback onSend;
-  final void Function(DropDoneDetails) onDrop;
+  final Future<void> Function(List<XFile>) onDrop;
   final bool isDropHovered;
   final ValueChanged<bool> onDropHoverChanged;
   final bool disabled;
@@ -290,10 +291,10 @@ class _PickerAndInput extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<TanColors>()!;
 
-    return DropTarget(
-      onDragDone: onDrop,
-      onDragEntered: (_) => onDropHoverChanged(true),
-      onDragExited: (_) => onDropHoverChanged(false),
+    return TanDropTarget(
+      onDrop: onDrop,
+      onDragEntered: () => onDropHoverChanged(true),
+      onDragExited: () => onDropHoverChanged(false),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,

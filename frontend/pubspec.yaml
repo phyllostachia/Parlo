@@ -51,13 +51,11 @@ dependencies:
   # iOS 和 desktop，因此所有目标平台都可以使用同一个调用位置。
   file_picker: ^8.1.4
 
-  # 图片附件功能（阶段 5）使用的 drag-and-drop。Web 上接入 HTML drop event，desktop
-  # 上使用 platform channels。应用用它接收拖到聊天输入框上的图片。
-  desktop_drop: ^0.4.4
-
-  # `file_picker` 和 `desktop_drop` 使用的跨平台 `XFile` abstraction。由于图片附件
+  # `file_picker` 使用的跨平台 `XFile` abstraction。由于图片附件
   # helper 在 public signature 中导入 `XFile`，因此将其声明为直接依赖。
   cross_file: ^0.3.4+1
+  # WASM Web 使用的 DOM bindings。用于替代依赖 dart:html 的旧版 desktop_drop。
+  web: ^1.1.1
   google_fonts: ^8.2.0
 
 dev_dependencies:
