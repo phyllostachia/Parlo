@@ -80,18 +80,20 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # 自托管 UI 和自然语言字体文件（参见架构文档第 9 节）。将字体放入应用 bundle，使
-  # 应用运行时不需要从网络获取字体。
+  # 自托管 UI 和自然语言字体文件（参见架构文档第 9 节）。将可变字体放入应用 bundle，
+  # 应用运行时不需要从网络获取字体，同时可以通过 TextStyle.fontWeight 使用各种字重。
   assets:
     - assets/fonts/
 
   fonts:
-    # Source Han Serif SC 作为私有 Anthropic Serif 的替代字体，用于 display headline
-    # 和对话中的自然语言文本。只保留设计系统实际需要的 Medium/Bold 两个字重。
-    - family: SourceHanSerifSC
+    # Noto Serif 作为私有 Anthropic Serif 的替代字体，用于 display headline 和对话中的
+    # 自然语言文本。单个可变字体文件包含完整的字重范围。
+    - family: NotoSerif
       fonts:
-        - asset: assets/fonts/SourceHanSerifSC-Medium.otf
-          weight: 400
-        - asset: assets/fonts/SourceHanSerifSC-Bold.otf
-          weight: 700
+        - asset: assets/fonts/NotoSerif-VariableFont_wdth,wght.ttf
+
+    # Noto Sans 用于应用 UI。单个可变字体文件包含完整的字重范围。
+    - family: NotoSans
+      fonts:
+        - asset: assets/fonts/NotoSans-VariableFont_wdth,wght.ttf
 

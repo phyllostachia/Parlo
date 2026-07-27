@@ -24,7 +24,7 @@ Claude presents a warm-paper editorial interface: off-white parchment canvas (#f
 ## Tokens — Typography
 
 ### Anthropic Serif — Display and editorial headlines (Explore plans, Think fast build faster). The serif is the brand signature — rare in AI/tech product UI; here it signals thoughtfulness and editorial confidence rather than software utility. · `--font-anthropic-serif`
-- **Substitute:** Source Serif 4, Charter, Georgia
+- **Substitute:** Noto Serif
 - **Weights:** 400
 - **Sizes:** 24px, 30px
 - **Line height:** 1.20-1.33
@@ -32,7 +32,7 @@ Claude presents a warm-paper editorial interface: off-white parchment canvas (#f
 - **Role:** Display and editorial headlines (Explore plans, Think fast build faster). The serif is the brand signature — rare in AI/tech product UI; here it signals thoughtfulness and editorial confidence rather than software utility.
 
 ### Anthropic Sans — All interface text: body copy, nav, buttons, cards, links, labels. Weight 580 is the heaviest; weight 400 dominates. The whisper-to-medium weight range creates hierarchy through contrast rather than heaviness — headlines don't shout at 800, they speak at 580. · `--font-anthropic-sans`
-- **Substitute:** Source Han Serif
+- **Substitute:** Noto Sans
 - **Weights:** 400, 500, 550, 580, 600
 - **Sizes:** 11px, 12px, 14px, 15px, 16px, 24px
 - **Line height:** 1.33-1.63
