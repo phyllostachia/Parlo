@@ -1,9 +1,8 @@
 /// dio HTTP client 和 base URL provider。
 ///
-/// dio 是应用唯一的 HTTP client。架构选择它而不是 `package:http`，因为 Flutter Web 上的
-/// `package:http` 会 buffer response，使 Server-Sent Events 无法工作（架构 §5.1）。dio
-/// 在 Web 上使用 fetch + ReadableStream，在 native 上使用 IOClient，因此同一份 code 可以
-/// 在所有 platform 上 streaming。
+/// Dio 是应用的 REST HTTP client。Web 上的 SSE 不能使用 Dio 默认的 XMLHttpRequest
+/// adapter（它会在 response 完成后才交付 bytes），因此聊天流在
+/// `sse_connection.dart` 中改用 Fetch `ReadableStream`；原生 SSE 仍复用 Dio。
 library;
 
 import 'package:dio/dio.dart';

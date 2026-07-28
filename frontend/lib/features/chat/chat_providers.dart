@@ -12,15 +12,16 @@ library;
 
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/auth/auth_providers.dart';
 import '../../core/models/conversation.dart';
 import '../../core/models/message.dart';
 import '../../core/models/model.dart';
 import '../../core/models/requests.dart';
 import '../../core/models/sse_event.dart';
 import '../../core/network/api_client.dart';
+import '../../core/network/sse_connection.dart';
 import '../../core/network/sse_parser.dart';
 import '../sidebar/sidebar_providers.dart';
 
@@ -258,32 +259,34 @@ class CurrentConversationNotifier
   Future<void> _openStream(int assistantMessageId) async {
     await _sub?.cancel();
     final dio = ref.read(dioProvider);
-    final response = await dio.get<ResponseBody>(
-      '/api/chat/stream',
-      queryParameters: <String, dynamic>{'message_id': assistantMessageId},
-      options: Options(responseType: ResponseType.stream),
-    );
-    final body = response.data;
-    if (body == null) {
-      ref.read(streamStateProvider.notifier).state = StreamState.error;
-      return;
-    }
-    ref.read(streamStateProvider.notifier).state = StreamState.streaming;
-    _sub = parseSseStream(body.stream).listen(
-      _onEvent,
-      onError: (Object error) {
-        ref.read(streamStateProvider.notifier).state = StreamState.error;
-        _sub = null;
-      },
-      onDone: () {
-        // 如果 stream 在没有 `done` event 的情况下关闭，则视为 drop。
-        if (ref.read(streamStateProvider) == StreamState.streaming) {
+    final authStore = ref.read(authStoreProvider);
+
+    try {
+      final byteStream = await openSseByteStream(
+        dio: dio,
+        messageId: assistantMessageId,
+        bearerToken: authStore.read(),
+        onUnauthorized: authStore.markUnauthorized,
+      );
+      ref.read(streamStateProvider.notifier).state = StreamState.streaming;
+      _sub = parseSseStream(byteStream).listen(
+        _onEvent,
+        onError: (Object error) {
           ref.read(streamStateProvider.notifier).state = StreamState.error;
-        }
-        _sub = null;
-      },
-      cancelOnError: false,
-    );
+          _sub = null;
+        },
+        onDone: () {
+          // 如果 stream 在没有 `done` event 的情况下关闭，则视为 drop。
+          if (ref.read(streamStateProvider) == StreamState.streaming) {
+            ref.read(streamStateProvider.notifier).state = StreamState.error;
+          }
+          _sub = null;
+        },
+        cancelOnError: false,
+      );
+    } catch (_) {
+      ref.read(streamStateProvider.notifier).state = StreamState.error;
+    }
   }
 
   void _onEvent(SseEvent event) {

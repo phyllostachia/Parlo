@@ -177,6 +177,66 @@ void main() {
     },
   );
 
+  test('applies the first text delta before the SSE stream closes', () async {
+    _stubPathLoad(dio, empty: true);
+    _stubSendMessage(dio);
+    final streamController = StreamController<Uint8List>();
+    _stubStreamFromController(dio, streamController);
+
+    final firstDeltaSeen = Completer<void>();
+    final pathSubscription = container.listen(
+      currentConversationProvider(_conversationId),
+      (_, next) {
+        final path = next.valueOrNull;
+        if (path == null ||
+            path.path.length < 2 ||
+            firstDeltaSeen.isCompleted) {
+          return;
+        }
+        if (path.path.last.message.content == 'First') {
+          firstDeltaSeen.complete();
+        }
+      },
+    );
+    addTearDown(pathSubscription.close);
+
+    final doneState = Completer<void>();
+    container.listen<StreamState>(streamStateProvider, (_, next) {
+      if (next == StreamState.done && !doneState.isCompleted) {
+        doneState.complete();
+      }
+    });
+
+    final notifier = container.read(
+      currentConversationProvider(_conversationId).notifier,
+    );
+    await container.read(currentConversationProvider(_conversationId).future);
+    await notifier.send(text: 'Stream in stages');
+
+    streamController
+      ..add(_encode('event: started\ndata: {"message_id":11}\n\n'))
+      ..add(_encode('event: text_delta\ndata: {"content":"First"}\n\n'));
+
+    await firstDeltaSeen.future.timeout(const Duration(seconds: 5));
+    expect(container.read(streamStateProvider), StreamState.streaming);
+    expect(
+      container
+          .read(currentConversationProvider(_conversationId))
+          .requireValue
+          .path
+          .last
+          .message
+          .content,
+      'First',
+    );
+
+    streamController
+      ..add(_encode('event: text_delta\ndata: {"content":" second"}\n\n'))
+      ..add(_encode('event: done\ndata: {}\n\n'));
+    await streamController.close();
+    await doneState.future.timeout(const Duration(seconds: 5));
+  });
+
   test('a stream error transitions the stream state to error', () async {
     _stubPathLoad(dio, empty: true);
     _stubSendMessage(dio);

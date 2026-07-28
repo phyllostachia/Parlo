@@ -20,8 +20,8 @@ dependencies:
   # 额外代码生成步骤。下方的 freezed 模型仍然使用代码生成。
   flutter_riverpod: ^2.5.1
 
-  # 网络。这里必须使用 dio（而不是 package:http），因为 Flutter Web 上的 dio 使用
-  # fetch + ReadableStream，这是在浏览器中实现真正流式 Server-Sent Events 的唯一方式。
+  # 网络。普通 REST request 使用 Dio。Web SSE 在 sse_connection_web.dart 中直接使用
+  # Fetch + ReadableStream，因为 Dio 默认的 XMLHttpRequest adapter 会缓冲完整 response。
   dio: ^5.7.0
 
   # 路由。go_router 配合 ShellRoute 可以让侧栏保持挂载，同时切换主区域中的会话，
