@@ -1,6 +1,8 @@
 /// 流式 assistant message 的微交互测试。
 library;
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -78,6 +80,50 @@ void main() {
     await tester.pump(const Duration(milliseconds: 140));
     expect(tester.widget<FadeTransition>(fadeFinder).opacity.value, 1);
   });
+
+  testWidgets('assistant footer keeps its height when hover actions appear', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [modelListProvider.overrideWithValue(const <ModelRead>[])],
+        child: MaterialApp(
+          theme: buildAppTheme(),
+          home: Scaffold(
+            body: Align(
+              alignment: Alignment.topLeft,
+              child: MessageBubble(
+                message: _completeAssistantMessage('Completed response'),
+                conversation: _conversation,
+                siblings: const SiblingInfo(siblings: <int>[11], activeId: 11),
+                isStreaming: false,
+                isLast: true,
+                streamState: StreamState.idle,
+                onRegenerate: (_) {},
+                onSwitchBranch: (_) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final bubble = find.byType(MessageBubble);
+    final originalHeight = tester.getSize(bubble).height;
+    expect(find.byTooltip('Copy'), findsNothing);
+
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer();
+    await mouse.moveTo(tester.getCenter(bubble));
+    await tester.pump();
+
+    expect(find.byTooltip('Copy'), findsOneWidget);
+    expect(find.byTooltip('Regenerate'), findsOneWidget);
+    expect(tester.getSize(bubble).height, originalHeight);
+
+    await mouse.removePointer();
+  });
 }
 
 final _conversation = Conversation(
@@ -101,6 +147,20 @@ Message _assistantMessage(String content) {
     reasoning: null,
     imageUrl: null,
     isComplete: false,
+    createdAt: DateTime.utc(2026, 7, 28),
+  );
+}
+
+Message _completeAssistantMessage(String content) {
+  return Message(
+    id: 11,
+    conversationId: 1,
+    parentId: 10,
+    role: MessageRole.assistant,
+    content: content,
+    reasoning: null,
+    imageUrl: null,
+    isComplete: true,
     createdAt: DateTime.utc(2026, 7, 28),
   );
 }

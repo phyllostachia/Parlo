@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tan/app.dart';
 import 'package:tan/core/auth/auth_providers.dart';
 import 'package:tan/core/auth/auth_store.dart';
+import 'package:tan/core/models/conversation.dart';
 import 'package:tan/core/models/model.dart';
 import 'package:tan/core/models/profile.dart';
 import 'package:tan/core/network/base_url_store.dart';
@@ -134,6 +135,72 @@ void main() {
       ),
       findsOneWidget,
     );
+    await mouse.removePointer();
+  });
+
+  testWidgets('folder hover menu does not shift its conversation list', (
+    tester,
+  ) async {
+    final profiles = <Profile>[
+      Profile(
+        id: 1,
+        name: 'Chats',
+        createdAt: DateTime.utc(2026, 7, 1),
+        updatedAt: DateTime.utc(2026, 7, 2),
+      ),
+    ];
+    final conversations = <Conversation>[
+      Conversation(
+        id: 1,
+        profileId: 1,
+        title: '',
+        modelId: 'test-model',
+        thinkingEnabled: false,
+        currentLeafId: null,
+        createdAt: DateTime.utc(2026, 7, 1),
+        updatedAt: DateTime.utc(2026, 7, 2),
+      ),
+    ];
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          profilesProvider.overrideWith(() => _FixedProfilesNotifier(profiles)),
+          conversationsForProfileProvider(
+            1,
+          ).overrideWith((ref) async => conversations),
+          expandedProfilesProvider.overrideWith((ref) => <int>{1}),
+        ],
+        child: MaterialApp(
+          theme: buildAppTheme(),
+          home: Scaffold(
+            body: SidebarScreen(
+              currentConversationId: null,
+              onNavigate: (_) {},
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final folderRow = find.ancestor(
+      of: find.text('Chats'),
+      matching: find.byType(GestureDetector),
+    );
+    final conversation = find.text('New conversation');
+    final originalHeight = tester.getSize(folderRow).height;
+    final originalConversationY = tester.getTopLeft(conversation).dy;
+
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer();
+    await mouse.moveTo(tester.getCenter(find.text('Chats')));
+    await tester.pump();
+
+    expect(find.byTooltip('More'), findsOneWidget);
+    expect(tester.getSize(folderRow).height, originalHeight);
+    expect(tester.getTopLeft(conversation).dy, originalConversationY);
+
     await mouse.removePointer();
   });
 

@@ -471,6 +471,8 @@ class _TreeRowState extends State<_TreeRow> {
     final background = widget.highlight
         ? (widget.highlightColor ?? colors.chalk)
         : Colors.transparent;
+    final menuVisible =
+        (_isHovered || _isMenuOpen) && widget.menuItems.isNotEmpty;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -497,26 +499,36 @@ class _TreeRowState extends State<_TreeRow> {
                 const SizedBox(width: 8),
               ],
               Expanded(child: widget.label),
-              // Popup route 打开时保持 button 留在 tree 中。否则 pointer 从 row 移入 popup
-              // 会触发 `onExit`，dispose button，导致 selected item 在 callback 运行前丢失 callback。
-              if ((_isHovered || _isMenuOpen) && widget.menuItems.isNotEmpty)
-                PopupMenuButton<_MenuItem>(
-                  child: const SizedBox(
-                    width: 24,
-                    height: 20,
-                    child: Center(child: Icon(Icons.more_horiz, size: 18)),
-                  ),
-                  tooltip: 'More',
-                  onOpened: () => setState(() => _isMenuOpen = true),
-                  onCanceled: () => setState(() => _isMenuOpen = false),
-                  itemBuilder: (_) => [
-                    for (final item in widget.menuItems)
-                      PopupMenuItem<_MenuItem>(
-                        value: item,
-                        child: Text(_labelForItem(item)),
-                      ),
-                  ],
-                  onSelected: _handleMenuSelected,
+              // 始终占用 menu 槽位；仅在 hover 时将其内容替换为菜单按钮。否则
+              // “...”出现会改变 Row 的高度和 label 的可用宽度，导致整个列表跳动。
+              if (widget.menuItems.isNotEmpty)
+                SizedBox(
+                  width: 24,
+                  height: 20,
+                  child: menuVisible
+                      ? PopupMenuButton<_MenuItem>(
+                          // child 已明确为 24×20；移除默认内边距以匹配该槽位。
+                          padding: EdgeInsets.zero,
+                          tooltip: 'More',
+                          onOpened: () => setState(() => _isMenuOpen = true),
+                          onCanceled: () => setState(() => _isMenuOpen = false),
+                          itemBuilder: (_) => [
+                            for (final item in widget.menuItems)
+                              PopupMenuItem<_MenuItem>(
+                                value: item,
+                                child: Text(_labelForItem(item)),
+                              ),
+                          ],
+                          onSelected: _handleMenuSelected,
+                          child: const SizedBox(
+                            width: 24,
+                            height: 20,
+                            child: Center(
+                              child: Icon(Icons.more_horiz, size: 18),
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
                 ),
             ],
           ),

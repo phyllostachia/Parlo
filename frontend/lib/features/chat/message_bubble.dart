@@ -291,16 +291,21 @@ class _AssistantBlockState extends ConsumerState<_AssistantBlock> {
                     onSwitch: widget.onSwitchBranch,
                   ),
                   Expanded(
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: actionsVisible
-                          ? MessageActions(
-                              content: widget.message.content,
-                              onRegenerate: () =>
-                                  widget.onRegenerate(widget.message.id),
-                              canRegenerate: !widget.isStreaming,
-                            )
-                          : const SizedBox.shrink(),
+                    // 始终为 hover action 预留高度，避免 Web 上按钮出现时把 footer
+                    // row 撑高、导致整条 assistant message 发生垂直位移。
+                    child: SizedBox(
+                      height: 28,
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: actionsVisible
+                            ? MessageActions(
+                                content: widget.message.content,
+                                onRegenerate: () =>
+                                    widget.onRegenerate(widget.message.id),
+                                canRegenerate: !widget.isStreaming,
+                              )
+                            : const SizedBox.shrink(),
+                      ),
                     ),
                   ),
                 ],
