@@ -1,7 +1,7 @@
 /// 一个 conversation 的 chat screen。
 ///
-/// 由 top bar（title + model badge；thinking-effort switcher 在阶段 4 加入）、可滚动 message
-/// list 和底部 input 组成。这是 router 为 `/c/:id` 返回的 widget。
+/// 由 top bar（title + model badge）、可滚动 message list 和底部 input 组成。这是 router
+/// 为 `/c/:id` 返回的 widget。
 ///
 /// Chat screen 挂载在 `AppShell` 的 main area 内；它不渲染自己的 `Scaffold`，因此 sidebar
 /// shell 负责 page chrome。
@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/model.dart';
-import '../../core/network/api_client.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import '../sidebar/sidebar_providers.dart';
@@ -48,7 +47,7 @@ class ChatScreen extends ConsumerWidget {
 /// Chat screen 的 top bar。
 ///
 /// 遵循 design 的“Top Bar”：左侧是带小型 rename pencil 的 conversation title；右侧是
-/// soft-stone model badge 和 outlined thinking-effort dropdown。
+/// soft-stone model badge。
 class _ChatTopBar extends ConsumerWidget {
   const _ChatTopBar({required this.conversationId});
 
@@ -66,10 +65,6 @@ class _ChatTopBar extends ConsumerWidget {
         : conversation.title;
     final models = ref.watch(modelListProvider);
     final modelName = _resolveModelName(models, conversation?.modelId ?? '');
-    final thinkingLevels = _resolveThinkingLevels(
-      models,
-      conversation?.modelId ?? '',
-    );
 
     return Container(
       // Design “Top Bar”：垂直 12px、水平 24px padding。没有 fixed height；padding 加
@@ -132,14 +127,6 @@ class _ChatTopBar extends ConsumerWidget {
               ),
             ),
           ],
-          if (conversation != null && thinkingLevels.isNotEmpty) ...[
-            const SizedBox(width: 8),
-            _ThinkingEffortBadge(
-              levels: thinkingLevels,
-              currentLevel: conversation.thinkingEffort,
-              onSelected: (level) => _setThinkingEffort(ref, level),
-            ),
-          ],
         ],
       ),
     );
@@ -154,16 +141,6 @@ class _ChatTopBar extends ConsumerWidget {
     return null;
   }
 
-  /// 查找绑定 model 支持的 thinking-effort level。Model 没有 thinking level 时为空（badge
-  /// 随后隐藏）。
-  List<String> _resolveThinkingLevels(List<ModelRead> models, String modelId) {
-    if (modelId.isEmpty) return const <String>[];
-    for (final model in models) {
-      if (model.id == modelId) return model.thinkingEffort;
-    }
-    return const <String>[];
-  }
-
   Future<void> _rename(WidgetRef ref, int profileId, String title) async {
     await ref
         .read(sidebarActionsProvider.notifier)
@@ -172,15 +149,6 @@ class _ChatTopBar extends ConsumerWidget {
           conversationId: conversationId,
           title: title,
         );
-    ref.invalidate(currentConversationProvider(conversationId));
-  }
-
-  Future<void> _setThinkingEffort(WidgetRef ref, String level) async {
-    final dio = ref.read(dioProvider);
-    await dio.patch<Map<String, dynamic>>(
-      '/api/conversations/$conversationId',
-      data: <String, dynamic>{'thinking_effort': level},
-    );
     ref.invalidate(currentConversationProvider(conversationId));
   }
 }
@@ -231,61 +199,6 @@ class _RenameButton extends StatelessWidget {
           onSubmit(trimmed);
         }
       },
-    );
-  }
-}
-
-/// Top bar 中 outlined thinking-effort badge。
-///
-/// 匹配 design 的“Thinking Badge”：带 mist border 的 capsule、brain icon、当前 level label
-/// 和 chevron。点击后打开包含 model 支持 level 的小型 popup menu。
-class _ThinkingEffortBadge extends StatelessWidget {
-  const _ThinkingEffortBadge({
-    required this.levels,
-    required this.currentLevel,
-    required this.onSelected,
-  });
-
-  final List<String> levels;
-  final String currentLevel;
-  final ValueChanged<String> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<TanColors>()!;
-    final label = currentLevel.isEmpty ? levels.first : currentLevel;
-
-    return PopupMenuButton<String>(
-      tooltip: 'Thinking effort',
-      onSelected: onSelected,
-      itemBuilder: (_) => [
-        for (final level in levels)
-          PopupMenuItem<String>(value: level, child: Text(level)),
-      ],
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: colors.mist, width: 1),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.psychology_outlined, size: 13, color: colors.graphite),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: colors.graphite,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(width: 6),
-            Icon(Icons.expand_more, size: 12, color: colors.ashen),
-          ],
-        ),
-      ),
     );
   }
 }

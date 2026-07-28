@@ -39,7 +39,8 @@ with open(_config_path, "w", encoding="utf-8") as _handle:
         "    family: openai\n"
         "    protocol: openai-response\n"
         "    vision: true\n"
-        "    thinking_effort: [medium, low, high, xhigh]\n"
+        "    thinking_off_effort: medium\n"
+        "    thinking_on_effort: xhigh\n"
         "    max_tokens: 32768\n"
         "  - id: test-anthropic\n"
         "    display_name: Test Anthropic\n"
@@ -48,7 +49,8 @@ with open(_config_path, "w", encoding="utf-8") as _handle:
         "    family: anthropic\n"
         "    protocol: anthropic-message\n"
         "    vision: true\n"
-        "    thinking_effort: [high, medium, low, xhigh, max]\n"
+        "    thinking_off_effort: medium\n"
+        "    thinking_on_effort: max\n"
         "    max_tokens: 16384\n"
     )
 os.environ.setdefault("TAN_CONFIG_PATH", _config_path)

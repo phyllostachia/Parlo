@@ -24,20 +24,20 @@ mixin _$Profile {
   /// Server 分配的 identifier，用于 URL path 和 CRUD call。
   int get id => throw _privateConstructorUsedError;
 
-  /// sidebar 中显示的可读 folder name。
+  /// Sidebar 中显示的可读 folder name。
   String get name => throw _privateConstructorUsedError;
 
-  /// Profile 创建时间。
+  /// Profile 首次创建时间。
   DateTime get createdAt => throw _privateConstructorUsedError;
 
-  /// Profile 最近重命名或添加 conversation 的时间。
-  /// Sidebar 按此 field 从新到旧排序。
+  /// Profile 最近一次重命名或添加 conversation 的时间。Sidebar 按此 field 从新到旧排序。
   DateTime get updatedAt => throw _privateConstructorUsedError;
 
-  /// 将此 Profile serialize 为 JSON map。
+  /// Serializes this Profile to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// 创建 Profile 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of Profile
+  /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   $ProfileCopyWith<Profile> get copyWith => throw _privateConstructorUsedError;
 }
@@ -60,7 +60,8 @@ class _$ProfileCopyWithImpl<$Res, $Val extends Profile>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// 创建 Profile 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of Profile
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -113,7 +114,8 @@ class __$$ProfileImplCopyWithImpl<$Res>
     $Res Function(_$ProfileImpl) _then,
   ) : super(_value, _then);
 
-  /// 创建 Profile 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of Profile
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -162,16 +164,15 @@ class _$ProfileImpl implements _Profile {
   @override
   final int id;
 
-  /// sidebar 中显示的可读 folder name。
+  /// Sidebar 中显示的可读 folder name。
   @override
   final String name;
 
-  /// Profile 创建时间。
+  /// Profile 首次创建时间。
   @override
   final DateTime createdAt;
 
-  /// Profile 最近重命名或添加 conversation 的时间。
-  /// Sidebar 按此 field 从新到旧排序。
+  /// Profile 最近一次重命名或添加 conversation 的时间。Sidebar 按此 field 从新到旧排序。
   @override
   final DateTime updatedAt;
 
@@ -197,7 +198,8 @@ class _$ProfileImpl implements _Profile {
   @override
   int get hashCode => Object.hash(runtimeType, id, name, createdAt, updatedAt);
 
-  /// 创建 Profile 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of Profile
+  /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
@@ -224,20 +226,20 @@ abstract class _Profile implements Profile {
   @override
   int get id;
 
-  /// sidebar 中显示的可读 folder name。
+  /// Sidebar 中显示的可读 folder name。
   @override
   String get name;
 
-  /// Profile 创建时间。
+  /// Profile 首次创建时间。
   @override
   DateTime get createdAt;
 
-  /// Profile 最近重命名或添加 conversation 的时间。
-  /// Sidebar 按此 field 从新到旧排序。
+  /// Profile 最近一次重命名或添加 conversation 的时间。Sidebar 按此 field 从新到旧排序。
   @override
   DateTime get updatedAt;
 
-  /// 创建 Profile 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of Profile
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ProfileImplCopyWith<_$ProfileImpl> get copyWith =>

@@ -257,7 +257,7 @@ Map<String, dynamic> _conversationJson() {
     'profile_id': 1,
     'title': 'Test',
     'model_id': 'm1',
-    'thinking_effort': 'low',
+    'thinking_enabled': false,
     'current_leaf_id': null,
     'created_at': '2026-07-01T00:00:00Z',
     'updated_at': '2026-07-01T00:00:00Z',

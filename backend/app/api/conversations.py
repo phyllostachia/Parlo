@@ -1,7 +1,7 @@
 """会话 endpoint。
 
 会话属于一个 profile，并拥有一棵 message tree。每个会话只绑定一个 model（决策 D03）：
-创建时设置 ``model_id`` 和 ``thinking_effort``，之后只能修改 ``thinking_effort`` 和
+创建时设置 ``model_id`` 和 ``thinking_enabled``，之后只能修改 ``thinking_enabled`` 和
 ``title``（决策 D09）。
 
 列表和创建操作位于 ``/profiles/{profile_id}/conversations`` 下；单个会话的读取、更新
@@ -22,31 +22,6 @@ from ..db import get_session
 from ..models import Conversation, ConversationCreate, ConversationRead, ConversationUpdate, Profile
 
 router = APIRouter(dependencies=[Depends(verify_token)])
-
-
-def _resolve_thinking_effort(
-    model_id: str, requested: str | None, settings
-) -> str:
-    """返回新建或 patch 会话要使用的 thinking-effort 级别。
-
-    如果 ``requested`` 为 ``None``，则使用模型列表中的第一个级别作为默认值（决策
-    D05）。如果提供了值，则它必须属于模型支持的级别，否则会抛出 400。
-    """
-    model = settings.app_config.get_model(model_id)
-    if model is None:
-        raise HTTPException(
-            status.HTTP_400_BAD_REQUEST,
-            f"unknown model id: {model_id!r}",
-        )
-    if requested is None:
-        return model.thinking_effort[0]
-    if requested not in model.thinking_effort:
-        raise HTTPException(
-            status.HTTP_400_BAD_REQUEST,
-            f"thinking_effort {requested!r} is not supported by model "
-            f"{model_id!r}; supported levels: {model.thinking_effort}",
-        )
-    return requested
 
 
 @router.get(
@@ -82,8 +57,7 @@ async def create_conversation(
 ) -> Conversation:
     """在给定 profile 中创建并绑定到指定 model 的会话。
 
-    如果省略 ``thinking_effort``，则使用模型列表中的第一个级别。会话存续期间不会
-    更换其绑定的 model。
+    ``thinking_enabled`` 默认关闭。会话存续期间不会更换其绑定的 model。
     """
     profile = await session.get(Profile, profile_id)
     if profile is None:
@@ -93,12 +67,11 @@ async def create_conversation(
             status.HTTP_400_BAD_REQUEST,
             f"unknown model id: {body.model_id!r}",
         )
-    thinking_effort = _resolve_thinking_effort(body.model_id, body.thinking_effort, settings)
     conversation = Conversation(
         profile_id=profile_id,
         title=body.title.strip(),
         model_id=body.model_id,
-        thinking_effort=thinking_effort,
+        thinking_enabled=body.thinking_enabled,
     )
     session.add(conversation)
     await session.commit()
@@ -122,22 +95,19 @@ async def update_conversation(
     conversation_id: int,
     body: ConversationUpdate,
     session=Depends(get_session),
-    settings=Depends(get_settings),
 ) -> Conversation:
-    """更新会话的 title 和/或 thinking_effort。
+    """更新会话的 title 和/或 thinking_enabled。
 
     这里不能修改 ``model_id``（决策 D09）；如果要使用其他 model，请创建新会话。
-    ``thinking_effort`` 会根据模型支持的级别进行校验。
+    上游 effort 在流式请求时由 model 配置和 ``thinking_enabled`` 共同解析。
     """
     conversation = await session.get(Conversation, conversation_id)
     if conversation is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "conversation not found")
     if body.title is not None:
         conversation.title = body.title.strip()
-    if body.thinking_effort is not None:
-        conversation.thinking_effort = _resolve_thinking_effort(
-            conversation.model_id, body.thinking_effort, settings
-        )
+    if body.thinking_enabled is not None:
+        conversation.thinking_enabled = body.thinking_enabled
     conversation.updated_at = datetime.now(timezone.utc)
     session.add(conversation)
     await session.commit()

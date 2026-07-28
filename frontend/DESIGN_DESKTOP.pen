@@ -561,52 +561,6 @@
                           "fontWeight": "500"
                         }
                       ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "RHOjv",
-                      "name": "Thinking Badge",
-                      "cornerRadius": "$radius-nav",
-                      "stroke": "$mist",
-                      "strokeWidth": 1,
-                      "gap": 6,
-                      "padding": [
-                        6,
-                        10
-                      ],
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon",
-                          "id": "J3lwJM",
-                          "name": "Thinking Icon",
-                          "width": 13,
-                          "height": 13,
-                          "icon": "brain",
-                          "library": "lucide",
-                          "fill": "$graphite"
-                        },
-                        {
-                          "type": "text",
-                          "id": "mePsT",
-                          "name": "Thinking Level",
-                          "fill": "$graphite",
-                          "content": "深度思考",
-                          "fontFamily": "$font-sans",
-                          "fontSize": 13,
-                          "fontWeight": "500"
-                        },
-                        {
-                          "type": "icon",
-                          "id": "jNELv",
-                          "name": "Thinking Chevron",
-                          "width": 12,
-                          "height": 12,
-                          "icon": "chevron-down",
-                          "library": "lucide",
-                          "fill": "$ashen"
-                        }
-                      ]
                     }
                   ]
                 }
@@ -1072,6 +1026,7 @@
                       "id": "tdHnW",
                       "name": "Input Actions Row",
                       "width": "fill_container",
+                      "gap": 8,
                       "justifyContent": "space_between",
                       "alignItems": "center",
                       "children": [
@@ -1115,6 +1070,43 @@
                           "fontFamily": "$font-sans",
                           "fontSize": 15,
                           "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "RHOjv",
+                          "name": "Thinking Button",
+                          "height": 32,
+                          "cornerRadius": "$radius-nav",
+                          "stroke": "$mist",
+                          "strokeWidth": 1,
+                          "gap": 6,
+                          "padding": [
+                            6,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "J3lwJM",
+                              "name": "Thinking Icon",
+                              "width": 13,
+                              "height": 13,
+                              "icon": "brain",
+                              "library": "lucide",
+                              "fill": "$graphite"
+                            },
+                            {
+                              "type": "text",
+                              "id": "mePsT",
+                              "name": "Thinking Level",
+                              "fill": "$graphite",
+                              "content": "深度思考",
+                              "fontFamily": "$font-sans",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            }
+                          ]
                         },
                         {
                           "type": "frame",
@@ -1720,6 +1712,7 @@
                       "id": "RWuuI",
                       "name": "Big Input Actions Row",
                       "width": "fill_container",
+                      "gap": 8,
                       "justifyContent": "space_between",
                       "alignItems": "center",
                       "children": [
@@ -1763,6 +1756,43 @@
                           "fontFamily": "$font-sans",
                           "fontSize": 16,
                           "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "H1Evc",
+                          "name": "Big Thinking Button",
+                          "height": 34,
+                          "cornerRadius": "$radius-nav",
+                          "stroke": "$mist",
+                          "strokeWidth": 1,
+                          "gap": 6,
+                          "padding": [
+                            6,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "GO3wM",
+                              "name": "Thinking Icon",
+                              "width": 13,
+                              "height": 13,
+                              "icon": "brain",
+                              "library": "lucide",
+                              "fill": "$graphite"
+                            },
+                            {
+                              "type": "text",
+                              "id": "n30O3f",
+                              "name": "Thinking Level",
+                              "fill": "$graphite",
+                              "content": "深度思考",
+                              "fontFamily": "$font-sans",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            }
+                          ]
                         },
                         {
                           "type": "frame",
@@ -2368,6 +2398,7 @@
                       "id": "D97Zw",
                       "name": "Big Input Actions Row",
                       "width": "fill_container",
+                      "gap": 8,
                       "justifyContent": "space_between",
                       "alignItems": "center",
                       "children": [
@@ -2411,6 +2442,43 @@
                           "fontFamily": "$font-sans",
                           "fontSize": 16,
                           "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "jnVIk",
+                          "name": "Big Thinking Button",
+                          "height": 34,
+                          "cornerRadius": "$radius-nav",
+                          "stroke": "$mist",
+                          "strokeWidth": 1,
+                          "gap": 6,
+                          "padding": [
+                            6,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "qgHzL",
+                              "name": "Thinking Icon",
+                              "width": 13,
+                              "height": 13,
+                              "icon": "brain",
+                              "library": "lucide",
+                              "fill": "$graphite"
+                            },
+                            {
+                              "type": "text",
+                              "id": "W3Zul",
+                              "name": "Thinking Level",
+                              "fill": "$graphite",
+                              "content": "深度思考",
+                              "fontFamily": "$font-sans",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            }
+                          ]
                         },
                         {
                           "type": "frame",
@@ -3129,52 +3197,6 @@
                           "fontWeight": "500"
                         }
                       ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "OMYcS",
-                      "name": "Thinking Badge",
-                      "cornerRadius": "$radius-nav",
-                      "stroke": "$mist",
-                      "strokeWidth": 1,
-                      "gap": 6,
-                      "padding": [
-                        6,
-                        10
-                      ],
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon",
-                          "id": "d3XDX",
-                          "name": "Thinking Icon",
-                          "width": 13,
-                          "height": 13,
-                          "icon": "brain",
-                          "library": "lucide",
-                          "fill": "$graphite"
-                        },
-                        {
-                          "type": "text",
-                          "id": "O5YRXA",
-                          "name": "Thinking Level",
-                          "fill": "$graphite",
-                          "content": "深度思考",
-                          "fontFamily": "$font-sans",
-                          "fontSize": 13,
-                          "fontWeight": "500"
-                        },
-                        {
-                          "type": "icon",
-                          "id": "jDUvu",
-                          "name": "Thinking Chevron",
-                          "width": 12,
-                          "height": 12,
-                          "icon": "chevron-down",
-                          "library": "lucide",
-                          "fill": "$ashen"
-                        }
-                      ]
                     }
                   ]
                 }
@@ -3640,6 +3662,7 @@
                       "id": "XmoLo",
                       "name": "Input Actions Row",
                       "width": "fill_container",
+                      "gap": 8,
                       "justifyContent": "space_between",
                       "alignItems": "center",
                       "children": [
@@ -3683,6 +3706,43 @@
                           "fontFamily": "$font-sans",
                           "fontSize": 15,
                           "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "OMYcS",
+                          "name": "Thinking Button",
+                          "height": 32,
+                          "cornerRadius": "$radius-nav",
+                          "stroke": "$mist",
+                          "strokeWidth": 1,
+                          "gap": 6,
+                          "padding": [
+                            6,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "d3XDX",
+                              "name": "Thinking Icon",
+                              "width": 13,
+                              "height": 13,
+                              "icon": "brain",
+                              "library": "lucide",
+                              "fill": "$graphite"
+                            },
+                            {
+                              "type": "text",
+                              "id": "O5YRXA",
+                              "name": "Thinking Level",
+                              "fill": "$graphite",
+                              "content": "深度思考",
+                              "fontFamily": "$font-sans",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            }
+                          ]
                         },
                         {
                           "type": "frame",
@@ -4539,52 +4599,6 @@
                           "fontWeight": "500"
                         }
                       ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "QCM0v",
-                      "name": "Thinking Badge",
-                      "cornerRadius": "$radius-nav",
-                      "stroke": "$mist",
-                      "strokeWidth": 1,
-                      "gap": 6,
-                      "padding": [
-                        6,
-                        10
-                      ],
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon",
-                          "id": "TOWLS",
-                          "name": "Thinking Icon",
-                          "width": 13,
-                          "height": 13,
-                          "icon": "brain",
-                          "library": "lucide",
-                          "fill": "$graphite"
-                        },
-                        {
-                          "type": "text",
-                          "id": "ALSuP",
-                          "name": "Thinking Level",
-                          "fill": "$graphite",
-                          "content": "深度思考",
-                          "fontFamily": "$font-sans",
-                          "fontSize": 13,
-                          "fontWeight": "500"
-                        },
-                        {
-                          "type": "icon",
-                          "id": "e5T4B",
-                          "name": "Thinking Chevron",
-                          "width": 12,
-                          "height": 12,
-                          "icon": "chevron-down",
-                          "library": "lucide",
-                          "fill": "$ashen"
-                        }
-                      ]
                     }
                   ]
                 }
@@ -5050,6 +5064,7 @@
                       "id": "kXP8e",
                       "name": "Input Actions Row",
                       "width": "fill_container",
+                      "gap": 8,
                       "justifyContent": "space_between",
                       "alignItems": "center",
                       "children": [
@@ -5093,6 +5108,43 @@
                           "fontFamily": "$font-sans",
                           "fontSize": 15,
                           "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "QCM0v",
+                          "name": "Thinking Button",
+                          "height": 32,
+                          "cornerRadius": "$radius-nav",
+                          "stroke": "$mist",
+                          "strokeWidth": 1,
+                          "gap": 6,
+                          "padding": [
+                            6,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "TOWLS",
+                              "name": "Thinking Icon",
+                              "width": 13,
+                              "height": 13,
+                              "icon": "brain",
+                              "library": "lucide",
+                              "fill": "$graphite"
+                            },
+                            {
+                              "type": "text",
+                              "id": "ALSuP",
+                              "name": "Thinking Level",
+                              "fill": "$graphite",
+                              "content": "深度思考",
+                              "fontFamily": "$font-sans",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            }
+                          ]
                         },
                         {
                           "type": "frame",

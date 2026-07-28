@@ -71,7 +71,8 @@ class OpenAIResponseProvider:
         ``system`` role）。Assistant turn 会作为 ``output_text`` item 发送；OpenAI reasoning
         不会从 history replay，因此会忽略 history message 上的 ``reasoning``。
 
-        conversation 选择 thinking level 时设置 ``reasoning.effort``；
+        backend 根据 conversation 的深度思考开关解析出的 effort 会设置为
+        ``reasoning.effort``；
         ``max_output_tokens`` 限制 thinking + visible output（决策 D08）。Responses API 会
         在选择的 effort level 内自适应处理 reasoning。
         """

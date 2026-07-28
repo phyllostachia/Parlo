@@ -9,7 +9,7 @@
 
 # 创建新会话且未明确选择模型时使用的默认模型。必须与下方 `models` 中某个条目的
 # `id` 匹配。
-default_model: claude-sonnet-5
+default_model: claude-opus-5
 
 # 不包含密钥的服务器运行参数。
 server:
@@ -33,48 +33,14 @@ images:
 # 可用模型。请按需添加或删除条目；每个条目的 `api_key` 字段都指定了必须在 `.env`
 # 中设置的环境变量名。
 models:
-  - id: gpt-5.6
-    display_name: GPT-5.6
-    api_key: OPENAI_API_KEY
-    base_url: https://api.openai.com/v1
-    family: openai
-    protocol: openai-response
-    vision: true
-    # 此模型支持的 thinking-effort 级别。创建新会话时使用第一个级别作为默认值。
-    thinking_effort:
-      - medium
-      - low
-      - high
-      - xhigh
-    # 发送给上游的输出预算（thinking + 可见文本）上限。
-    max_tokens: 32768
-
-  - id: claude-sonnet-5
-    display_name: Claude Sonnet 5
+  - id: claude-opus-5
+    display_name: Claude Opus 5
     api_key: ANTHROPIC_API_KEY
-    base_url: https://api.anthropic.com
+    base_url: https://api.ofox.io/anthropic
     family: anthropic
     protocol: anthropic-message
     vision: true
-    thinking_effort:
-      - high
-      - medium
-      - low
-      - xhigh
-      - max
-    max_tokens: 65536
-
-  - id: claude-opus-4-8
-    display_name: Claude Opus 4.8
-    api_key: ANTHROPIC_API_KEY
-    base_url: https://api.anthropic.com
-    family: anthropic
-    protocol: anthropic-message
-    vision: true
-    thinking_effort:
-      - high
-      - medium
-      - low
-      - xhigh
-      - max
+    # 用户关闭或开启深度思考时，分别传给上游的 effort。
+    thinking_off_effort: medium
+    thinking_on_effort: xhigh
     max_tokens: 32768

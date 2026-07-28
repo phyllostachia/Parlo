@@ -56,14 +56,16 @@ class ModelConfig(BaseModel):
     """provider family，决定客户端的 logo。"""
 
     protocol: ProviderType
-    """上游 protocol，决定 request wire format 和客户端可选择的 thinking-effort level 集合。"""
+    """上游 protocol，决定 request wire format。"""
 
     vision: bool
     """model 是否接受 image input。当值为 ``False`` 时，客户端隐藏 multimodal upload button。"""
 
-    thinking_effort: list[str]
-    """model 接受的 thinking-effort level，按客户端应提供的顺序排列。创建新 conversation
-    时使用第一个 entry 作为默认值（参见决策 D05）。"""
+    thinking_off_effort: str
+    """用户关闭深度思考时转发给上游的 thinking effort。"""
+
+    thinking_on_effort: str
+    """用户开启深度思考时转发给上游的 thinking effort。"""
 
     max_tokens: int
     """发送给上游的 output budget（thinking + visible text），作为 generated token 的硬上限。
@@ -75,13 +77,14 @@ class ModelConfig(BaseModel):
         """移除 trailing slash，使 URL joining 结果可预测。"""
         return value.rstrip("/")
 
-    @field_validator("thinking_effort")
+    @field_validator("thinking_off_effort", "thinking_on_effort")
     @classmethod
-    def _non_empty_efforts(cls, value: list[str]) -> list[str]:
-        """没有 effort level 的 model 无法为客户端提供可选项。"""
-        if not value:
-            raise ValueError("thinking_effort must list at least one level")
-        return value
+    def _non_empty_effort(cls, value: str) -> str:
+        """每个开关状态都必须映射到一个非空的上游 effort。"""
+        effort = value.strip()
+        if not effort:
+            raise ValueError("thinking effort must not be blank")
+        return effort
 
     def resolve_api_key(self) -> str:
         """从 environment 返回该 model 引用的实际 secret。

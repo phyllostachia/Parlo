@@ -63,9 +63,9 @@ class ChatMessage:
 class ChatRequest:
     """针对给定 message history 请求 streaming completion。
 
-    ``thinking_effort`` 是会话选择的 level（model 列出的 level 之一）。它会以
-    ``reasoning.effort``（OpenAI）或 ``thinking.effort``（Anthropic adaptive）的形式
-    转发给上游；空 string 表示 adapter 不应发送 thinking parameter。
+    ``thinking_effort`` 是后端根据会话的 ``thinking_enabled`` 开关和 model 配置解析出的
+    上游值。它会以 ``reasoning.effort``（OpenAI）或 ``thinking.effort``（Anthropic
+    adaptive）的形式转发；空 string 表示 adapter 不应发送 thinking parameter。
     """
 
     messages: list[ChatMessage] = field(default_factory=list)

@@ -12,7 +12,7 @@ _$ConversationImpl _$$ConversationImplFromJson(Map<String, dynamic> json) =>
       profileId: (json['profile_id'] as num).toInt(),
       title: json['title'] as String,
       modelId: json['model_id'] as String,
-      thinkingEffort: json['thinking_effort'] as String,
+      thinkingEnabled: json['thinking_enabled'] as bool,
       currentLeafId: (json['current_leaf_id'] as num?)?.toInt(),
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
@@ -24,7 +24,7 @@ Map<String, dynamic> _$$ConversationImplToJson(_$ConversationImpl instance) =>
       'profile_id': instance.profileId,
       'title': instance.title,
       'model_id': instance.modelId,
-      'thinking_effort': instance.thinkingEffort,
+      'thinking_enabled': instance.thinkingEnabled,
       'current_leaf_id': instance.currentLeafId,
       'created_at': instance.createdAt.toIso8601String(),
       'updated_at': instance.updatedAt.toIso8601String(),
@@ -35,7 +35,7 @@ _$ConversationCreateImpl _$$ConversationCreateImplFromJson(
 ) => _$ConversationCreateImpl(
   modelId: json['model_id'] as String,
   title: json['title'] as String? ?? '',
-  thinkingEffort: json['thinking_effort'] as String?,
+  thinkingEnabled: json['thinking_enabled'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$$ConversationCreateImplToJson(
@@ -43,19 +43,19 @@ Map<String, dynamic> _$$ConversationCreateImplToJson(
 ) => <String, dynamic>{
   'model_id': instance.modelId,
   'title': instance.title,
-  'thinking_effort': instance.thinkingEffort,
+  'thinking_enabled': instance.thinkingEnabled,
 };
 
 _$ConversationUpdateImpl _$$ConversationUpdateImplFromJson(
   Map<String, dynamic> json,
 ) => _$ConversationUpdateImpl(
   title: json['title'] as String?,
-  thinkingEffort: json['thinking_effort'] as String?,
+  thinkingEnabled: json['thinking_enabled'] as bool?,
 );
 
 Map<String, dynamic> _$$ConversationUpdateImplToJson(
   _$ConversationUpdateImpl instance,
 ) => <String, dynamic>{
   'title': instance.title,
-  'thinking_effort': instance.thinkingEffort,
+  'thinking_enabled': instance.thinkingEnabled,
 };

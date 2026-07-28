@@ -13,11 +13,6 @@ _$ModelReadImpl _$$ModelReadImplFromJson(Map<String, dynamic> json) =>
       family: json['family'] as String,
       protocol: json['protocol'] as String,
       vision: json['vision'] as bool,
-      thinkingEffort:
-          (json['thinking_effort'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const <String>[],
     );
 
 Map<String, dynamic> _$$ModelReadImplToJson(_$ModelReadImpl instance) =>
@@ -27,7 +22,6 @@ Map<String, dynamic> _$$ModelReadImplToJson(_$ModelReadImpl instance) =>
       'family': instance.family,
       'protocol': instance.protocol,
       'vision': instance.vision,
-      'thinking_effort': instance.thinkingEffort,
     };
 
 _$ModelsResponseImpl _$$ModelsResponseImplFromJson(Map<String, dynamic> json) =>

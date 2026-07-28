@@ -69,7 +69,7 @@ async def get_session() -> AsyncIterator[AsyncSession]:
 
 
 async def init_db() -> None:
-    """创建 SQLModel metadata 定义的所有 table。
+    """创建 SQLModel metadata 定义的所有 table，并迁移已有 SQLite 数据库。
 
     这里才导入（而不是在 module top 导入），使 ``models`` 只在确实需要创建 schema 时
     加载，从而避免 ``db`` 与 ``models`` 之间的 circular import。
@@ -78,3 +78,15 @@ async def init_db() -> None:
 
     async with engine.begin() as conn:
         await conn.run_sync(models.SQLModel.metadata.create_all)
+        if engine.url.get_backend_name() == "sqlite":
+            columns = {
+                row[1]
+                for row in (
+                    await conn.exec_driver_sql("PRAGMA table_info(conversation)")
+                )
+            }
+            if "thinking_enabled" not in columns:
+                await conn.exec_driver_sql(
+                    "ALTER TABLE conversation "
+                    "ADD COLUMN thinking_enabled BOOLEAN NOT NULL DEFAULT 0"
+                )

@@ -20,6 +20,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Literal
 
+from pydantic import ConfigDict
 from sqlmodel import Field, SQLModel
 
 
@@ -58,9 +59,8 @@ class Conversation(SQLModel, table=True):
     model_id: str = ""
     """该 conversation 的每个 assistant turn 使用的 model。创建时固定（决策 D03）；如需
     使用其他 model，请创建新 conversation。该 value 是 ``config.yaml`` 中某个 entry 的 ``id``。"""
-    thinking_effort: str = ""
-    """为该 conversation 选择的 thinking-effort level。必须是 model 的 ``thinking_effort``
-    field 中列出的 level 之一。可以通过 ``PATCH`` 修改（决策 D05/D09）。"""
+    thinking_enabled: bool = False
+    """用户是否为该 conversation 开启深度思考。上游 effort 由 model 配置解析。"""
     current_leaf_id: int | None = Field(
         default=None,
         foreign_key="message.id",
@@ -109,24 +109,28 @@ class ConversationCreate(SQLModel):
     ``model_id`` 选择该 conversation 使用的 model（决策 D03），必须匹配 ``config.yaml``
     中的 entry，endpoint 会进行校验。
 
-    省略 ``thinking_effort`` 时，默认使用 model 的 ``thinking_effort`` list 中的第一个
-    level（决策 D05）。如果提供了值，则必须是 model 列出的 level 之一。
+    ``thinking_enabled`` 默认关闭。后端会在请求上游时根据该开关，从 model 的
+    ``thinking_off_effort`` 或 ``thinking_on_effort`` 配置选择 effort。
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     model_id: str
     title: str = ""
-    thinking_effort: str | None = None
+    thinking_enabled: bool = False
 
 
 class ConversationUpdate(SQLModel):
     """PATCH conversation request 的 body。
 
-    创建后只能修改 ``thinking_effort`` 和 ``title``；``model_id`` 固定不变（决策 D09）。
+    创建后只能修改 ``thinking_enabled`` 和 ``title``；``model_id`` 固定不变（决策 D09）。
     两个 field 都是 optional，只有提供的 field 会被应用。
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     title: str | None = None
-    thinking_effort: str | None = None
+    thinking_enabled: bool | None = None
 
 
 
@@ -159,7 +163,7 @@ class ConversationRead(SQLModel):
     profile_id: int
     title: str
     model_id: str
-    thinking_effort: str
+    thinking_enabled: bool
     current_leaf_id: int | None
     created_at: datetime
     updated_at: datetime
@@ -227,14 +231,13 @@ class ModelRead(SQLModel):
     family: str
     protocol: str
     vision: bool
-    thinking_effort: list[str]
 
 
 class ModelsResponse(SQLModel):
     """``GET /api/models`` 的 response。
 
     携带已配置的 default model id 和可用 model list，使客户端无需 hardcoded protocol
-    knowledge 就能渲染 model 和 thinking-effort selector。
+    knowledge 就能渲染 model selector。
     """
 
     default_model: str

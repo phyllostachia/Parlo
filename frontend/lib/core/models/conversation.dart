@@ -1,7 +1,7 @@
 /// `Conversation` data model 及其 create/update request body。
 ///
 /// Conversation 是属于一个 profile、并在整个生命周期内绑定单个 model 的 chat thread
-///（架构决策 D03）。创建后只能修改 title 和 thinking-effort level。
+///（架构决策 D03）。创建后只能修改 title 和深度思考开关。
 library;
 
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -29,9 +29,8 @@ class Conversation with _$Conversation {
     /// `config.yaml` 中的 model id。创建时固定；如需使用其他 model，请创建新 conversation。
     required String modelId,
 
-    /// 此 conversation 的 thinking-effort level。必须是绑定 model 的 `thinking_effort` field
-    /// 中列出的 level 之一。可以通过 `PATCH` 修改。
-    required String thinkingEffort,
+    /// 此 conversation 是否启用深度思考。上游 effort 由 backend 的 model 配置解析。
+    required bool thinkingEnabled,
 
     /// 可见 path 上最后一条 message 的 id；conversation 尚无 message 时为 `null`。
     required int? currentLeafId,
@@ -50,8 +49,7 @@ class Conversation with _$Conversation {
 
 /// `POST /api/profiles/{id}/conversations` request 的 body。
 ///
-/// `thinkingEffort` 是 optional；省略时 backend 使用 model 的 `thinking_effort` list 中的
-/// 第一个 level（决策 D05）。
+/// `thinkingEnabled` 默认关闭；backend 会根据此开关选择模型配置的对应 effort。
 @freezed
 class ConversationCreate with _$ConversationCreate {
   /// 创建 request body。
@@ -62,9 +60,8 @@ class ConversationCreate with _$ConversationCreate {
     /// 可选的初始 title。通常在第一个 turn 前保持为空。
     @Default('') String title,
 
-    /// 可选的 thinking-effort level。必须是 model 列出的 level 之一；`null` 表示“使用
-    /// model default”。
-    String? thinkingEffort,
+    /// 是否为新会话开启深度思考。
+    @Default(false) bool thinkingEnabled,
   }) = _ConversationCreate;
 
   /// 根据 JSON 重建 request body（主要用于 test）。
@@ -83,8 +80,8 @@ class ConversationUpdate with _$ConversationUpdate {
     /// 要修改的新 title。
     String? title,
 
-    /// 要修改的新 thinking-effort level。必须是 model 支持的 level 之一。
-    String? thinkingEffort,
+    /// 要修改的深度思考开关；`null` 表示不变。
+    bool? thinkingEnabled,
   }) = _ConversationUpdate;
 
   /// 根据 JSON 重建 request body（主要用于 test）。

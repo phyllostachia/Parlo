@@ -21,20 +21,21 @@ UserMessageCreate _$UserMessageCreateFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$UserMessageCreate {
-  /// Parent message id。`null` 表示“使用 conversation 当前的 leaf”。
+  /// Parent message id。`null` 表示“使用 conversation current leaf”。
   int? get parentId => throw _privateConstructorUsedError;
 
-  /// User text。即使附加了 image，也必须提供此字段。
+  /// User 的 text。即使附加了 image 也必须提供。
   String get text => throw _privateConstructorUsedError;
 
-  /// 可选的附加 image 的 base64 data URL。Frontend 会在发送前根据 picked、pasted 或
-  /// dropped file 构建此值。
+  /// 附加 image 的可选 base64 data URL。Frontend 在发送前根据 picked/pasted/dropped file
+  /// 构建它。
   String? get imageData => throw _privateConstructorUsedError;
 
-  /// 将此 UserMessageCreate serialize 为 JSON map。
+  /// Serializes this UserMessageCreate to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// 创建 UserMessageCreate 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of UserMessageCreate
+  /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   $UserMessageCreateCopyWith<UserMessageCreate> get copyWith =>
       throw _privateConstructorUsedError;
@@ -60,7 +61,8 @@ class _$UserMessageCreateCopyWithImpl<$Res, $Val extends UserMessageCreate>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// 创建 UserMessageCreate 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of UserMessageCreate
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -109,7 +111,8 @@ class __$$UserMessageCreateImplCopyWithImpl<$Res>
     $Res Function(_$UserMessageCreateImpl) _then,
   ) : super(_value, _then);
 
-  /// 创建 UserMessageCreate 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of UserMessageCreate
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -148,16 +151,16 @@ class _$UserMessageCreateImpl implements _UserMessageCreate {
   factory _$UserMessageCreateImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserMessageCreateImplFromJson(json);
 
-  /// Parent message id。`null` 表示“使用 conversation 当前的 leaf”。
+  /// Parent message id。`null` 表示“使用 conversation current leaf”。
   @override
   final int? parentId;
 
-  /// User text。即使附加了 image，也必须提供此字段。
+  /// User 的 text。即使附加了 image 也必须提供。
   @override
   final String text;
 
-  /// 可选的附加 image 的 base64 data URL。Frontend 会在发送前根据 picked、pasted 或
-  /// dropped file 构建此值。
+  /// 附加 image 的可选 base64 data URL。Frontend 在发送前根据 picked/pasted/dropped file
+  /// 构建它。
   @override
   final String? imageData;
 
@@ -182,7 +185,8 @@ class _$UserMessageCreateImpl implements _UserMessageCreate {
   @override
   int get hashCode => Object.hash(runtimeType, parentId, text, imageData);
 
-  /// 创建 UserMessageCreate 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of UserMessageCreate
+  /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
@@ -208,20 +212,21 @@ abstract class _UserMessageCreate implements UserMessageCreate {
   factory _UserMessageCreate.fromJson(Map<String, dynamic> json) =
       _$UserMessageCreateImpl.fromJson;
 
-  /// Parent message id。`null` 表示“使用 conversation 当前的 leaf”。
+  /// Parent message id。`null` 表示“使用 conversation current leaf”。
   @override
   int? get parentId;
 
-  /// User text。即使附加了 image，也必须提供此字段。
+  /// User 的 text。即使附加了 image 也必须提供。
   @override
   String get text;
 
-  /// 可选的附加 image 的 base64 data URL。Frontend 会在发送前根据 picked、pasted 或
-  /// dropped file 构建此值。
+  /// 附加 image 的可选 base64 data URL。Frontend 在发送前根据 picked/pasted/dropped file
+  /// 构建它。
   @override
   String? get imageData;
 
-  /// 创建 UserMessageCreate 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of UserMessageCreate
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$UserMessageCreateImplCopyWith<_$UserMessageCreateImpl> get copyWith =>

@@ -19,10 +19,12 @@ Tan BYOK AI Chatbot 的自托管、单用户后端。
 - `family`
 - `protocol`，`openai-response` 或 `claude-message`
 - `vision`
-- 支持的 `thinking_effort` 级别列表
+- `thinking_off_effort`：用户关闭深度思考时使用的上游 effort
+- `thinking_on_effort`：用户开启深度思考时使用的上游 effort
 - `max_tokens`
 
-每个会话只绑定一个模型；选定的 thinking-effort 级别会按会话保存，并转发给上游。
+每个会话只绑定一个模型；深度思考开关会按会话保存。每次请求时，后端根据该开关从模型
+配置中选择 `thinking_off_effort` 或 `thinking_on_effort`，并将对应 effort 转发给上游。
 
 ## 支持的 provider
 
@@ -71,7 +73,7 @@ API 位于 `/api` 路径下。上传的图片位于 `/images` 路径下。
 | GET    | `/api/profiles/{id}/conversations`                        | 列出会话                                           |
 | POST   | `/api/profiles/{id}/conversations`                        | 创建会话（绑定模型）                                |
 | GET    | `/api/conversations/{id}`                                 | 获取会话                                           |
-| PATCH  | `/api/conversations/{id}`                                 | 更新 title / thinking_effort                       |
+| PATCH  | `/api/conversations/{id}`                                 | 更新 title / thinking_enabled                      |
 | DELETE | `/api/conversations/{id}`                                 | 删除会话                                           |
 | GET    | `/api/conversations/{id}/messages`                        | 获取可见消息路径                                    |
 | POST   | `/api/conversations/{id}/messages`                        | 创建 user 消息和 assistant 占位消息                 |

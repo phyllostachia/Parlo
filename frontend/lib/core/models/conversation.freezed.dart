@@ -33,9 +33,8 @@ mixin _$Conversation {
   /// `config.yaml` 中的 model id。创建时固定；如需使用其他 model，请创建新 conversation。
   String get modelId => throw _privateConstructorUsedError;
 
-  /// 此 conversation 的 thinking-effort level。必须是绑定 model 的 `thinking_effort` field
-  /// 中列出的 level 之一。可以通过 `PATCH` 修改。
-  String get thinkingEffort => throw _privateConstructorUsedError;
+  /// 此 conversation 是否启用深度思考。上游 effort 由 backend 的 model 配置解析。
+  bool get thinkingEnabled => throw _privateConstructorUsedError;
 
   /// 可见 path 上最后一条 message 的 id；conversation 尚无 message 时为 `null`。
   int? get currentLeafId => throw _privateConstructorUsedError;
@@ -46,10 +45,11 @@ mixin _$Conversation {
   /// Conversation 最近更新时间。用于 sidebar sorting。
   DateTime get updatedAt => throw _privateConstructorUsedError;
 
-  /// 将此 Conversation serialize 为 JSON map。
+  /// Serializes this Conversation to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// 创建 Conversation 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of Conversation
+  /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   $ConversationCopyWith<Conversation> get copyWith =>
       throw _privateConstructorUsedError;
@@ -67,7 +67,7 @@ abstract class $ConversationCopyWith<$Res> {
     int profileId,
     String title,
     String modelId,
-    String thinkingEffort,
+    bool thinkingEnabled,
     int? currentLeafId,
     DateTime createdAt,
     DateTime updatedAt,
@@ -84,7 +84,8 @@ class _$ConversationCopyWithImpl<$Res, $Val extends Conversation>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// 创建 Conversation 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of Conversation
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -92,7 +93,7 @@ class _$ConversationCopyWithImpl<$Res, $Val extends Conversation>
     Object? profileId = null,
     Object? title = null,
     Object? modelId = null,
-    Object? thinkingEffort = null,
+    Object? thinkingEnabled = null,
     Object? currentLeafId = freezed,
     Object? createdAt = null,
     Object? updatedAt = null,
@@ -115,10 +116,10 @@ class _$ConversationCopyWithImpl<$Res, $Val extends Conversation>
                 ? _value.modelId
                 : modelId // ignore: cast_nullable_to_non_nullable
                       as String,
-            thinkingEffort: null == thinkingEffort
-                ? _value.thinkingEffort
-                : thinkingEffort // ignore: cast_nullable_to_non_nullable
-                      as String,
+            thinkingEnabled: null == thinkingEnabled
+                ? _value.thinkingEnabled
+                : thinkingEnabled // ignore: cast_nullable_to_non_nullable
+                      as bool,
             currentLeafId: freezed == currentLeafId
                 ? _value.currentLeafId
                 : currentLeafId // ignore: cast_nullable_to_non_nullable
@@ -151,7 +152,7 @@ abstract class _$$ConversationImplCopyWith<$Res>
     int profileId,
     String title,
     String modelId,
-    String thinkingEffort,
+    bool thinkingEnabled,
     int? currentLeafId,
     DateTime createdAt,
     DateTime updatedAt,
@@ -167,7 +168,8 @@ class __$$ConversationImplCopyWithImpl<$Res>
     $Res Function(_$ConversationImpl) _then,
   ) : super(_value, _then);
 
-  /// 创建 Conversation 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of Conversation
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -175,7 +177,7 @@ class __$$ConversationImplCopyWithImpl<$Res>
     Object? profileId = null,
     Object? title = null,
     Object? modelId = null,
-    Object? thinkingEffort = null,
+    Object? thinkingEnabled = null,
     Object? currentLeafId = freezed,
     Object? createdAt = null,
     Object? updatedAt = null,
@@ -198,10 +200,10 @@ class __$$ConversationImplCopyWithImpl<$Res>
             ? _value.modelId
             : modelId // ignore: cast_nullable_to_non_nullable
                   as String,
-        thinkingEffort: null == thinkingEffort
-            ? _value.thinkingEffort
-            : thinkingEffort // ignore: cast_nullable_to_non_nullable
-                  as String,
+        thinkingEnabled: null == thinkingEnabled
+            ? _value.thinkingEnabled
+            : thinkingEnabled // ignore: cast_nullable_to_non_nullable
+                  as bool,
         currentLeafId: freezed == currentLeafId
             ? _value.currentLeafId
             : currentLeafId // ignore: cast_nullable_to_non_nullable
@@ -227,7 +229,7 @@ class _$ConversationImpl implements _Conversation {
     required this.profileId,
     required this.title,
     required this.modelId,
-    required this.thinkingEffort,
+    required this.thinkingEnabled,
     required this.currentLeafId,
     required this.createdAt,
     required this.updatedAt,
@@ -252,10 +254,9 @@ class _$ConversationImpl implements _Conversation {
   @override
   final String modelId;
 
-  /// 此 conversation 的 thinking-effort level。必须是绑定 model 的 `thinking_effort` field
-  /// 中列出的 level 之一。可以通过 `PATCH` 修改。
+  /// 此 conversation 是否启用深度思考。上游 effort 由 backend 的 model 配置解析。
   @override
-  final String thinkingEffort;
+  final bool thinkingEnabled;
 
   /// 可见 path 上最后一条 message 的 id；conversation 尚无 message 时为 `null`。
   @override
@@ -271,7 +272,7 @@ class _$ConversationImpl implements _Conversation {
 
   @override
   String toString() {
-    return 'Conversation(id: $id, profileId: $profileId, title: $title, modelId: $modelId, thinkingEffort: $thinkingEffort, currentLeafId: $currentLeafId, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Conversation(id: $id, profileId: $profileId, title: $title, modelId: $modelId, thinkingEnabled: $thinkingEnabled, currentLeafId: $currentLeafId, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -284,8 +285,8 @@ class _$ConversationImpl implements _Conversation {
                 other.profileId == profileId) &&
             (identical(other.title, title) || other.title == title) &&
             (identical(other.modelId, modelId) || other.modelId == modelId) &&
-            (identical(other.thinkingEffort, thinkingEffort) ||
-                other.thinkingEffort == thinkingEffort) &&
+            (identical(other.thinkingEnabled, thinkingEnabled) ||
+                other.thinkingEnabled == thinkingEnabled) &&
             (identical(other.currentLeafId, currentLeafId) ||
                 other.currentLeafId == currentLeafId) &&
             (identical(other.createdAt, createdAt) ||
@@ -302,13 +303,14 @@ class _$ConversationImpl implements _Conversation {
     profileId,
     title,
     modelId,
-    thinkingEffort,
+    thinkingEnabled,
     currentLeafId,
     createdAt,
     updatedAt,
   );
 
-  /// 创建 Conversation 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of Conversation
+  /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
@@ -327,7 +329,7 @@ abstract class _Conversation implements Conversation {
     required final int profileId,
     required final String title,
     required final String modelId,
-    required final String thinkingEffort,
+    required final bool thinkingEnabled,
     required final int? currentLeafId,
     required final DateTime createdAt,
     required final DateTime updatedAt,
@@ -352,12 +354,11 @@ abstract class _Conversation implements Conversation {
   @override
   String get modelId;
 
-  /// 此 conversation 的 thinking-effort level。必须是绑定 model 的 `thinking_effort` field
-  /// 中列出的 level 之一。可以通过 `PATCH` 修改。
+  /// 此 conversation 是否启用深度思考。上游 effort 由 backend 的 model 配置解析。
   @override
-  String get thinkingEffort;
+  bool get thinkingEnabled;
 
-  /// Visible path 上最后一条 message 的 id；conversation 尚无 message 时为 `null`。
+  /// 可见 path 上最后一条 message 的 id；conversation 尚无 message 时为 `null`。
   @override
   int? get currentLeafId;
 
@@ -369,7 +370,8 @@ abstract class _Conversation implements Conversation {
   @override
   DateTime get updatedAt;
 
-  /// 创建 Conversation 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of Conversation
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ConversationImplCopyWith<_$ConversationImpl> get copyWith =>
@@ -388,14 +390,14 @@ mixin _$ConversationCreate {
   /// 可选的初始 title。通常在第一个 turn 前保持为空。
   String get title => throw _privateConstructorUsedError;
 
-  /// 可选的 thinking-effort level。必须是 model 列出的 level 之一；`null` 表示“使用
-  /// model default”。
-  String? get thinkingEffort => throw _privateConstructorUsedError;
+  /// 是否为新会话开启深度思考。
+  bool get thinkingEnabled => throw _privateConstructorUsedError;
 
-  /// 将此 ConversationCreate serialize 为 JSON map。
+  /// Serializes this ConversationCreate to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// 创建 ConversationCreate 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of ConversationCreate
+  /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   $ConversationCreateCopyWith<ConversationCreate> get copyWith =>
       throw _privateConstructorUsedError;
@@ -408,7 +410,7 @@ abstract class $ConversationCreateCopyWith<$Res> {
     $Res Function(ConversationCreate) then,
   ) = _$ConversationCreateCopyWithImpl<$Res, ConversationCreate>;
   @useResult
-  $Res call({String modelId, String title, String? thinkingEffort});
+  $Res call({String modelId, String title, bool thinkingEnabled});
 }
 
 /// @nodoc
@@ -421,13 +423,14 @@ class _$ConversationCreateCopyWithImpl<$Res, $Val extends ConversationCreate>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// 创建 ConversationCreate 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of ConversationCreate
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? modelId = null,
     Object? title = null,
-    Object? thinkingEffort = freezed,
+    Object? thinkingEnabled = null,
   }) {
     return _then(
       _value.copyWith(
@@ -439,10 +442,10 @@ class _$ConversationCreateCopyWithImpl<$Res, $Val extends ConversationCreate>
                 ? _value.title
                 : title // ignore: cast_nullable_to_non_nullable
                       as String,
-            thinkingEffort: freezed == thinkingEffort
-                ? _value.thinkingEffort
-                : thinkingEffort // ignore: cast_nullable_to_non_nullable
-                      as String?,
+            thinkingEnabled: null == thinkingEnabled
+                ? _value.thinkingEnabled
+                : thinkingEnabled // ignore: cast_nullable_to_non_nullable
+                      as bool,
           )
           as $Val,
     );
@@ -458,7 +461,7 @@ abstract class _$$ConversationCreateImplCopyWith<$Res>
   ) = __$$ConversationCreateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String modelId, String title, String? thinkingEffort});
+  $Res call({String modelId, String title, bool thinkingEnabled});
 }
 
 /// @nodoc
@@ -470,13 +473,14 @@ class __$$ConversationCreateImplCopyWithImpl<$Res>
     $Res Function(_$ConversationCreateImpl) _then,
   ) : super(_value, _then);
 
-  /// 创建 ConversationCreate 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of ConversationCreate
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? modelId = null,
     Object? title = null,
-    Object? thinkingEffort = freezed,
+    Object? thinkingEnabled = null,
   }) {
     return _then(
       _$ConversationCreateImpl(
@@ -488,10 +492,10 @@ class __$$ConversationCreateImplCopyWithImpl<$Res>
             ? _value.title
             : title // ignore: cast_nullable_to_non_nullable
                   as String,
-        thinkingEffort: freezed == thinkingEffort
-            ? _value.thinkingEffort
-            : thinkingEffort // ignore: cast_nullable_to_non_nullable
-                  as String?,
+        thinkingEnabled: null == thinkingEnabled
+            ? _value.thinkingEnabled
+            : thinkingEnabled // ignore: cast_nullable_to_non_nullable
+                  as bool,
       ),
     );
   }
@@ -503,7 +507,7 @@ class _$ConversationCreateImpl implements _ConversationCreate {
   const _$ConversationCreateImpl({
     required this.modelId,
     this.title = '',
-    this.thinkingEffort,
+    this.thinkingEnabled = false,
   });
 
   factory _$ConversationCreateImpl.fromJson(Map<String, dynamic> json) =>
@@ -518,14 +522,14 @@ class _$ConversationCreateImpl implements _ConversationCreate {
   @JsonKey()
   final String title;
 
-  /// 可选的 thinking-effort level。必须是 model 列出的 level 之一；`null` 表示“使用
-  /// model default”。
+  /// 是否为新会话开启深度思考。
   @override
-  final String? thinkingEffort;
+  @JsonKey()
+  final bool thinkingEnabled;
 
   @override
   String toString() {
-    return 'ConversationCreate(modelId: $modelId, title: $title, thinkingEffort: $thinkingEffort)';
+    return 'ConversationCreate(modelId: $modelId, title: $title, thinkingEnabled: $thinkingEnabled)';
   }
 
   @override
@@ -535,15 +539,16 @@ class _$ConversationCreateImpl implements _ConversationCreate {
             other is _$ConversationCreateImpl &&
             (identical(other.modelId, modelId) || other.modelId == modelId) &&
             (identical(other.title, title) || other.title == title) &&
-            (identical(other.thinkingEffort, thinkingEffort) ||
-                other.thinkingEffort == thinkingEffort));
+            (identical(other.thinkingEnabled, thinkingEnabled) ||
+                other.thinkingEnabled == thinkingEnabled));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, modelId, title, thinkingEffort);
+  int get hashCode => Object.hash(runtimeType, modelId, title, thinkingEnabled);
 
-  /// 创建 ConversationCreate 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of ConversationCreate
+  /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
@@ -563,7 +568,7 @@ abstract class _ConversationCreate implements ConversationCreate {
   const factory _ConversationCreate({
     required final String modelId,
     final String title,
-    final String? thinkingEffort,
+    final bool thinkingEnabled,
   }) = _$ConversationCreateImpl;
 
   factory _ConversationCreate.fromJson(Map<String, dynamic> json) =
@@ -577,12 +582,12 @@ abstract class _ConversationCreate implements ConversationCreate {
   @override
   String get title;
 
-  /// 可选的 thinking-effort level。必须是 model 列出的 level 之一；`null` 表示“使用
-  /// model default”。
+  /// 是否为新会话开启深度思考。
   @override
-  String? get thinkingEffort;
+  bool get thinkingEnabled;
 
-  /// 创建 ConversationCreate 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of ConversationCreate
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ConversationCreateImplCopyWith<_$ConversationCreateImpl> get copyWith =>
@@ -598,13 +603,14 @@ mixin _$ConversationUpdate {
   /// 要修改的新 title。
   String? get title => throw _privateConstructorUsedError;
 
-  /// 要修改的新 thinking-effort level。必须是 model 支持的 level 之一。
-  String? get thinkingEffort => throw _privateConstructorUsedError;
+  /// 要修改的深度思考开关；`null` 表示不变。
+  bool? get thinkingEnabled => throw _privateConstructorUsedError;
 
-  /// 将此 ConversationUpdate serialize 为 JSON map。
+  /// Serializes this ConversationUpdate to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// 创建 ConversationUpdate 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of ConversationUpdate
+  /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   $ConversationUpdateCopyWith<ConversationUpdate> get copyWith =>
       throw _privateConstructorUsedError;
@@ -617,7 +623,7 @@ abstract class $ConversationUpdateCopyWith<$Res> {
     $Res Function(ConversationUpdate) then,
   ) = _$ConversationUpdateCopyWithImpl<$Res, ConversationUpdate>;
   @useResult
-  $Res call({String? title, String? thinkingEffort});
+  $Res call({String? title, bool? thinkingEnabled});
 }
 
 /// @nodoc
@@ -630,20 +636,21 @@ class _$ConversationUpdateCopyWithImpl<$Res, $Val extends ConversationUpdate>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// 创建 ConversationUpdate 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of ConversationUpdate
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? title = freezed, Object? thinkingEffort = freezed}) {
+  $Res call({Object? title = freezed, Object? thinkingEnabled = freezed}) {
     return _then(
       _value.copyWith(
             title: freezed == title
                 ? _value.title
                 : title // ignore: cast_nullable_to_non_nullable
                       as String?,
-            thinkingEffort: freezed == thinkingEffort
-                ? _value.thinkingEffort
-                : thinkingEffort // ignore: cast_nullable_to_non_nullable
-                      as String?,
+            thinkingEnabled: freezed == thinkingEnabled
+                ? _value.thinkingEnabled
+                : thinkingEnabled // ignore: cast_nullable_to_non_nullable
+                      as bool?,
           )
           as $Val,
     );
@@ -659,7 +666,7 @@ abstract class _$$ConversationUpdateImplCopyWith<$Res>
   ) = __$$ConversationUpdateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String? title, String? thinkingEffort});
+  $Res call({String? title, bool? thinkingEnabled});
 }
 
 /// @nodoc
@@ -671,20 +678,21 @@ class __$$ConversationUpdateImplCopyWithImpl<$Res>
     $Res Function(_$ConversationUpdateImpl) _then,
   ) : super(_value, _then);
 
-  /// 创建 ConversationUpdate 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of ConversationUpdate
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? title = freezed, Object? thinkingEffort = freezed}) {
+  $Res call({Object? title = freezed, Object? thinkingEnabled = freezed}) {
     return _then(
       _$ConversationUpdateImpl(
         title: freezed == title
             ? _value.title
             : title // ignore: cast_nullable_to_non_nullable
                   as String?,
-        thinkingEffort: freezed == thinkingEffort
-            ? _value.thinkingEffort
-            : thinkingEffort // ignore: cast_nullable_to_non_nullable
-                  as String?,
+        thinkingEnabled: freezed == thinkingEnabled
+            ? _value.thinkingEnabled
+            : thinkingEnabled // ignore: cast_nullable_to_non_nullable
+                  as bool?,
       ),
     );
   }
@@ -693,7 +701,7 @@ class __$$ConversationUpdateImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$ConversationUpdateImpl implements _ConversationUpdate {
-  const _$ConversationUpdateImpl({this.title, this.thinkingEffort});
+  const _$ConversationUpdateImpl({this.title, this.thinkingEnabled});
 
   factory _$ConversationUpdateImpl.fromJson(Map<String, dynamic> json) =>
       _$$ConversationUpdateImplFromJson(json);
@@ -702,13 +710,13 @@ class _$ConversationUpdateImpl implements _ConversationUpdate {
   @override
   final String? title;
 
-  /// 要修改的新 thinking-effort level。必须是 model 支持的 level 之一。
+  /// 要修改的深度思考开关；`null` 表示不变。
   @override
-  final String? thinkingEffort;
+  final bool? thinkingEnabled;
 
   @override
   String toString() {
-    return 'ConversationUpdate(title: $title, thinkingEffort: $thinkingEffort)';
+    return 'ConversationUpdate(title: $title, thinkingEnabled: $thinkingEnabled)';
   }
 
   @override
@@ -717,15 +725,16 @@ class _$ConversationUpdateImpl implements _ConversationUpdate {
         (other.runtimeType == runtimeType &&
             other is _$ConversationUpdateImpl &&
             (identical(other.title, title) || other.title == title) &&
-            (identical(other.thinkingEffort, thinkingEffort) ||
-                other.thinkingEffort == thinkingEffort));
+            (identical(other.thinkingEnabled, thinkingEnabled) ||
+                other.thinkingEnabled == thinkingEnabled));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, title, thinkingEffort);
+  int get hashCode => Object.hash(runtimeType, title, thinkingEnabled);
 
-  /// 创建 ConversationUpdate 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of ConversationUpdate
+  /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
@@ -744,7 +753,7 @@ class _$ConversationUpdateImpl implements _ConversationUpdate {
 abstract class _ConversationUpdate implements ConversationUpdate {
   const factory _ConversationUpdate({
     final String? title,
-    final String? thinkingEffort,
+    final bool? thinkingEnabled,
   }) = _$ConversationUpdateImpl;
 
   factory _ConversationUpdate.fromJson(Map<String, dynamic> json) =
@@ -754,11 +763,12 @@ abstract class _ConversationUpdate implements ConversationUpdate {
   @override
   String? get title;
 
-  /// 要修改的新 thinking-effort level。必须是 model 支持的 level 之一。
+  /// 要修改的深度思考开关；`null` 表示不变。
   @override
-  String? get thinkingEffort;
+  bool? get thinkingEnabled;
 
-  /// 创建 ConversationUpdate 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of ConversationUpdate
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ConversationUpdateImplCopyWith<_$ConversationUpdateImpl> get copyWith =>

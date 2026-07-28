@@ -368,6 +368,7 @@ class ChatActionsNotifier extends Notifier<void> {
     required String modelId,
     required String text,
     String? imageData,
+    bool thinkingEnabled = false,
   }) async {
     final profileId = await _resolveProfileId();
     final dio = ref.read(dioProvider);
@@ -375,7 +376,10 @@ class ChatActionsNotifier extends Notifier<void> {
     // 1. 创建绑定到所选 model 的 conversation。
     final createResp = await dio.post<Map<String, dynamic>>(
       '/api/profiles/$profileId/conversations',
-      data: <String, dynamic>{'model_id': modelId},
+      data: <String, dynamic>{
+        'model_id': modelId,
+        'thinking_enabled': thinkingEnabled,
+      },
     );
     final conversation = Conversation.fromJson(createResp.data!);
 

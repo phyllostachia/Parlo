@@ -144,21 +144,22 @@ async def test_list_models_returns_registry_and_default(client) -> None:
     assert openai["family"] == "openai"
     assert openai["protocol"] == "openai-response"
     assert openai["vision"] is True
-    assert openai["thinking_effort"] == ["medium", "low", "high", "xhigh"]
     # secret 永远不会暴露。
     assert "api_key" not in openai
     assert "base_url" not in openai
+    assert "thinking_off_effort" not in openai
+    assert "thinking_on_effort" not in openai
 
 
-async def test_create_conversation_defaults_effort_to_first(client) -> None:
-    """省略 ``thinking_effort`` 时使用 model 列出的第一个 level。"""
+async def test_create_conversation_defaults_thinking_to_off(client) -> None:
+    """省略 ``thinking_enabled`` 时默认关闭深度思考。"""
     pid = await _create_profile(client)
     response = await client.post(
         f"/api/profiles/{pid}/conversations",
         json={"model_id": "test-openai"},
     )
     assert response.status_code == 201
-    assert response.json()["thinking_effort"] == "medium"
+    assert response.json()["thinking_enabled"] is False
     assert response.json()["model_id"] == "test-openai"
 
 
@@ -172,35 +173,36 @@ async def test_create_conversation_rejects_unknown_model(client) -> None:
     assert response.status_code == 400
 
 
-async def test_create_conversation_rejects_unsupported_effort(client) -> None:
-    """model 未列出的 effort level 会被拒绝并返回 400。"""
+async def test_create_conversation_persists_thinking_toggle(client) -> None:
+    """创建时可以直接保存用户选择的深度思考开关。"""
     pid = await _create_profile(client)
     response = await client.post(
         f"/api/profiles/{pid}/conversations",
-        json={"model_id": "test-openai", "thinking_effort": "max"},
+        json={"model_id": "test-openai", "thinking_enabled": True},
     )
-    assert response.status_code == 400
+    assert response.status_code == 201
+    assert response.json()["thinking_enabled"] is True
 
 
-async def test_patch_conversation_changes_effort(client) -> None:
-    """创建后可以修改 ``thinking_effort``，但不能修改 ``model_id``。"""
+async def test_create_conversation_rejects_deprecated_effort(client) -> None:
+    """已废弃的 ``thinking_effort`` 字段不会被静默忽略。"""
+    pid = await _create_profile(client)
+    response = await client.post(
+        f"/api/profiles/{pid}/conversations",
+        json={"model_id": "test-openai", "thinking_effort": "xhigh"},
+    )
+    assert response.status_code == 422
+
+
+async def test_patch_conversation_changes_thinking_toggle(client) -> None:
+    """创建后可以修改 ``thinking_enabled``，但不能修改 ``model_id``。"""
     pid = await _create_profile(client)
     cid = await _create_conversation(client, pid)
     response = await client.patch(
-        f"/api/conversations/{cid}", json={"thinking_effort": "high"}
+        f"/api/conversations/{cid}", json={"thinking_enabled": True}
     )
     assert response.status_code == 200
-    assert response.json()["thinking_effort"] == "high"
-
-
-async def test_patch_conversation_rejects_unsupported_effort(client) -> None:
-    """将 conversation patch 为 model 不支持的 level 会返回 400。"""
-    pid = await _create_profile(client)
-    cid = await _create_conversation(client, pid)
-    response = await client.patch(
-        f"/api/conversations/{cid}", json={"thinking_effort": "max"}
-    )
-    assert response.status_code == 400
+    assert response.json()["thinking_enabled"] is True
 
 
 async def test_chat_stream_writes_tokens_to_placeholder(
@@ -273,8 +275,33 @@ async def test_chat_stream_persists_reasoning_and_signature(
     assert fake.last_request is not None
     assert fake.last_request.messages[-1].role == "user"
     assert fake.last_request.messages[-1].text == "hi"
-    # thinking-effort level 已从 conversation 转发。
+    # 关闭深度思考时，使用 model 配置的 off effort。
     assert fake.last_request.thinking_effort == "medium"
+
+
+async def test_chat_stream_uses_thinking_on_effort(client, monkeypatch) -> None:
+    """开启深度思考后，stream 会转发 model 配置的 on effort。"""
+    fake = _FakeProvider([StreamEvent(kind="done")])
+    monkeypatch.setattr("app.api.chat.get_provider", lambda model, settings: fake)
+
+    pid = await _create_profile(client)
+    create_conversation = await client.post(
+        f"/api/profiles/{pid}/conversations",
+        json={"model_id": "test-openai", "thinking_enabled": True},
+    )
+    cid = create_conversation.json()["id"]
+    create_message = await client.post(
+        f"/api/conversations/{cid}/messages", json={"text": "hi"}
+    )
+    assistant_id = create_message.json()["assistant_message"]["id"]
+
+    async with client.stream(
+        "GET", f"/api/chat/stream?message_id={assistant_id}"
+    ) as response:
+        _ = [line async for line in response.aiter_lines()]
+
+    assert fake.last_request is not None
+    assert fake.last_request.thinking_effort == "xhigh"
 
 
 async def test_regenerate_creates_sibling_placeholder(client, monkeypatch) -> None:

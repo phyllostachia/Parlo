@@ -91,7 +91,7 @@ class AnthropicMessageProvider:
         ``reasoning_signature`` 的 assistant turn 会生成 thinking block，使 conversation
         能够继续；否则只生成 text block。
 
-        当 conversation 请求 thinking 时，使用选定 effort level 设置
+        backend 根据 conversation 的深度思考开关解析出的 effort 会设置到
         ``thinking.type: "adaptive"``；始终设置 ``display: "summarized"``，使客户端能看到
         reasoning summary（决策 D06；否则较新的 Anthropic model 默认使用 ``omitted``）。
         ``max_tokens`` 限制 thinking + visible output（决策 D08），替代旧的 hardcoded 8192。

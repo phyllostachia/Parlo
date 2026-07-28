@@ -17,9 +17,11 @@ import '../../core/theme/colors.dart';
 import '../../core/theme/fonts.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/util/image_data_url.dart';
+import '../../core/network/api_client.dart';
 import '../../core/widgets/drop_target.dart';
 import 'chat_providers.dart';
 import 'image_attachment.dart';
+import 'thinking_toggle_button.dart';
 
 /// 底部 input widget。
 class ChatInput extends ConsumerStatefulWidget {
@@ -81,6 +83,32 @@ class _ChatInputState extends ConsumerState<ChatInput> {
         .stop();
   }
 
+  Future<void> _toggleThinking() async {
+    final conversation = ref
+        .read(currentConversationProvider(widget.conversationId))
+        .valueOrNull
+        ?.conversation;
+    if (conversation == null) return;
+
+    try {
+      await ref
+          .read(dioProvider)
+          .patch<Map<String, dynamic>>(
+            '/api/conversations/${widget.conversationId}',
+            data: <String, dynamic>{
+              'thinking_enabled': !conversation.thinkingEnabled,
+            },
+          );
+      ref.invalidate(currentConversationProvider(widget.conversationId));
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not update thinking: $error')),
+        );
+      }
+    }
+  }
+
   Future<void> _pickImage() async {
     final attachment = await pickImageAttachment();
     if (attachment != null) {
@@ -125,6 +153,10 @@ class _ChatInputState extends ConsumerState<ChatInput> {
   Widget build(BuildContext context) {
     final streamState = ref.watch(streamStateProvider);
     final isStreaming = streamState == StreamState.streaming;
+    final conversation = ref
+        .watch(currentConversationProvider(widget.conversationId))
+        .valueOrNull
+        ?.conversation;
     final spacing = Theme.of(context).extension<TanSpacing>()!;
     final colors = Theme.of(context).extension<TanColors>()!;
     final canAttachImage = _canAttachImage;
@@ -239,6 +271,13 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                               ),
                             ),
                           ),
+                          if (conversation != null) ...[
+                            const SizedBox(width: 8),
+                            ThinkingToggleButton(
+                              enabled: conversation.thinkingEnabled,
+                              onPressed: isStreaming ? null : _toggleThinking,
+                            ),
+                          ],
                           const SizedBox(width: 8),
                           _SendButton(
                             isStreaming: isStreaming,

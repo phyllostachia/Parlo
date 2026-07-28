@@ -91,7 +91,8 @@ class _$SseEventCopyWithImpl<$Res, $Val extends SseEvent>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// 创建 SseEvent 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of SseEvent
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
@@ -113,7 +114,8 @@ class __$$SseStartedImplCopyWithImpl<$Res>
     $Res Function(_$SseStartedImpl) _then,
   ) : super(_value, _then);
 
-  /// 创建 SseEvent 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of SseEvent
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({Object? messageId = null}) {
@@ -154,7 +156,8 @@ class _$SseStartedImpl implements SseStarted {
   @override
   int get hashCode => Object.hash(runtimeType, messageId);
 
-  /// 创建 SseEvent 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of SseEvent
+  /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
@@ -254,7 +257,8 @@ abstract class SseStarted implements SseEvent {
   /// 此 stream 正在填充的 assistant placeholder id。
   int get messageId;
 
-  /// 创建 SseEvent 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of SseEvent
+  /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$SseStartedImplCopyWith<_$SseStartedImpl> get copyWith =>
       throw _privateConstructorUsedError;
@@ -279,7 +283,8 @@ class __$$SseTextDeltaImplCopyWithImpl<$Res>
     $Res Function(_$SseTextDeltaImpl) _then,
   ) : super(_value, _then);
 
-  /// 创建 SseEvent 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of SseEvent
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({Object? content = null}) {
@@ -319,7 +324,8 @@ class _$SseTextDeltaImpl implements SseTextDelta {
   @override
   int get hashCode => Object.hash(runtimeType, content);
 
-  /// 创建 SseEvent 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of SseEvent
+  /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
@@ -420,7 +426,8 @@ abstract class SseTextDelta implements SseEvent {
   /// 要追加的 text。
   String get content;
 
-  /// 创建 SseEvent 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of SseEvent
+  /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$SseTextDeltaImplCopyWith<_$SseTextDeltaImpl> get copyWith =>
       throw _privateConstructorUsedError;
@@ -445,7 +452,8 @@ class __$$SseReasoningDeltaImplCopyWithImpl<$Res>
     $Res Function(_$SseReasoningDeltaImpl) _then,
   ) : super(_value, _then);
 
-  /// 创建 SseEvent 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of SseEvent
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({Object? content = null}) {
@@ -485,7 +493,8 @@ class _$SseReasoningDeltaImpl implements SseReasoningDelta {
   @override
   int get hashCode => Object.hash(runtimeType, content);
 
-  /// 创建 SseEvent 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of SseEvent
+  /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
@@ -589,7 +598,8 @@ abstract class SseReasoningDelta implements SseEvent {
   /// 要追加的 reasoning text。
   String get content;
 
-  /// 创建 SseEvent 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of SseEvent
+  /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$SseReasoningDeltaImplCopyWith<_$SseReasoningDeltaImpl> get copyWith =>
       throw _privateConstructorUsedError;
@@ -614,7 +624,8 @@ class __$$SseReasoningSignatureImplCopyWithImpl<$Res>
     $Res Function(_$SseReasoningSignatureImpl) _then,
   ) : super(_value, _then);
 
-  /// 创建 SseEvent 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of SseEvent
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({Object? content = null}) {
@@ -654,7 +665,8 @@ class _$SseReasoningSignatureImpl implements SseReasoningSignature {
   @override
   int get hashCode => Object.hash(runtimeType, content);
 
-  /// 创建 SseEvent 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of SseEvent
+  /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
@@ -759,7 +771,8 @@ abstract class SseReasoningSignature implements SseEvent {
   /// 签名 string。
   String get content;
 
-  /// 创建 SseEvent 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of SseEvent
+  /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$SseReasoningSignatureImplCopyWith<_$SseReasoningSignatureImpl>
   get copyWith => throw _privateConstructorUsedError;
@@ -784,7 +797,8 @@ class __$$SseErrorImplCopyWithImpl<$Res>
     $Res Function(_$SseErrorImpl) _then,
   ) : super(_value, _then);
 
-  /// 创建 SseEvent 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of SseEvent
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({Object? message = null}) {
@@ -824,7 +838,8 @@ class _$SseErrorImpl implements SseError {
   @override
   int get hashCode => Object.hash(runtimeType, message);
 
-  /// 创建 SseEvent 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of SseEvent
+  /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
@@ -924,7 +939,8 @@ abstract class SseError implements SseEvent {
   /// 可读的 error message。
   String get message;
 
-  /// 创建 SseEvent 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of SseEvent
+  /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$SseErrorImplCopyWith<_$SseErrorImpl> get copyWith =>
       throw _privateConstructorUsedError;
@@ -947,7 +963,8 @@ class __$$SseDoneImplCopyWithImpl<$Res>
     $Res Function(_$SseDoneImpl) _then,
   ) : super(_value, _then);
 
-  /// 创建 SseEvent 的副本，并用非 null parameter value 替换给定 field。
+  /// Create a copy of SseEvent
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc

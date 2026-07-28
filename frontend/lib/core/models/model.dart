@@ -1,7 +1,7 @@
 /// Model registry data model。
 ///
 /// `GET /api/models` 返回 backend `config.yaml` 中声明的 model list 和已配置 default。
-/// Frontend 用它填充 model selector 和 thinking-effort selector，而无需内置 protocol knowledge。
+/// Frontend 用它填充 model selector，而无需内置 protocol knowledge。
 library;
 
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -11,8 +11,8 @@ part 'model.g.dart';
 
 /// Backend config 中一个 model definition 的 client-facing view。
 ///
-/// 有意省略 `api_key`（secret）和 `base_url`（客户端不需要）。`thinkingEffort` list 驱动
-/// top bar 中的 thinking-effort selector。
+/// 有意省略 `api_key`、`base_url`（secret 或客户端不需要）以及仅供后端使用的 thinking
+/// effort 配置。
 @freezed
 class ModelRead with _$ModelRead {
   /// 创建 model entry。
@@ -33,10 +33,6 @@ class ModelRead with _$ModelRead {
 
     /// 此 model 是否接受 image attachment。
     required bool vision,
-
-    /// 支持的 thinking-effort level，按 UI 应显示的顺序排列。第一个 entry 是新 conversation
-    /// 的 default。
-    @Default(<String>[]) List<String> thinkingEffort,
   }) = _ModelRead;
 
   /// 根据 JSON 重建 model entry。

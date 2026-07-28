@@ -23,6 +23,7 @@ import '../../core/widgets/drop_target.dart';
 import '../../core/widgets/error_banner.dart';
 import 'chat_providers.dart';
 import 'image_attachment.dart';
+import 'thinking_toggle_button.dart';
 
 /// 居中的 empty-state widget。
 class EmptyState extends ConsumerStatefulWidget {
@@ -44,6 +45,7 @@ class _EmptyStateState extends ConsumerState<EmptyState> {
     null,
   );
   String? _selectedModelId;
+  bool _thinkingEnabled = false;
   bool _sending = false;
   bool _isDropHovered = false;
 
@@ -73,7 +75,12 @@ class _EmptyStateState extends ConsumerState<EmptyState> {
     try {
       final conversationId = await ref
           .read(chatActionsProvider.notifier)
-          .sendFirstMessage(modelId: modelId, text: text, imageData: imageData);
+          .sendFirstMessage(
+            modelId: modelId,
+            text: text,
+            imageData: imageData,
+            thinkingEnabled: _thinkingEnabled,
+          );
       widget.onNavigate('/c/$conversationId');
     } catch (error) {
       if (mounted) {
@@ -168,6 +175,9 @@ class _EmptyStateState extends ConsumerState<EmptyState> {
                 onDropHoverChanged: (hovered) =>
                     setState(() => _isDropHovered = hovered),
                 disabled: _sending,
+                thinkingEnabled: _thinkingEnabled,
+                onThinkingEnabledChanged: (enabled) =>
+                    setState(() => _thinkingEnabled = enabled),
                 canAttachImage: _canAttachImage(selectedModel),
                 accentColor: colors.clay,
               );
@@ -267,6 +277,8 @@ class _PickerAndInput extends StatelessWidget {
     required this.isDropHovered,
     required this.onDropHoverChanged,
     required this.disabled,
+    required this.thinkingEnabled,
+    required this.onThinkingEnabledChanged,
     required this.canAttachImage,
     required this.accentColor,
   });
@@ -284,6 +296,8 @@ class _PickerAndInput extends StatelessWidget {
   final bool isDropHovered;
   final ValueChanged<bool> onDropHoverChanged;
   final bool disabled;
+  final bool thinkingEnabled;
+  final ValueChanged<bool> onThinkingEnabledChanged;
   final bool canAttachImage;
   final Color accentColor;
 
@@ -306,13 +320,13 @@ class _PickerAndInput extends StatelessWidget {
             selectedId: selectedModelId,
             onChanged: onModelChanged,
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Text(
             '今天想聊些什么？',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.displayLarge,
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           AnimatedContainer(
             duration: const Duration(milliseconds: 120),
             decoration: BoxDecoration(
@@ -352,6 +366,8 @@ class _PickerAndInput extends StatelessWidget {
                   controller: controller,
                   onSend: onSend,
                   disabled: disabled,
+                  thinkingEnabled: thinkingEnabled,
+                  onThinkingEnabledChanged: onThinkingEnabledChanged,
                   accentColor: accentColor,
                   canAttachImage: canAttachImage,
                   onPickImage: onPickImage,
@@ -374,6 +390,8 @@ class _LargeInputField extends StatelessWidget {
     required this.controller,
     required this.onSend,
     required this.disabled,
+    required this.thinkingEnabled,
+    required this.onThinkingEnabledChanged,
     required this.accentColor,
     required this.canAttachImage,
     required this.onPickImage,
@@ -382,6 +400,8 @@ class _LargeInputField extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onSend;
   final bool disabled;
+  final bool thinkingEnabled;
+  final ValueChanged<bool> onThinkingEnabledChanged;
   final Color accentColor;
   final bool canAttachImage;
   final VoidCallback onPickImage;
@@ -449,6 +469,14 @@ class _LargeInputField extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
+            const SizedBox(width: 8),
+            ThinkingToggleButton(
+              enabled: thinkingEnabled,
+              height: 34,
+              onPressed: disabled
+                  ? null
+                  : () => onThinkingEnabledChanged(!thinkingEnabled),
             ),
             const SizedBox(width: 8),
             Material(

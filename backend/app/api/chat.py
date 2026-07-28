@@ -97,10 +97,15 @@ async def _event_generator(message_id: int, settings: Settings) -> AsyncIterator
                 },
             )
             return
+        thinking_effort = (
+            model.thinking_on_effort
+            if conversation.thinking_enabled
+            else model.thinking_off_effort
+        )
         request = ChatRequest(
             messages=history,
             model=model.id,
-            thinking_effort=conversation.thinking_effort,
+            thinking_effort=thinking_effort,
         )
         provider = get_provider(model, settings)
         content_buffer = ""

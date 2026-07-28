@@ -30,7 +30,8 @@ def _openai_model() -> ModelConfig:
         family="openai",
         protocol="openai-response",
         vision=True,
-        thinking_effort=["medium", "low", "high", "xhigh"],
+        thinking_off_effort="medium",
+        thinking_on_effort="xhigh",
         max_tokens=32768,
     )
 
@@ -44,7 +45,8 @@ def _anthropic_model() -> ModelConfig:
         family="anthropic",
         protocol="anthropic-message",
         vision=True,
-        thinking_effort=["high", "medium", "low", "xhigh", "max"],
+        thinking_off_effort="medium",
+        thinking_on_effort="max",
         max_tokens=16384,
     )
 
