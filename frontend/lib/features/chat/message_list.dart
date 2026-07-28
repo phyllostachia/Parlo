@@ -94,8 +94,8 @@ class _MessageListState extends ConsumerState<MessageList> {
               itemBuilder: (context, index) {
                 final node = path.path[index];
                 final isLast = index == path.path.length - 1;
-                // 最后一条 assistant message 尚未 complete 时视为“streaming”；它驱动 loading
-                // cursor 和“Thinking…”placeholder。
+                // 最后一条 assistant message 尚未 complete 时视为“streaming”；它驱动正文
+                // chunk 淡入和末尾的 stream cursor。
                 final isStreaming =
                     isLast &&
                     node.message.role == MessageRole.assistant &&

@@ -153,8 +153,8 @@ class _UserBubble extends StatelessWidget {
   }
 }
 
-/// Assistant message：可选 thinking strip、Markdown body、可选 streaming indicator、version
-/// switcher、hover action bar，以及 stream drop 时显示的 retry button。
+/// Assistant message：可选 thinking strip、带 chunk 淡入效果的 Markdown body、可选 streaming
+/// indicator、version switcher、hover action bar，以及 stream drop 时显示的 retry button。
 class _AssistantBlock extends ConsumerStatefulWidget {
   const _AssistantBlock({
     required this.message,
@@ -237,10 +237,21 @@ class _AssistantBlockState extends ConsumerState<_AssistantBlock> {
                       widget.isStreaming && widget.message.content.isEmpty,
                 ),
               ),
-            if (widget.message.content.isEmpty && widget.isStreaming)
-              _StreamingPlaceholder()
-            else
-              _conversationMarkdown(widget.message.content, colors.carbonInk),
+            // 首个 token 到达前不显示额外 loading UI，避免“Thinking…”转圈打断对话节奏。
+            // 流式 token 到达后，以短暂淡入缓和新文字突然出现的观感。
+            if (widget.message.content.isNotEmpty)
+              widget.isStreaming
+                  ? _StreamingMarkdown(
+                      key: ValueKey<String>(
+                        'streaming-markdown-${widget.message.id}',
+                      ),
+                      content: widget.message.content,
+                      textColor: colors.carbonInk,
+                    )
+                  : _conversationMarkdown(
+                      widget.message.content,
+                      colors.carbonInk,
+                    ),
             if (widget.isStreaming && widget.message.content.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
@@ -310,25 +321,69 @@ class _AssistantBlockState extends ConsumerState<_AssistantBlock> {
   }
 }
 
-/// Assistant 第一个 token 尚未到达时显示的小型“thinking…”placeholder。
-class _StreamingPlaceholder extends StatelessWidget {
+/// 流式 Markdown 正文。
+///
+/// Markdown renderer 会在每个 SSE delta 到达后重新解析完整 content，因此无法可靠地为
+/// 任意 Markdown 结构单独包裹新字符。这里以很小的 opacity 幅度重播整个正文的 140ms
+/// 淡入；已显示内容不会闪烁，新追加字符的出现则不再生硬。
+class _StreamingMarkdown extends StatefulWidget {
+  const _StreamingMarkdown({
+    required this.content,
+    required this.textColor,
+    super.key,
+  });
+
+  final String content;
+  final Color textColor;
+
+  @override
+  State<_StreamingMarkdown> createState() => _StreamingMarkdownState();
+}
+
+class _StreamingMarkdownState extends State<_StreamingMarkdown>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _opacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 140),
+    );
+    _opacity = Tween<double>(
+      begin: 0.72,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    _controller.forward();
+  }
+
+  @override
+  void didUpdateWidget(covariant _StreamingMarkdown oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.content != oldWidget.content) {
+      _controller.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<TanColors>()!;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: 14,
-          height: 14,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            color: colors.pebble,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Text('Thinking…', style: Theme.of(context).textTheme.bodySmall),
-      ],
+    final disableAnimations =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    final markdown = _conversationMarkdown(widget.content, widget.textColor);
+    if (disableAnimations) return markdown;
+
+    return FadeTransition(
+      key: const ValueKey<String>('streaming-markdown-fade'),
+      opacity: _opacity,
+      child: markdown,
     );
   }
 }
