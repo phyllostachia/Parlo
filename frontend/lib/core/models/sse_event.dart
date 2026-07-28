@@ -51,6 +51,9 @@ sealed class SseEvent with _$SseEvent {
     required String message,
   }) = SseError;
 
-  /// Stream 正常完成。Message 现在已完成。
-  const factory SseEvent.done() = SseDone;
+  /// Stream 正常完成。Message 现在已完成，并携带可持久化的 reasoning 耗时。
+  const factory SseEvent.done({
+    /// 从请求开始到 reasoning 结束的耗时（毫秒）。没有 reasoning 时为 `null`。
+    int? reasoningDurationMs,
+  }) = SseDone;
 }

@@ -90,3 +90,11 @@ async def init_db() -> None:
                     "ALTER TABLE conversation "
                     "ADD COLUMN thinking_enabled BOOLEAN NOT NULL DEFAULT 0"
                 )
+            message_columns = {
+                row[1]
+                for row in (await conn.exec_driver_sql("PRAGMA table_info(message)"))
+            }
+            if "reasoning_duration_ms" not in message_columns:
+                await conn.exec_driver_sql(
+                    "ALTER TABLE message ADD COLUMN reasoning_duration_ms INTEGER"
+                )

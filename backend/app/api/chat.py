@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 from collections.abc import AsyncIterator
 from datetime import datetime, timezone
+from time import monotonic
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
@@ -111,11 +112,23 @@ async def _event_generator(message_id: int, settings: Settings) -> AsyncIterator
         content_buffer = ""
         reasoning_buffer = ""
         signature: str | None = None
+        reasoning_finished_at: float | None = None
+        reasoning_duration_ms: int | None = None
         finished_cleanly = False
+        stream_started_at = monotonic()
+
+        def measured_reasoning_duration_ms() -> int | None:
+            if not reasoning_buffer:
+                return None
+            finished_at = reasoning_finished_at or monotonic()
+            return max(1, round((finished_at - stream_started_at) * 1000))
+
         yield _sse("started", {"message_id": message_id})
         try:
             async for event in provider.stream(request):
                 if event.kind == "text_delta":
+                    if reasoning_buffer and reasoning_finished_at is None:
+                        reasoning_finished_at = monotonic()
                     content_buffer += event.content
                     yield _sse("text_delta", {"content": event.content})
                 elif event.kind == "reasoning_delta":
@@ -129,13 +142,19 @@ async def _event_generator(message_id: int, settings: Settings) -> AsyncIterator
                     break
                 elif event.kind == "done":
                     finished_cleanly = True
-                    yield _sse("done", {})
+                    reasoning_duration_ms = measured_reasoning_duration_ms()
+                    yield _sse(
+                        "done", {"reasoning_duration_ms": reasoning_duration_ms}
+                    )
                     break
         except Exception as exc:  # 将未预期的 adapter failure 返回给客户端
             yield _sse("error", {"message": f"stream failed: {exc}"})
         finally:
             message.content = content_buffer
             message.reasoning = reasoning_buffer or None
+            message.reasoning_duration_ms = (
+                reasoning_duration_ms or measured_reasoning_duration_ms()
+            )
             message.reasoning_signature = signature
             message.is_complete = True
             conversation.updated_at = datetime.now(timezone.utc)

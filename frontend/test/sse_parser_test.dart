@@ -33,14 +33,14 @@ void main() {
         'event: text_delta\n'
         'data: {"content":"Hi"}\n\n'
         'event: done\n'
-        'data: {}\n\n',
+        'data: {"reasoning_duration_ms":12000}\n\n',
       );
       final events = await parseSseStream(Stream.value(bytes)).toList();
 
       expect(events, hasLength(3));
       expect((events[0] as SseStarted).messageId, 42);
       expect((events[1] as SseTextDelta).content, 'Hi');
-      expect(events[2], isA<SseDone>());
+      expect((events[2] as SseDone).reasoningDurationMs, 12000);
     });
 
     test('reassembles an event split across chunks', () async {

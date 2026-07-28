@@ -226,7 +226,13 @@ class _AssistantBlockState extends ConsumerState<_AssistantBlock> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: ThinkingStrip(
+                  key: ValueKey<String>('thinking-${widget.message.id}'),
                   reasoning: widget.message.reasoning!,
+                  reasoningDuration: widget.message.reasoningDurationMs == null
+                      ? null
+                      : Duration(
+                          milliseconds: widget.message.reasoningDurationMs!,
+                        ),
                   isStreaming:
                       widget.isStreaming && widget.message.content.isEmpty,
                 ),

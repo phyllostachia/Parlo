@@ -95,6 +95,8 @@ class Message(SQLModel, table=True):
     到 column type，这里存储为 plain text；read schema 使用 :data:`MessageRole` 重新收窄 value。"""
     content: str = ""
     reasoning: str | None = None
+    reasoning_duration_ms: int | None = None
+    """模型生成 reasoning 到开始输出正文之间耗费的毫秒数。"""
     reasoning_signature: str | None = None
     image_path: str | None = None
     is_complete: bool = Field(default=True)
@@ -176,6 +178,7 @@ class MessageRead(SQLModel):
     role: MessageRole
     content: str
     reasoning: str | None
+    reasoning_duration_ms: int | None
     image_url: str | None = None
     """客户端可以用来获取附加图片的 URL；没有图片时为 ``None``。"""
     is_complete: bool

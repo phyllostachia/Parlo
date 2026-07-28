@@ -1,12 +1,7 @@
-/// 在主 reply body 上方显示 assistant reasoning（“thinking”trace）的 collapsible strip。
+/// 在主 reply body 上方显示 assistant reasoning（“thinking”trace）的可折叠摘要。
 ///
-/// 根据 `product.md` §6.3，此 strip 具有以下特征：
-/// - Optional：只有 message 有 reasoning text 时显示。
-/// - 默认 collapsed；user 点击后展开。
-/// - Streaming 时 live：reasoning token 到达期间，pulsing indicator 标记 strip 处于 active，
-///   让 user 知道 model 仍在 thinking，并可以展开观看 reasoning scroll。
-///
-/// Strip 不标注 thinking-effort level：该 value 已位于 top bar，再次显示只会使 message 杂乱。
+/// 默认只显示一个紧凑的「已思考 N 秒」短条。点击后，reasoning 文本以 200ms 动画展开；
+/// 文本没有卡片背景，使用与正文一致的字体、较小字号和较浅颜色。
 library;
 
 import 'package:flutter/material.dart';
@@ -19,6 +14,7 @@ class ThinkingStrip extends StatefulWidget {
   /// 创建 strip。
   const ThinkingStrip({
     required this.reasoning,
+    required this.reasoningDuration,
     required this.isStreaming,
     super.key,
   });
@@ -26,8 +22,10 @@ class ThinkingStrip extends StatefulWidget {
   /// 展开时显示的 reasoning text。Reasoning 为空表示完全不显示 strip（parent 会隐藏它）。
   final String reasoning;
 
-  /// 此 message 的 reasoning 是否仍在 streaming。为 `true` 时，strip header 显示 pulsing
-  /// indicator，使 user 知道 model 仍在 thinking。
+  /// Backend 持久化的 reasoning 耗时。旧 message 没有该值时回退到一般性文案。
+  final Duration? reasoningDuration;
+
+  /// 此 message 的 reasoning 是否仍在 streaming。为 `true` 时显示进行中文案。
   final bool isStreaming;
 
   @override
@@ -40,78 +38,93 @@ class _ThinkingStripState extends State<ThinkingStrip> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<TanColors>()!;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.softStone,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _Header(
-            isExpanded: _isExpanded,
-            isStreaming: widget.isStreaming,
-            onTap: () => setState(() => _isExpanded = !_isExpanded),
-          ),
-          if (_isExpanded)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              child: _ReasoningBody(
-                reasoning: widget.reasoning,
-                isStreaming: widget.isStreaming,
-              ),
-            ),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _Header(
+          isExpanded: _isExpanded,
+          label: _labelFor(widget.reasoningDuration, widget.isStreaming),
+          onTap: () => setState(() => _isExpanded = !_isExpanded),
+        ),
+        AnimatedSize(
+          alignment: Alignment.topCenter,
+          curve: Curves.easeOutCubic,
+          duration: const Duration(milliseconds: 200),
+          child: _isExpanded
+              ? Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                  child: _ReasoningBody(
+                    reasoning: widget.reasoning,
+                    isStreaming: widget.isStreaming,
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
+      ],
     );
+  }
+
+  String _labelFor(Duration? duration, bool isStreaming) {
+    if (duration == null) {
+      return isStreaming ? '思考中' : '思考过程';
+    }
+    final seconds = (duration.inMilliseconds + 999) ~/ 1000;
+    final displaySeconds = seconds < 1 ? 1 : seconds;
+    return isStreaming ? '思考中 $displaySeconds 秒' : '已思考 $displaySeconds 秒';
   }
 }
 
 /// Thinking strip 可点击的 header row。
 ///
-/// 显示在 collapsed（right）和 expanded（down）之间变化的 chevron、“Thinking”label，以及
-/// reasoning 仍在 streaming 时显示的小 pulsing dot。整个 row 都是 button，因此 user 可以
-/// 点击任意位置进行 toggle。
+/// 显示在 collapsed（right）和 expanded（down）之间变化的 chevron 与耗时 label。
+/// 整个短条都是 button，因此 user 可以点击任意位置进行 toggle。
 class _Header extends StatelessWidget {
   const _Header({
     required this.isExpanded,
-    required this.isStreaming,
+    required this.label,
     required this.onTap,
   });
 
   final bool isExpanded;
-  final bool isStreaming;
+  final String label;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<TanColors>()!;
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Row(
-          children: [
-            Icon(
-              isExpanded ? Icons.expand_more : Icons.chevron_right,
-              size: 18,
-              color: colors.graphite,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              'Thinking',
-              style: Theme.of(
-                context,
-              ).textTheme.labelMedium?.copyWith(color: colors.graphite),
-            ),
-            if (isStreaming) ...[
-              const SizedBox(width: 8),
-              _PulsingDot(color: colors.clay),
+    return Semantics(
+      button: true,
+      expanded: isExpanded,
+      label: '$label，${isExpanded ? '收起思考过程' : '展开思考过程'}',
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: colors.softStone,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.psychology_outlined, size: 14, color: colors.ashen),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: colors.ashen,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Icon(
+                isExpanded ? Icons.expand_more : Icons.chevron_right,
+                size: 16,
+                color: colors.pebble,
+              ),
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -166,8 +179,8 @@ class _ReasoningBodyState extends State<_ReasoningBody> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<TanColors>()!;
-    // 限制 height，避免较长 reasoning trace 将 reply body 推出 screen；user 改为在此 box
-    // 内滚动。
+    // 限制 height，避免较长 reasoning trace 将 reply body 推出 screen；user 改为在此区域
+    // 内滚动。这里没有 background，展开文本直接落在与正文相同的页面表面上。
     return ConstrainedBox(
       constraints: const BoxConstraints(maxHeight: 240),
       child: SingleChildScrollView(
@@ -175,52 +188,10 @@ class _ReasoningBodyState extends State<_ReasoningBody> {
         child: SelectableText(
           widget.reasoning,
           style: TanFonts.naturalLanguageStyle.copyWith(
-            color: colors.graphite,
-            fontSize: 12,
+            color: colors.ashen,
+            fontSize: 13,
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// 通过 pulse（淡入淡出）标记 active streaming 的小 dot。
-class _PulsingDot extends StatefulWidget {
-  const _PulsingDot({required this.color});
-
-  final Color color;
-
-  @override
-  State<_PulsingDot> createState() => _PulsingDotState();
-}
-
-class _PulsingDotState extends State<_PulsingDot>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    )..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _controller,
-      child: Container(
-        width: 6,
-        height: 6,
-        decoration: BoxDecoration(color: widget.color, shape: BoxShape.circle),
       ),
     );
   }

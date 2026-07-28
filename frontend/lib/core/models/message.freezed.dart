@@ -40,6 +40,9 @@ mixin _$Message {
   /// reasoning 的 assistant message 为 `null`。
   String? get reasoning => throw _privateConstructorUsedError;
 
+  /// 从开始请求到 reasoning 完成的耗时。没有 reasoning 的 message 为 `null`。
+  int? get reasoningDurationMs => throw _privateConstructorUsedError;
+
   /// Client 可以获取附加 image 的 URL（如果有）。`null` 表示没有 image。
   String? get imageUrl => throw _privateConstructorUsedError;
 
@@ -72,6 +75,7 @@ abstract class $MessageCopyWith<$Res> {
     MessageRole role,
     String content,
     String? reasoning,
+    int? reasoningDurationMs,
     String? imageUrl,
     bool isComplete,
     DateTime createdAt,
@@ -99,6 +103,7 @@ class _$MessageCopyWithImpl<$Res, $Val extends Message>
     Object? role = null,
     Object? content = null,
     Object? reasoning = freezed,
+    Object? reasoningDurationMs = freezed,
     Object? imageUrl = freezed,
     Object? isComplete = null,
     Object? createdAt = null,
@@ -129,6 +134,10 @@ class _$MessageCopyWithImpl<$Res, $Val extends Message>
                 ? _value.reasoning
                 : reasoning // ignore: cast_nullable_to_non_nullable
                       as String?,
+            reasoningDurationMs: freezed == reasoningDurationMs
+                ? _value.reasoningDurationMs
+                : reasoningDurationMs // ignore: cast_nullable_to_non_nullable
+                      as int?,
             imageUrl: freezed == imageUrl
                 ? _value.imageUrl
                 : imageUrl // ignore: cast_nullable_to_non_nullable
@@ -162,6 +171,7 @@ abstract class _$$MessageImplCopyWith<$Res> implements $MessageCopyWith<$Res> {
     MessageRole role,
     String content,
     String? reasoning,
+    int? reasoningDurationMs,
     String? imageUrl,
     bool isComplete,
     DateTime createdAt,
@@ -188,6 +198,7 @@ class __$$MessageImplCopyWithImpl<$Res>
     Object? role = null,
     Object? content = null,
     Object? reasoning = freezed,
+    Object? reasoningDurationMs = freezed,
     Object? imageUrl = freezed,
     Object? isComplete = null,
     Object? createdAt = null,
@@ -218,6 +229,10 @@ class __$$MessageImplCopyWithImpl<$Res>
             ? _value.reasoning
             : reasoning // ignore: cast_nullable_to_non_nullable
                   as String?,
+        reasoningDurationMs: freezed == reasoningDurationMs
+            ? _value.reasoningDurationMs
+            : reasoningDurationMs // ignore: cast_nullable_to_non_nullable
+                  as int?,
         imageUrl: freezed == imageUrl
             ? _value.imageUrl
             : imageUrl // ignore: cast_nullable_to_non_nullable
@@ -245,6 +260,7 @@ class _$MessageImpl implements _Message {
     required this.role,
     required this.content,
     required this.reasoning,
+    this.reasoningDurationMs,
     required this.imageUrl,
     required this.isComplete,
     required this.createdAt,
@@ -278,6 +294,10 @@ class _$MessageImpl implements _Message {
   @override
   final String? reasoning;
 
+  /// 从开始请求到 reasoning 完成的耗时。没有 reasoning 的 message 为 `null`。
+  @override
+  final int? reasoningDurationMs;
+
   /// Client 可以获取附加 image 的 URL（如果有）。`null` 表示没有 image。
   @override
   final String? imageUrl;
@@ -294,7 +314,7 @@ class _$MessageImpl implements _Message {
 
   @override
   String toString() {
-    return 'Message(id: $id, conversationId: $conversationId, parentId: $parentId, role: $role, content: $content, reasoning: $reasoning, imageUrl: $imageUrl, isComplete: $isComplete, createdAt: $createdAt)';
+    return 'Message(id: $id, conversationId: $conversationId, parentId: $parentId, role: $role, content: $content, reasoning: $reasoning, reasoningDurationMs: $reasoningDurationMs, imageUrl: $imageUrl, isComplete: $isComplete, createdAt: $createdAt)';
   }
 
   @override
@@ -311,6 +331,8 @@ class _$MessageImpl implements _Message {
             (identical(other.content, content) || other.content == content) &&
             (identical(other.reasoning, reasoning) ||
                 other.reasoning == reasoning) &&
+            (identical(other.reasoningDurationMs, reasoningDurationMs) ||
+                other.reasoningDurationMs == reasoningDurationMs) &&
             (identical(other.imageUrl, imageUrl) ||
                 other.imageUrl == imageUrl) &&
             (identical(other.isComplete, isComplete) ||
@@ -329,6 +351,7 @@ class _$MessageImpl implements _Message {
     role,
     content,
     reasoning,
+    reasoningDurationMs,
     imageUrl,
     isComplete,
     createdAt,
@@ -356,6 +379,7 @@ abstract class _Message implements Message {
     required final MessageRole role,
     required final String content,
     required final String? reasoning,
+    final int? reasoningDurationMs,
     required final String? imageUrl,
     required final bool isComplete,
     required final DateTime createdAt,
@@ -387,6 +411,10 @@ abstract class _Message implements Message {
   /// reasoning 的 assistant message 为 `null`。
   @override
   String? get reasoning;
+
+  /// 从开始请求到 reasoning 完成的耗时。没有 reasoning 的 message 为 `null`。
+  @override
+  int? get reasoningDurationMs;
 
   /// Client 可以获取附加 image 的 URL（如果有）。`null` 表示没有 image。
   @override

@@ -43,6 +43,7 @@ def _to_message_read(message: Message) -> MessageRead:
         role=message.role,
         content=message.content,
         reasoning=message.reasoning,
+        reasoning_duration_ms=message.reasoning_duration_ms,
         image_url=image_url_for(message.image_path),
         is_complete=message.is_complete,
         created_at=message.created_at,

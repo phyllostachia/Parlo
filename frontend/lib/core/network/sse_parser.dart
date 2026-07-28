@@ -152,6 +152,14 @@ SseEvent? _buildEvent(String type, String data) {
     return 0;
   }
 
+  // Helper：读取 optional int field；缺失或类型错误时返回 null。
+  int? readOptionalInt(Map<String, dynamic> obj, String key) {
+    final value = obj[key];
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return null;
+  }
+
   switch (type) {
     case 'started':
       final obj = decodeObject();
@@ -169,7 +177,10 @@ SseEvent? _buildEvent(String type, String data) {
       final obj = decodeObject();
       return SseEvent.error(message: readString(obj, 'message'));
     case 'done':
-      return const SseEvent.done();
+      final obj = decodeObject();
+      return SseEvent.done(
+        reasoningDurationMs: readOptionalInt(obj, 'reasoning_duration_ms'),
+      );
     default:
       // 未知 event type：忽略，而不是崩溃。
       return null;

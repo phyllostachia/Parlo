@@ -24,7 +24,7 @@ mixin _$SseEvent {
     required TResult Function(String content) reasoningDelta,
     required TResult Function(String content) reasoningSignature,
     required TResult Function(String message) error,
-    required TResult Function() done,
+    required TResult Function(int? reasoningDurationMs) done,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
@@ -33,7 +33,7 @@ mixin _$SseEvent {
     TResult? Function(String content)? reasoningDelta,
     TResult? Function(String content)? reasoningSignature,
     TResult? Function(String message)? error,
-    TResult? Function()? done,
+    TResult? Function(int? reasoningDurationMs)? done,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
@@ -42,7 +42,7 @@ mixin _$SseEvent {
     TResult Function(String content)? reasoningDelta,
     TResult Function(String content)? reasoningSignature,
     TResult Function(String message)? error,
-    TResult Function()? done,
+    TResult Function(int? reasoningDurationMs)? done,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -172,7 +172,7 @@ class _$SseStartedImpl implements SseStarted {
     required TResult Function(String content) reasoningDelta,
     required TResult Function(String content) reasoningSignature,
     required TResult Function(String message) error,
-    required TResult Function() done,
+    required TResult Function(int? reasoningDurationMs) done,
   }) {
     return started(messageId);
   }
@@ -185,7 +185,7 @@ class _$SseStartedImpl implements SseStarted {
     TResult? Function(String content)? reasoningDelta,
     TResult? Function(String content)? reasoningSignature,
     TResult? Function(String message)? error,
-    TResult? Function()? done,
+    TResult? Function(int? reasoningDurationMs)? done,
   }) {
     return started?.call(messageId);
   }
@@ -198,7 +198,7 @@ class _$SseStartedImpl implements SseStarted {
     TResult Function(String content)? reasoningDelta,
     TResult Function(String content)? reasoningSignature,
     TResult Function(String message)? error,
-    TResult Function()? done,
+    TResult Function(int? reasoningDurationMs)? done,
     required TResult orElse(),
   }) {
     if (started != null) {
@@ -340,7 +340,7 @@ class _$SseTextDeltaImpl implements SseTextDelta {
     required TResult Function(String content) reasoningDelta,
     required TResult Function(String content) reasoningSignature,
     required TResult Function(String message) error,
-    required TResult Function() done,
+    required TResult Function(int? reasoningDurationMs) done,
   }) {
     return textDelta(content);
   }
@@ -353,7 +353,7 @@ class _$SseTextDeltaImpl implements SseTextDelta {
     TResult? Function(String content)? reasoningDelta,
     TResult? Function(String content)? reasoningSignature,
     TResult? Function(String message)? error,
-    TResult? Function()? done,
+    TResult? Function(int? reasoningDurationMs)? done,
   }) {
     return textDelta?.call(content);
   }
@@ -366,7 +366,7 @@ class _$SseTextDeltaImpl implements SseTextDelta {
     TResult Function(String content)? reasoningDelta,
     TResult Function(String content)? reasoningSignature,
     TResult Function(String message)? error,
-    TResult Function()? done,
+    TResult Function(int? reasoningDurationMs)? done,
     required TResult orElse(),
   }) {
     if (textDelta != null) {
@@ -512,7 +512,7 @@ class _$SseReasoningDeltaImpl implements SseReasoningDelta {
     required TResult Function(String content) reasoningDelta,
     required TResult Function(String content) reasoningSignature,
     required TResult Function(String message) error,
-    required TResult Function() done,
+    required TResult Function(int? reasoningDurationMs) done,
   }) {
     return reasoningDelta(content);
   }
@@ -525,7 +525,7 @@ class _$SseReasoningDeltaImpl implements SseReasoningDelta {
     TResult? Function(String content)? reasoningDelta,
     TResult? Function(String content)? reasoningSignature,
     TResult? Function(String message)? error,
-    TResult? Function()? done,
+    TResult? Function(int? reasoningDurationMs)? done,
   }) {
     return reasoningDelta?.call(content);
   }
@@ -538,7 +538,7 @@ class _$SseReasoningDeltaImpl implements SseReasoningDelta {
     TResult Function(String content)? reasoningDelta,
     TResult Function(String content)? reasoningSignature,
     TResult Function(String message)? error,
-    TResult Function()? done,
+    TResult Function(int? reasoningDurationMs)? done,
     required TResult orElse(),
   }) {
     if (reasoningDelta != null) {
@@ -685,7 +685,7 @@ class _$SseReasoningSignatureImpl implements SseReasoningSignature {
     required TResult Function(String content) reasoningDelta,
     required TResult Function(String content) reasoningSignature,
     required TResult Function(String message) error,
-    required TResult Function() done,
+    required TResult Function(int? reasoningDurationMs) done,
   }) {
     return reasoningSignature(content);
   }
@@ -698,7 +698,7 @@ class _$SseReasoningSignatureImpl implements SseReasoningSignature {
     TResult? Function(String content)? reasoningDelta,
     TResult? Function(String content)? reasoningSignature,
     TResult? Function(String message)? error,
-    TResult? Function()? done,
+    TResult? Function(int? reasoningDurationMs)? done,
   }) {
     return reasoningSignature?.call(content);
   }
@@ -711,7 +711,7 @@ class _$SseReasoningSignatureImpl implements SseReasoningSignature {
     TResult Function(String content)? reasoningDelta,
     TResult Function(String content)? reasoningSignature,
     TResult Function(String message)? error,
-    TResult Function()? done,
+    TResult Function(int? reasoningDurationMs)? done,
     required TResult orElse(),
   }) {
     if (reasoningSignature != null) {
@@ -854,7 +854,7 @@ class _$SseErrorImpl implements SseError {
     required TResult Function(String content) reasoningDelta,
     required TResult Function(String content) reasoningSignature,
     required TResult Function(String message) error,
-    required TResult Function() done,
+    required TResult Function(int? reasoningDurationMs) done,
   }) {
     return error(message);
   }
@@ -867,7 +867,7 @@ class _$SseErrorImpl implements SseError {
     TResult? Function(String content)? reasoningDelta,
     TResult? Function(String content)? reasoningSignature,
     TResult? Function(String message)? error,
-    TResult? Function()? done,
+    TResult? Function(int? reasoningDurationMs)? done,
   }) {
     return error?.call(message);
   }
@@ -880,7 +880,7 @@ class _$SseErrorImpl implements SseError {
     TResult Function(String content)? reasoningDelta,
     TResult Function(String content)? reasoningSignature,
     TResult Function(String message)? error,
-    TResult Function()? done,
+    TResult Function(int? reasoningDurationMs)? done,
     required TResult orElse(),
   }) {
     if (error != null) {
@@ -952,6 +952,8 @@ abstract class _$$SseDoneImplCopyWith<$Res> {
     _$SseDoneImpl value,
     $Res Function(_$SseDoneImpl) then,
   ) = __$$SseDoneImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({int? reasoningDurationMs});
 }
 
 /// @nodoc
@@ -965,26 +967,53 @@ class __$$SseDoneImplCopyWithImpl<$Res>
 
   /// Create a copy of SseEvent
   /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? reasoningDurationMs = freezed}) {
+    return _then(
+      _$SseDoneImpl(
+        reasoningDurationMs: freezed == reasoningDurationMs
+            ? _value.reasoningDurationMs
+            : reasoningDurationMs // ignore: cast_nullable_to_non_nullable
+                  as int?,
+      ),
+    );
+  }
 }
 
 /// @nodoc
 
 class _$SseDoneImpl implements SseDone {
-  const _$SseDoneImpl();
+  const _$SseDoneImpl({this.reasoningDurationMs});
+
+  /// 从请求开始到 reasoning 结束的耗时（毫秒）。没有 reasoning 时为 `null`。
+  @override
+  final int? reasoningDurationMs;
 
   @override
   String toString() {
-    return 'SseEvent.done()';
+    return 'SseEvent.done(reasoningDurationMs: $reasoningDurationMs)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$SseDoneImpl);
+        (other.runtimeType == runtimeType &&
+            other is _$SseDoneImpl &&
+            (identical(other.reasoningDurationMs, reasoningDurationMs) ||
+                other.reasoningDurationMs == reasoningDurationMs));
   }
 
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode => Object.hash(runtimeType, reasoningDurationMs);
+
+  /// Create a copy of SseEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$SseDoneImplCopyWith<_$SseDoneImpl> get copyWith =>
+      __$$SseDoneImplCopyWithImpl<_$SseDoneImpl>(this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -994,9 +1023,9 @@ class _$SseDoneImpl implements SseDone {
     required TResult Function(String content) reasoningDelta,
     required TResult Function(String content) reasoningSignature,
     required TResult Function(String message) error,
-    required TResult Function() done,
+    required TResult Function(int? reasoningDurationMs) done,
   }) {
-    return done();
+    return done(reasoningDurationMs);
   }
 
   @override
@@ -1007,9 +1036,9 @@ class _$SseDoneImpl implements SseDone {
     TResult? Function(String content)? reasoningDelta,
     TResult? Function(String content)? reasoningSignature,
     TResult? Function(String message)? error,
-    TResult? Function()? done,
+    TResult? Function(int? reasoningDurationMs)? done,
   }) {
-    return done?.call();
+    return done?.call(reasoningDurationMs);
   }
 
   @override
@@ -1020,11 +1049,11 @@ class _$SseDoneImpl implements SseDone {
     TResult Function(String content)? reasoningDelta,
     TResult Function(String content)? reasoningSignature,
     TResult Function(String message)? error,
-    TResult Function()? done,
+    TResult Function(int? reasoningDurationMs)? done,
     required TResult orElse(),
   }) {
     if (done != null) {
-      return done();
+      return done(reasoningDurationMs);
     }
     return orElse();
   }
@@ -1074,5 +1103,14 @@ class _$SseDoneImpl implements SseDone {
 }
 
 abstract class SseDone implements SseEvent {
-  const factory SseDone() = _$SseDoneImpl;
+  const factory SseDone({final int? reasoningDurationMs}) = _$SseDoneImpl;
+
+  /// 从请求开始到 reasoning 结束的耗时（毫秒）。没有 reasoning 时为 `null`。
+  int? get reasoningDurationMs;
+
+  /// Create a copy of SseEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$SseDoneImplCopyWith<_$SseDoneImpl> get copyWith =>
+      throw _privateConstructorUsedError;
 }

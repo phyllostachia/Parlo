@@ -301,8 +301,8 @@ class CurrentConversationNotifier
         ref.read(streamStateProvider.notifier).state = StreamState.error;
         _sub?.cancel();
         _sub = null;
-      case SseDone():
-        _markAssistantComplete();
+      case SseDone(:final reasoningDurationMs):
+        _markAssistantComplete(reasoningDurationMs: reasoningDurationMs);
         ref.read(streamStateProvider.notifier).state = StreamState.done;
         _sub?.cancel();
         _sub = null;
@@ -325,8 +325,16 @@ class CurrentConversationNotifier
   }
 
   /// 将最后一条 assistant message 标记为 complete。
-  void _markAssistantComplete() {
-    _patchLastAssistant((message) => message.copyWith(isComplete: true));
+  void _markAssistantComplete({int? reasoningDurationMs}) {
+    _patchLastAssistant((message) {
+      if (reasoningDurationMs == null) {
+        return message.copyWith(isComplete: true);
+      }
+      return message.copyWith(
+        isComplete: true,
+        reasoningDurationMs: reasoningDurationMs,
+      );
+    });
   }
 
   /// 对 path 中最后一条 assistant message 应用 `update` 并 emit new state。如果 path 为空，

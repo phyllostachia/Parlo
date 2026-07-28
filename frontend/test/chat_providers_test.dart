@@ -97,6 +97,40 @@ void main() {
     },
   );
 
+  test('stream completion retains the measured reasoning duration', () async {
+    _stubPathLoad(dio, empty: true);
+    _stubSendMessage(dio);
+    _stubStream(dio, <String>[
+      'event: started\ndata: {"message_id":11}\n\n',
+      'event: reasoning_delta\ndata: {"content":"thinking"}\n\n',
+      'event: text_delta\ndata: {"content":"Answer"}\n\n',
+      'event: done\ndata: {"reasoning_duration_ms":12000}\n\n',
+    ]);
+
+    final doneState = Completer<void>();
+    container.listen<StreamState>(streamStateProvider, (_, next) {
+      if (next == StreamState.done && !doneState.isCompleted) {
+        doneState.complete();
+      }
+    });
+
+    final notifier = container.read(
+      currentConversationProvider(_conversationId).notifier,
+    );
+    await container.read(currentConversationProvider(_conversationId).future);
+    await notifier.send(text: 'Reason about this');
+    await doneState.future.timeout(const Duration(seconds: 5));
+
+    final assistant = container
+        .read(currentConversationProvider(_conversationId))
+        .requireValue
+        .path
+        .last
+        .message;
+    expect(assistant.reasoning, 'thinking');
+    expect(assistant.reasoningDurationMs, 12000);
+  });
+
   test(
     'stop cancels the stream and marks the assistant message complete',
     () async {

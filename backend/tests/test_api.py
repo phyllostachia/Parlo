@@ -270,6 +270,8 @@ async def test_chat_stream_persists_reasoning_and_signature(
     types = [event_type for event_type, _ in parsed]
     assert "reasoning_delta" in types
     assert "reasoning_signature" in types
+    done_payload = next(data for event_type, data in parsed if event_type == "done")
+    assert isinstance(json.loads(done_payload)["reasoning_duration_ms"], int)
 
     # fake provider 在 request history 中收到了 user message。
     assert fake.last_request is not None
@@ -277,6 +279,11 @@ async def test_chat_stream_persists_reasoning_and_signature(
     assert fake.last_request.messages[-1].text == "hi"
     # 关闭深度思考时，使用 model 配置的 off effort。
     assert fake.last_request.thinking_effort == "medium"
+
+    path = (await client.get(f"/api/conversations/{cid}/messages")).json()
+    assistant = path["path"][-1]["message"]
+    assert isinstance(assistant["reasoning_duration_ms"], int)
+    assert assistant["reasoning_duration_ms"] >= 1
 
 
 async def test_chat_stream_uses_thinking_on_effort(client, monkeypatch) -> None:

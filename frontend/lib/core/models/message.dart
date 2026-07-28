@@ -73,6 +73,9 @@ class Message with _$Message {
     /// reasoning 的 assistant message 为 `null`。
     required String? reasoning,
 
+    /// 从开始请求到 reasoning 完成的耗时。没有 reasoning 的 message 为 `null`。
+    int? reasoningDurationMs,
+
     /// Client 可以获取附加 image 的 URL（如果有）。`null` 表示没有 image。
     required String? imageUrl,
 
