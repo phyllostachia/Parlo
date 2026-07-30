@@ -134,32 +134,26 @@ class _ChatInputState extends ConsumerState<ChatInput> {
     }
   }
 
-  /// Conversation 绑定的 model 是否接受 image。读取 current path 和 model registry；任一
-  /// 正在 loading 或 model 不是 vision model 时返回 `false`。
-  bool get _canAttachImage {
-    final path = ref
-        .read(currentConversationProvider(widget.conversationId))
-        .valueOrNull;
-    final modelId = path?.conversation.modelId;
-    if (modelId == null) return false;
-    final models = ref.read(modelListProvider);
-    for (final model in models) {
-      if (model.id == modelId) return model.vision;
-    }
-    return false;
-  }
-
   @override
   Widget build(BuildContext context) {
     final streamState = ref.watch(streamStateProvider);
     final isStreaming = streamState == StreamState.streaming;
-    final conversation = ref
-        .watch(currentConversationProvider(widget.conversationId))
-        .valueOrNull
-        ?.conversation;
+    final conversationAsync = ref.watch(
+      currentConversationProvider(widget.conversationId),
+    );
+    final conversation = conversationAsync.valueOrNull?.conversation;
+    // 必须 watch（而非 read）model list：models 异步加载完成后会触发 rebuild，否则
+    // attach button 会在 models 尚未就绪时隐藏，且之后永不出现。
+    final models = ref.watch(modelListProvider);
     final spacing = Theme.of(context).extension<TanSpacing>()!;
     final colors = Theme.of(context).extension<TanColors>()!;
-    final canAttachImage = _canAttachImage;
+
+    /// Conversation 绑定的 model 是否接受 image。任一数据仍在 loading 或 model 不是
+    /// vision model 时为 `false`。
+    final modelId = conversation?.modelId;
+    final canAttachImage =
+        modelId != null &&
+        models.any((model) => model.id == modelId && model.vision);
 
     return TanDropTarget(
       onDrop: _handleDrop,
