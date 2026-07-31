@@ -60,7 +60,7 @@ class VersionSwitcher extends StatelessWidget {
           onPressed: canGoPrevious
               ? () => onSwitch(siblings.siblings[activeIndex - 1])
               : null,
-          tooltip: 'Previous version',
+          tooltip: '上一版本',
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -81,7 +81,7 @@ class VersionSwitcher extends StatelessWidget {
           onPressed: canGoNext
               ? () => onSwitch(siblings.siblings[activeIndex + 1])
               : null,
-          tooltip: 'Next version',
+          tooltip: '下一版本',
         ),
       ],
     );

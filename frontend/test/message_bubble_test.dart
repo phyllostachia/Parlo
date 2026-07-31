@@ -111,15 +111,15 @@ void main() {
 
     final bubble = find.byType(MessageBubble);
     final originalHeight = tester.getSize(bubble).height;
-    expect(find.byTooltip('Copy'), findsNothing);
+    expect(find.byTooltip('复制'), findsNothing);
 
     final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await mouse.addPointer();
     await mouse.moveTo(tester.getCenter(bubble));
     await tester.pump();
 
-    expect(find.byTooltip('Copy'), findsOneWidget);
-    expect(find.byTooltip('Regenerate'), findsOneWidget);
+    expect(find.byTooltip('复制'), findsOneWidget);
+    expect(find.byTooltip('重新生成'), findsOneWidget);
     expect(tester.getSize(bubble).height, originalHeight);
 
     await mouse.removePointer();

@@ -101,10 +101,10 @@ class SidebarScreen extends ConsumerWidget {
   ) async {
     final name = await _showNameDialog(
       context: context,
-      title: 'New folder',
-      labelText: 'Folder name',
-      initialText: 'New folder',
-      confirmText: 'Create',
+      title: '新建分组',
+      labelText: '分组名称',
+      initialText: '新分组',
+      confirmText: '创建',
     );
     if (name == null || name.trim().isEmpty) return;
     // Fire-and-forget；AsyncNotifier state 会反映 refetch。Error 会通过 tree 中的 AsyncValue
@@ -150,14 +150,14 @@ class _SidebarHeader extends StatelessWidget {
           const SizedBox(height: 8),
           _SidebarActionButton(
             icon: Icons.edit_outlined,
-            label: '新建对话',
+            label: '新对话',
             onTap: onNewConversation,
             collapsed: true,
           ),
           const SizedBox(height: 4),
           _SidebarActionButton(
             icon: Icons.create_new_folder_outlined,
-            label: '新建分组',
+            label: '新分组',
             onTap: onNewProfile,
             collapsed: true,
           ),
@@ -202,13 +202,13 @@ class _SidebarHeader extends StatelessWidget {
         // Design “New Actions Row”：两个相距 4px 的 full-width ghost button。
         _SidebarActionButton(
           icon: Icons.edit_outlined,
-          label: '新建对话',
+          label: '新对话',
           onTap: onNewConversation,
         ),
         const SizedBox(height: 4),
         _SidebarActionButton(
           icon: Icons.create_new_folder_outlined,
-          label: '新建分组',
+          label: '新分组',
           onTap: onNewProfile,
         ),
       ],
@@ -423,7 +423,7 @@ Future<String?> _showNameDialog({
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(null),
-            child: const Text('Cancel'),
+            child: const Text('取消'),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(controller.text),

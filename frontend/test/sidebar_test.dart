@@ -120,12 +120,12 @@ void main() {
     await mouse.addPointer();
     await mouse.moveTo(tester.getCenter(find.text('Learning')));
     await tester.pump();
-    expect(find.byTooltip('More'), findsOneWidget);
+    expect(find.byTooltip('更多'), findsOneWidget);
     expect(tester.getSize(row).height, originalHeight);
 
-    await tester.tap(find.byTooltip('More'));
+    await tester.tap(find.byTooltip('更多'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Rename'));
+    await tester.tap(find.text('重命名'));
     await tester.pumpAndSettle();
 
     expect(
@@ -188,7 +188,12 @@ void main() {
       of: find.text('Chats'),
       matching: find.byType(GestureDetector),
     );
-    final conversation = find.text('New conversation');
+    final conversation = find.byWidgetPredicate(
+      (widget) =>
+          widget is Text &&
+          widget.data == '新对话' &&
+          widget.style?.fontWeight == FontWeight.normal,
+    );
     final originalHeight = tester.getSize(folderRow).height;
     final originalConversationY = tester.getTopLeft(conversation).dy;
 
@@ -197,7 +202,7 @@ void main() {
     await mouse.moveTo(tester.getCenter(find.text('Chats')));
     await tester.pump();
 
-    expect(find.byTooltip('More'), findsOneWidget);
+    expect(find.byTooltip('更多'), findsOneWidget);
     expect(tester.getSize(folderRow).height, originalHeight);
     expect(tester.getTopLeft(conversation).dy, originalConversationY);
 
@@ -226,8 +231,7 @@ void main() {
     // 紧耦合。
     expect(
       find.byWidgetPredicate(
-        (widget) =>
-            widget is Text && (widget.data ?? '').startsWith('No folders yet.'),
+        (widget) => widget is Text && (widget.data ?? '').startsWith('还没有分组。'),
       ),
       findsOneWidget,
     );

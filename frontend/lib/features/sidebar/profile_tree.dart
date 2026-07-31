@@ -47,21 +47,19 @@ class ProfileTree extends ConsumerWidget {
     return profilesAsync.when(
       loading: () => collapsed
           ? const _CollapsedHint(icon: Icons.more_horiz)
-          : const _CenteredHint(text: 'Loading…'),
+          : const _CenteredHint(text: '加载中…'),
       error: (error, _) => collapsed
           ? const _CollapsedHint(icon: Icons.error_outline)
           : _CenteredHint(
-              text: 'Could not load folders:\n$error',
-              actionLabel: 'Retry',
+              text: '无法加载分组：\n$error',
+              actionLabel: '重试',
               onAction: () => ref.invalidate(profilesProvider),
             ),
       data: (profiles) {
         if (profiles.isEmpty) {
           return collapsed
               ? const _CollapsedHint(icon: Icons.folder_off_outlined)
-              : const _CenteredHint(
-                  text: 'No folders yet.\nCreate one with the + button above.',
-                );
+              : const _CenteredHint(text: '还没有分组。\n点击上方的 + 创建分组。');
         }
         if (collapsed) {
           return ListView.builder(
@@ -169,11 +167,9 @@ class _ProfileFolderState extends ConsumerState<_ProfileFolder> {
   Future<void> _confirmDelete() async {
     final confirmed = await _showDeleteConfirmation(
       context: context,
-      title: 'Delete folder?',
-      message:
-          '"${widget.profile.name}" and every conversation inside it will be '
-          'deleted. This cannot be undone.',
-      confirmText: 'Delete',
+      title: '删除分组？',
+      message: '“${widget.profile.name}”及其中的所有对话都会被删除，且无法撤销。',
+      confirmText: '删除',
     );
     if (confirmed) {
       // 从 expanded set 移除，使 row 不会尝试为已删除的 profile 加载 conversation。
@@ -273,16 +269,16 @@ class _ConversationsList extends ConsumerWidget {
     final convosAsync = ref.watch(conversationsForProfileProvider(profileId));
 
     return convosAsync.when(
-      loading: () => const _IndentedHint(text: 'Loading…'),
+      loading: () => const _IndentedHint(text: '加载中…'),
       error: (error, _) => _IndentedHint(
-        text: 'Could not load: $error',
-        actionLabel: 'Retry',
+        text: '无法加载：$error',
+        actionLabel: '重试',
         onAction: () =>
             ref.invalidate(conversationsForProfileProvider(profileId)),
       ),
       data: (conversations) {
         if (conversations.isEmpty) {
-          return const _IndentedHint(text: 'No conversations yet');
+          return const _IndentedHint(text: '还没有对话');
         }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -358,11 +354,10 @@ class _ConversationRowState extends ConsumerState<_ConversationRow> {
   Future<void> _confirmDelete() async {
     final confirmed = await _showDeleteConfirmation(
       context: context,
-      title: 'Delete conversation?',
+      title: '删除对话？',
       message:
-          '"${widget.conversation.title.isEmpty ? 'This conversation' : widget.conversation.title}" '
-          'and every message in it will be deleted. This cannot be undone.',
-      confirmText: 'Delete',
+          '“${widget.conversation.title.isEmpty ? '此对话' : widget.conversation.title}”及其中的所有消息都会被删除，且无法撤销。',
+      confirmText: '删除',
     );
     if (confirmed) {
       await ref
@@ -378,7 +373,7 @@ class _ConversationRowState extends ConsumerState<_ConversationRow> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<TanColors>()!;
     final title = widget.conversation.title.isEmpty
-        ? 'New conversation'
+        ? '新对话'
         : widget.conversation.title;
 
     return _TreeRow(
@@ -509,7 +504,7 @@ class _TreeRowState extends State<_TreeRow> {
                       ? PopupMenuButton<_MenuItem>(
                           // child 已明确为 24×20；移除默认内边距以匹配该槽位。
                           padding: EdgeInsets.zero,
-                          tooltip: 'More',
+                          tooltip: '更多',
                           onOpened: () => setState(() => _isMenuOpen = true),
                           onCanceled: () => setState(() => _isMenuOpen = false),
                           itemBuilder: (_) => [
@@ -541,9 +536,9 @@ class _TreeRowState extends State<_TreeRow> {
 String _labelForItem(_MenuItem item) {
   switch (item) {
     case _MenuItem.rename:
-      return 'Rename';
+      return '重命名';
     case _MenuItem.delete:
-      return 'Delete';
+      return '删除';
   }
 }
 
@@ -698,7 +693,7 @@ Future<bool> _showDeleteConfirmation({
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: const Text('取消'),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),

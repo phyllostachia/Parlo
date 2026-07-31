@@ -488,9 +488,7 @@ class _RetryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = streamState == StreamState.stopped
-        ? 'Continue'
-        : 'Connection broken. Retry';
+    final label = streamState == StreamState.stopped ? '继续' : '连接中断，重试';
     return OutlinedButton.icon(
       onPressed: onPressed,
       icon: const Icon(Icons.refresh, size: 16),

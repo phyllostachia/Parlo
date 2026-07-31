@@ -58,7 +58,7 @@ void main() {
     );
     expect(find.text('Clear token'), findsNothing);
     expect(find.text('Clear address'), findsNothing);
-    expect(find.text('Save'), findsOneWidget);
+    expect(find.text('保存'), findsOneWidget);
 
     final fields = find.byType(TextField);
     await tester.enterText(fields.at(0), 'updated-token');
@@ -66,7 +66,7 @@ void main() {
     await tester.enterText(fields.at(2), '8443');
     await tester.pump();
 
-    await tester.tap(find.text('Save'));
+    await tester.tap(find.text('保存'));
     await tester.pumpAndSettle();
 
     expect(find.byType(Dialog), findsNothing);

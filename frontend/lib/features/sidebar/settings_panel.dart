@@ -89,10 +89,7 @@ class _SettingsPanelDialogState extends ConsumerState<SettingsPanelDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Settings',
-                  style: Theme.of(context).textTheme.displayLarge,
-                ),
+                Text('设置', style: Theme.of(context).textTheme.displayLarge),
                 SizedBox(height: spacing.s24),
                 _TokenSection(
                   controller: _tokenController,
@@ -115,7 +112,7 @@ class _SettingsPanelDialogState extends ConsumerState<SettingsPanelDialog> {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Close'),
+                      child: const Text('关闭'),
                     ),
                     SizedBox(width: spacing.s16),
                     SizedBox(
@@ -123,7 +120,7 @@ class _SettingsPanelDialogState extends ConsumerState<SettingsPanelDialog> {
                       height: 52,
                       child: FilledButton(
                         onPressed: _canSave ? _save : null,
-                        child: const Text('Save'),
+                        child: const Text('保存'),
                       ),
                     ),
                   ],
@@ -156,7 +153,7 @@ class _TokenSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Token', style: Theme.of(context).textTheme.headlineMedium),
+        Text('令牌', style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 8),
         SizedBox(
           height: 56,
@@ -166,9 +163,9 @@ class _TokenSection extends StatelessWidget {
             onChanged: (_) => onChanged(),
             style: Theme.of(context).textTheme.bodyLarge,
             decoration: InputDecoration(
-              hintText: 'Paste your token here',
+              hintText: '在此粘贴令牌',
               suffixIcon: IconButton(
-                tooltip: obscured ? 'Show token' : 'Hide token',
+                tooltip: obscured ? '显示令牌' : '隐藏令牌',
                 icon: Icon(
                   obscured
                       ? Icons.visibility_outlined
@@ -201,10 +198,7 @@ class _BackendUrlSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Backend address',
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
+        Text('后端地址', style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 8),
         BackendUrlField(
           domainController: domainController,
@@ -212,6 +206,9 @@ class _BackendUrlSection extends StatelessWidget {
           onChanged: onChanged,
           fieldGap: 12,
           portWidth: 140,
+          domainLabel: '后端域名',
+          portLabel: '端口',
+          numbersOnlyError: '只能输入数字',
         ),
       ],
     );
@@ -228,26 +225,25 @@ class _ThemeSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Theme', style: Theme.of(context).textTheme.headlineMedium),
+        Text('主题', style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 8),
         Text(
-          'v1 supports the light theme. Dark and system-follow arrive in a '
-          'later phase.',
+          '当前版本仅支持浅色主题。深色主题和跟随系统将在后续版本提供。',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: Theme.of(context).extension<TanColors>()!.ashen,
           ),
         ),
         const SizedBox(height: 8),
-        const _ThemeOption(label: 'Light', selected: true),
+        const _ThemeOption(label: '浅色', selected: true),
         const SizedBox(height: 8),
         _ThemeOption(
-          label: 'Dark',
+          label: '深色',
           disabled: true,
           disabledColor: Theme.of(context).disabledColor,
         ),
         const SizedBox(height: 8),
         _ThemeOption(
-          label: 'Follow system',
+          label: '跟随系统',
           disabled: true,
           disabledColor: Theme.of(context).disabledColor,
         ),
@@ -299,10 +295,7 @@ class _ThemeOption extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                Text(
-                  'Coming soon',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
+                Text('即将推出', style: Theme.of(context).textTheme.bodyMedium),
               ],
             )
           else

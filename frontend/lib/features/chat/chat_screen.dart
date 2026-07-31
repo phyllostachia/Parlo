@@ -61,7 +61,7 @@ class _ChatTopBar extends ConsumerWidget {
     final pathAsync = ref.watch(currentConversationProvider(conversationId));
     final conversation = pathAsync.valueOrNull?.conversation;
     final title = (conversation == null || conversation.title.isEmpty)
-        ? 'New conversation'
+        ? '新对话'
         : conversation.title;
     final models = ref.watch(modelListProvider);
     final modelName = _resolveModelName(models, conversation?.modelId ?? '');
@@ -164,7 +164,7 @@ class _RenameButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<TanColors>()!;
     return IconButton(
-      tooltip: 'Rename',
+      tooltip: '重命名',
       icon: Icon(Icons.edit_outlined, size: 13, color: colors.pebble),
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
@@ -174,22 +174,22 @@ class _RenameButton extends StatelessWidget {
         final newTitle = await showDialog<String>(
           context: context,
           builder: (dialogContext) => AlertDialog(
-            title: const Text('Rename conversation'),
+            title: const Text('重命名对话'),
             content: TextField(
               controller: controller,
               autofocus: true,
-              decoration: const InputDecoration(labelText: 'Title'),
+              decoration: const InputDecoration(labelText: '标题'),
               onSubmitted: (value) => Navigator.of(dialogContext).pop(value),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(null),
-                child: const Text('Cancel'),
+                child: const Text('取消'),
               ),
               FilledButton(
                 onPressed: () =>
                     Navigator.of(dialogContext).pop(controller.text),
-                child: const Text('Rename'),
+                child: const Text('重命名'),
               ),
             ],
           ),

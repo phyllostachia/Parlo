@@ -61,7 +61,7 @@ class _MessageActionsState extends State<MessageActions> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(
-              'Copied',
+              '已复制',
               style: Theme.of(
                 context,
               ).textTheme.labelSmall?.copyWith(color: colors.graphite),
@@ -70,14 +70,14 @@ class _MessageActionsState extends State<MessageActions> {
         else
           _ActionButton(
             icon: Icons.copy_outlined,
-            tooltip: 'Copy',
+            tooltip: '复制',
             onPressed: _copy,
           ),
         if (widget.canRegenerate) ...[
           const SizedBox(width: 4),
           _ActionButton(
             icon: Icons.refresh,
-            tooltip: 'Regenerate',
+            tooltip: '重新生成',
             onPressed: widget.onRegenerate,
           ),
         ],

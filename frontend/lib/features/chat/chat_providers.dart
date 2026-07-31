@@ -374,7 +374,7 @@ class ChatActionsNotifier extends Notifier<void> {
   /// streaming。返回新的 conversation id，使调用方可以 navigation 到 `/c/{id}`。
   ///
   /// Conversation 会创建在最近更新的 profile 中。如果还没有 profile，会先创建默认的
-  /// “Chats” folder，使首次使用时用户无需先管理 folder 就可以 chat。
+  /// “聊天”分组，使首次使用时用户无需先管理分组就可以聊天。
   Future<int> sendFirstMessage({
     required String modelId,
     required String text,
@@ -418,11 +418,11 @@ class ChatActionsNotifier extends Notifier<void> {
   /// 选择用于创建新 conversation 的 profile。
   ///
   /// 使用最近更新的 profile（sidebar 按此方式排序，因此 `first` 是最新的）。如果没有
-  /// profile，则创建“Chats”folder 并返回其 id。
+  /// profile，则创建“聊天”分组并返回其 id。
   Future<int> _resolveProfileId() async {
     var profiles = await ref.read(profilesProvider.future);
     if (profiles.isNotEmpty) return profiles.first.id;
-    await ref.read(profilesProvider.notifier).createProfile('Chats');
+    await ref.read(profilesProvider.notifier).createProfile('聊天');
     profiles = await ref.read(profilesProvider.future);
     return profiles.first.id;
   }

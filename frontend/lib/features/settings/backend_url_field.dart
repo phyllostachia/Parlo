@@ -77,6 +77,9 @@ class BackendUrlField extends StatefulWidget {
     this.fieldGap = 8,
     this.onChanged,
     this.portWidth = 96,
+    this.domainLabel = 'Backend domain',
+    this.portLabel = 'Port',
+    this.numbersOnlyError = 'Numbers only',
     super.key,
   });
 
@@ -94,6 +97,15 @@ class BackendUrlField extends StatefulWidget {
 
   /// Port field 的宽度。
   final double portWidth;
+
+  /// Domain field 的 label。
+  final String domainLabel;
+
+  /// Port field 的 label。
+  final String portLabel;
+
+  /// Port 不是数字时显示的错误文案。
+  final String numbersOnlyError;
 
   @override
   State<BackendUrlField> createState() => _BackendUrlFieldState();
@@ -132,7 +144,7 @@ class _BackendUrlFieldState extends State<BackendUrlField> {
     final text = widget.portController.text.trim();
     if (text.isEmpty) return null;
     final port = int.tryParse(text);
-    if (port == null) return 'Numbers only';
+    if (port == null) return widget.numbersOnlyError;
     if (port < 1 || port > 65535) return '1–65535';
     return null;
   }
@@ -146,7 +158,7 @@ class _BackendUrlFieldState extends State<BackendUrlField> {
           child: TextField(
             controller: widget.domainController,
             decoration: InputDecoration(
-              labelText: 'Backend domain',
+              labelText: widget.domainLabel,
               hintText: 'tan.example.com',
               errorText: _domainError,
             ),
@@ -161,7 +173,7 @@ class _BackendUrlFieldState extends State<BackendUrlField> {
           child: TextField(
             controller: widget.portController,
             decoration: InputDecoration(
-              labelText: 'Port',
+              labelText: widget.portLabel,
               hintText: '8000',
               errorText: _portError,
             ),
