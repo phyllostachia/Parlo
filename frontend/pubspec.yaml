@@ -86,14 +86,16 @@ flutter:
     - assets/fonts/
 
   fonts:
-    # Noto Serif 作为私有 Anthropic Serif 的替代字体，用于 display headline 和对话中的
-    # 自然语言文本。单个可变字体文件包含完整的字重范围。
-    - family: NotoSerif
+    - family: NotoSansSC
       fonts:
-        - asset: assets/fonts/NotoSerif-VariableFont_wdth,wght.ttf
+        - asset: assets/fonts/NotoSansSC-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/NotoSansSC-SemiBold.ttf
+          weight: 600
 
-    # Noto Sans 用于应用 UI。单个可变字体文件包含完整的字重范围。
-    - family: NotoSans
+    - family: NotoSerifSC
       fonts:
-        - asset: assets/fonts/NotoSans-VariableFont_wdth,wght.ttf
-
+        - asset: assets/fonts/NotoSerifSC-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/NotoSerifSC-Bold.ttf
+          weight: 700

@@ -17,15 +17,15 @@ import 'package:flutter/material.dart';
 /// 尤其是固定的；自然语言和代码字体的入口集中在这里，后续如需更换字体只需修改本文件。
 abstract final class TanFonts {
   /// UI 字体：固定使用 Noto Sans，不提供用户可变配置。
-  static const String uiFamily = 'NotoSans';
+  static const String uiFamily = 'NotoSansSC';
 
   /// UI display 标题使用的 Noto Serif。
-  static const String displayFamily = 'NotoSerif';
+  static const String displayFamily = 'NotoSerifSC';
 
   /// 对话中用户消息和 AI 回复的自然语言字体。
   ///
   /// 使用 Noto Serif 可变字体；所需字重通过 [TextStyle.fontWeight] 选择。
-  static const String naturalLanguageFamily = 'NotoSerif';
+  static const String naturalLanguageFamily = 'NotoSerifSC';
 
   /// gpt_markdown 包内注册的代码字体。
   static const String codeFamily = 'JetBrainsMono';
