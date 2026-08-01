@@ -11,8 +11,9 @@ part 'requests.g.dart';
 /// `POST /api/conversations/{id}/messages` 的 body。
 ///
 /// 省略 `parentId` 时，server 将其默认为 conversation current leaf，这是向可见 path 追加
-/// 新问题的常见情况。`imageData` 是 base64 data URL；server 会 decode 并存储它，然后在
-/// message 上返回可获取的 URL。
+/// 新问题的常见情况；显式传入 `null` 会创建新的 root message，用于编辑首条 prompt。
+/// `imageData` 是 base64 data URL；server 会 decode 并存储它，然后在 message 上返回可获取的
+/// URL。
 @freezed
 class UserMessageCreate with _$UserMessageCreate {
   /// 创建 request body。

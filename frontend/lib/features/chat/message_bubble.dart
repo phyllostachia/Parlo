@@ -1,7 +1,7 @@
 /// Conversation path 中的一条 message。
 ///
 /// 根据 `product.md` §6.3：
-/// - User message 使用包含 text 和 image（如果有）的 subtle bubble。
+/// - User message 使用包含 text 和 image（如果有）的 subtle bubble，并在旁边提供 edit action。
 /// - Assistant message 渲染为 Markdown，并带 model-name footer、可选的 collapsible thinking
 ///   strip；有 sibling reply 时显示 version switcher，显示 hover action bar（Copy / Regenerate），
 ///   stream drop 时显示“connection broken, retry”button。
@@ -54,6 +54,7 @@ class MessageBubble extends ConsumerWidget {
     required this.streamState,
     required this.onRegenerate,
     required this.onSwitchBranch,
+    required this.onEdit,
     super.key,
   });
 
@@ -81,11 +82,19 @@ class MessageBubble extends ConsumerWidget {
   /// User 点击 version switcher 时，携带目标 leaf message id 调用。
   final void Function(int leafId) onSwitchBranch;
 
+  /// User 提交编辑后的 prompt 时调用。调用方负责创建新的 sibling branch。
+  final Future<void> Function(Message message, String text) onEdit;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     switch (message.role) {
       case MessageRole.user:
-        return _UserBubble(message: message, ref: ref);
+        return _UserBubble(
+          key: ValueKey<int>(message.id),
+          message: message,
+          canEdit: streamState != StreamState.streaming,
+          onEdit: onEdit,
+        );
       case MessageRole.assistant:
         return _AssistantBlock(
           message: message,
@@ -105,48 +114,237 @@ class MessageBubble extends ConsumerWidget {
 }
 
 /// User message：subtle bubble、text 和可选 image。
-class _UserBubble extends StatelessWidget {
-  const _UserBubble({required this.message, required this.ref});
+class _UserBubble extends ConsumerStatefulWidget {
+  const _UserBubble({
+    required this.message,
+    required this.canEdit,
+    required this.onEdit,
+    super.key,
+  });
 
   final Message message;
-  final WidgetRef ref;
+  final bool canEdit;
+  final Future<void> Function(Message message, String text) onEdit;
+
+  @override
+  ConsumerState<_UserBubble> createState() => _UserBubbleState();
+}
+
+class _UserBubbleState extends ConsumerState<_UserBubble> {
+  late final TextEditingController _controller;
+  bool _isEditing = false;
+  bool _isHovered = false;
+  bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.message.content);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _startEditing() {
+    if (!widget.canEdit || _isSubmitting) return;
+    _controller
+      ..text = widget.message.content
+      ..selection = TextSelection.collapsed(
+        offset: widget.message.content.length,
+      );
+    setState(() => _isEditing = true);
+  }
+
+  void _cancelEditing() {
+    if (_isSubmitting) return;
+    setState(() => _isEditing = false);
+  }
+
+  Future<void> _submitEditing() async {
+    final text = _controller.text.trim();
+    if (text.isEmpty || _isSubmitting || !widget.canEdit) return;
+
+    setState(() => _isSubmitting = true);
+    try {
+      await widget.onEdit(widget.message, text);
+      if (!mounted) return;
+      setState(() {
+        _isSubmitting = false;
+        _isEditing = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('无法修改消息：$error')));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<TanColors>()!;
     final spacing = Theme.of(context).extension<TanSpacing>()!;
     final baseUrl = ref.read(baseUrlProvider);
-    final imageUrl = message.imageUrl == null || message.imageUrl!.isEmpty
+    final imageUrl =
+        widget.message.imageUrl == null || widget.message.imageUrl!.isEmpty
         ? null
-        : '$baseUrl${message.imageUrl}';
+        : '$baseUrl${widget.message.imageUrl}';
+    final capabilities = ref.watch(platformCapabilitiesProvider);
+    final showEditOnHover =
+        capabilities.messageActions == MessageActionsMode.hover;
+    final showEditButton =
+        widget.canEdit && (!showEditOnHover || _isHovered || _isEditing);
 
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            // Web 上与 assistant actions 一致地仅在 hover 时显示；mobile 没有 hover，
+            // 因此始终保留这个容易发现的 pencil button。预留固定宽度避免出现按钮时气泡跳动。
+            SizedBox(
+              width: 28,
+              height: 28,
+              child: IgnorePointer(
+                ignoring: !showEditButton,
+                child: AnimatedOpacity(
+                  opacity: showEditButton ? 1 : 0,
+                  duration: const Duration(milliseconds: 120),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.edit_outlined,
+                      size: 16,
+                      color: colors.pebble,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 28,
+                      minHeight: 28,
+                    ),
+                    visualDensity: VisualDensity.compact,
+                    tooltip: '编辑消息',
+                    onPressed: _startEditing,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            if (_isEditing)
+              _buildEditor(colors)
+            else
+              _buildMessageCard(colors, spacing, imageUrl),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMessageCard(
+    TanColors colors,
+    TanSpacing spacing,
+    String? imageUrl,
+  ) {
     // Design “User Message Row”：bubble 贴近 720px column 的右边缘；bubble 自身的 text
     // width 上限约为 420px。
-    return Align(
-      alignment: Alignment.centerRight,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 452),
-        child: Container(
-          decoration: BoxDecoration(
-            color: colors.softStone,
-            borderRadius: BorderRadius.circular(TanRadius.light.card),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (message.content.isNotEmpty)
-                _conversationMarkdown(message.content, colors.carbonInk),
-              if (imageUrl != null) ...[
-                SizedBox(height: spacing.s8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(TanRadius.light.card),
-                  child: Image.network(imageUrl),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 452),
+      child: Container(
+        decoration: BoxDecoration(
+          color: colors.softStone,
+          borderRadius: BorderRadius.circular(TanRadius.light.card),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (widget.message.content.isNotEmpty)
+              _conversationMarkdown(widget.message.content, colors.carbonInk),
+            if (imageUrl != null) ...[
+              SizedBox(height: spacing.s8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(TanRadius.light.card),
+                child: Image.network(imageUrl),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEditor(TanColors colors) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 452),
+      child: Container(
+        decoration: BoxDecoration(
+          // 编辑态仍然是 user message bubble，只是把正文替换成可编辑文字；不再
+          // 使用另一层白色 surface 或 outline，避免用户感知到一个独立的文本框。
+          color: colors.softStone,
+          borderRadius: BorderRadius.circular(TanRadius.light.card),
+        ),
+        padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _controller,
+              autofocus: true,
+              enabled: !_isSubmitting,
+              minLines: 1,
+              maxLines: 8,
+              textInputAction: TextInputAction.newline,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: colors.softStone,
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                hoverColor: colors.softStone,
+                isCollapsed: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+              style: TanFonts.naturalLanguageStyle.copyWith(
+                color: colors.carbonInk,
+                fontSize: 15,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: _isSubmitting ? null : _cancelEditing,
+                  child: const Text('取消'),
+                ),
+                const SizedBox(width: 8),
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _controller,
+                  builder: (context, value, _) => FilledButton(
+                    onPressed: _isSubmitting || value.text.trim().isEmpty
+                        ? null
+                        : _submitEditing,
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('发送'),
+                  ),
                 ),
               ],
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

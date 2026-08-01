@@ -119,6 +119,35 @@ async def test_create_user_message_adds_assistant_placeholder(client) -> None:
     assert conv["current_leaf_id"] == body["assistant_message"]["id"]
 
 
+async def test_explicit_null_parent_creates_root_sibling(client) -> None:
+    """显式 ``parent_id: null`` 用于编辑首条 prompt，而不是追加到 current leaf。"""
+    pid = await _create_profile(client)
+    cid = await _create_conversation(client, pid)
+    first = await client.post(
+        f"/api/conversations/{cid}/messages", json={"text": "Original"}
+    )
+    first_user_id = first.json()["user_message"]["id"]
+
+    second = await client.post(
+        f"/api/conversations/{cid}/messages",
+        json={"parent_id": None, "text": "Revised"},
+    )
+    assert second.status_code == 201, second.text
+    body = second.json()
+    assert body["user_message"]["parent_id"] is None
+    assert body["user_message"]["content"] == "Revised"
+
+    path = (await client.get(f"/api/conversations/{cid}/messages")).json()
+    assert [item["message"]["id"] for item in path["path"]] == [
+        body["user_message"]["id"],
+        body["assistant_message"]["id"],
+    ]
+    assert set(path["path"][0]["siblings"]["siblings"]) == {
+        first_user_id,
+        body["user_message"]["id"],
+    }
+
+
 async def test_conversation_path_lists_visible_messages(client) -> None:
     """path endpoint 同时返回 user message 和 placeholder。"""
     pid = await _create_profile(client)

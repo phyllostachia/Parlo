@@ -140,7 +140,7 @@ class UserMessageCreate(SQLModel):
     """create-user-message request 的 body。
 
     省略 ``parent_id`` 时，默认为 conversation 的 current leaf，这是向可见 path 追加新问题
-    的常见情况。
+    的常见情况；显式传入 ``null`` 则创建新的 root message，用于编辑首条 prompt。
     """
     parent_id: int | None = None
     text: str

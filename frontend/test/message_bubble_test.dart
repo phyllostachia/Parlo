@@ -10,7 +10,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tan/core/models/conversation.dart';
 import 'package:tan/core/models/message.dart';
 import 'package:tan/core/models/model.dart';
+import 'package:tan/core/network/api_client.dart';
 import 'package:tan/core/theme/app_theme.dart';
+import 'package:tan/core/theme/colors.dart';
 import 'package:tan/features/chat/chat_providers.dart';
 import 'package:tan/features/chat/message_bubble.dart';
 
@@ -44,6 +46,7 @@ void main() {
                   streamState: StreamState.streaming,
                   onRegenerate: (_) {},
                   onSwitchBranch: (_) {},
+                  onEdit: (_, _) async {},
                 );
               },
             ),
@@ -101,6 +104,7 @@ void main() {
                 streamState: StreamState.idle,
                 onRegenerate: (_) {},
                 onSwitchBranch: (_) {},
+                onEdit: (_, _) async {},
               ),
             ),
           ),
@@ -122,6 +126,62 @@ void main() {
     expect(find.byTooltip('重新生成'), findsOneWidget);
     expect(tester.getSize(bubble).height, originalHeight);
 
+    await mouse.removePointer();
+  });
+
+  testWidgets('user message edits through the pencil button', (tester) async {
+    Message? editedMessage;
+    String? editedText;
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [baseUrlProvider.overrideWithValue('')],
+        child: MaterialApp(
+          theme: buildAppTheme(),
+          home: Scaffold(
+            body: MessageBubble(
+              message: _userMessage('Original question'),
+              conversation: _conversation,
+              siblings: const SiblingInfo(siblings: <int>[10], activeId: 10),
+              isStreaming: false,
+              isLast: false,
+              streamState: StreamState.idle,
+              onRegenerate: (_) {},
+              onSwitchBranch: (_) {},
+              onEdit: (message, text) async {
+                editedMessage = message;
+                editedText = text;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final bubble = find.byType(MessageBubble);
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer();
+    await mouse.moveTo(tester.getCenter(bubble));
+    await tester.pump(const Duration(milliseconds: 120));
+
+    final editButton = find.byTooltip('编辑消息');
+    expect(editButton, findsOneWidget);
+    await tester.tap(editButton);
+    await tester.pumpAndSettle();
+
+    final editor = find.byType(TextField);
+    expect(editor, findsOneWidget);
+    final editorWidget = tester.widget<TextField>(editor);
+    expect(editorWidget.decoration?.border, same(InputBorder.none));
+    expect(editorWidget.decoration?.focusedBorder, same(InputBorder.none));
+    expect(editorWidget.decoration?.filled, isTrue);
+    expect(editorWidget.decoration?.fillColor, TanColors.light.softStone);
+    await tester.enterText(editor, 'Revised question');
+    await tester.tap(find.text('发送'));
+    await tester.pumpAndSettle();
+
+    expect(editedMessage?.id, 10);
+    expect(editedText, 'Revised question');
     await mouse.removePointer();
   });
 }
@@ -147,6 +207,20 @@ Message _assistantMessage(String content) {
     reasoning: null,
     imageUrl: null,
     isComplete: false,
+    createdAt: DateTime.utc(2026, 7, 28),
+  );
+}
+
+Message _userMessage(String content) {
+  return Message(
+    id: 10,
+    conversationId: 1,
+    parentId: null,
+    role: MessageRole.user,
+    content: content,
+    reasoning: null,
+    imageUrl: null,
+    isComplete: true,
     createdAt: DateTime.utc(2026, 7, 28),
   );
 }

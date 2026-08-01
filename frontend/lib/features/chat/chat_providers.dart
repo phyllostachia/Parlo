@@ -145,7 +145,10 @@ class CurrentConversationNotifier
     // 需要 current path 才能追加内容。如果 build 已完成，`future` 会立即 resolve。
     final current = await future;
 
-    final body = UserMessageCreate(text: text, imageData: imageData).toJson();
+    final body = UserMessageCreate(text: text, imageData: imageData).toJson()
+      // 省略 parent_id 才会让 backend 使用 conversation current leaf；显式 null
+      // 保留给编辑 root prompt 的分支请求。
+      ..remove('parent_id');
     final response = await dio.post<Map<String, dynamic>>(
       '/api/conversations/$conversationId/messages',
       data: body,
@@ -169,7 +172,77 @@ class CurrentConversationNotifier
 
     state = AsyncData(
       current.copyWith(
+        conversation: current.conversation.copyWith(
+          currentLeafId: sendMessage.assistantMessage.id,
+        ),
         path: <MessageTreeNode>[...current.path, userNode, assistantNode],
+      ),
+    );
+
+    unawaited(_openStream(sendMessage.assistantMessage.id));
+  }
+
+  /// 编辑 visible path 上的 user message，并从该 message 的 parent 创建一个新 sibling。
+  ///
+  /// 新 user message 与原 message 共享 parent，因此旧 prompt 及其后续 branch 不会被删除。
+  /// 新建的 assistant placeholder 成为 visible path 的末端，随后由 SSE 填充回复。
+  Future<void> editUserMessage({
+    required Message message,
+    required String text,
+  }) async {
+    if (ref.read(streamStateProvider) == StreamState.streaming) return;
+
+    final current = await future;
+    final index = current.path.indexWhere(
+      (node) => node.message.id == message.id,
+    );
+    if (index == -1) return;
+    final oldNode = current.path[index];
+    if (oldNode.message.role != MessageRole.user) return;
+
+    final conversationId = arg;
+    final dio = ref.read(dioProvider);
+    final response = await dio.post<Map<String, dynamic>>(
+      '/api/conversations/$conversationId/messages',
+      data: UserMessageCreate(
+        // 这里必须使用原 user message 的 parent，而不是 current leaf；这样新 prompt
+        // 会成为原 prompt 的 sibling，而不是追加到当前 branch 的末尾。
+        parentId: oldNode.message.parentId,
+        text: text,
+      ).toJson(),
+    );
+    final sendMessage = SendMessageResponse.fromJson(response.data!);
+
+    final userNode = MessageTreeNode(
+      message: sendMessage.userMessage,
+      siblings: SiblingInfo(
+        siblings: <int>[
+          ...oldNode.siblings.siblings,
+          sendMessage.userMessage.id,
+        ],
+        activeId: sendMessage.userMessage.id,
+      ),
+    );
+    final assistantNode = MessageTreeNode(
+      message: sendMessage.assistantMessage,
+      siblings: SiblingInfo(
+        siblings: <int>[sendMessage.assistantMessage.id],
+        activeId: sendMessage.assistantMessage.id,
+      ),
+    );
+
+    // 保留原 prompt 之前的共同祖先，丢弃旧 branch 在 visible path 上的后续节点；旧节点
+    // 仍保留在 backend tree 中，可供之后切换或继续扩展。
+    state = AsyncData(
+      current.copyWith(
+        conversation: current.conversation.copyWith(
+          currentLeafId: sendMessage.assistantMessage.id,
+        ),
+        path: <MessageTreeNode>[
+          ...current.path.sublist(0, index),
+          userNode,
+          assistantNode,
+        ],
       ),
     );
 
@@ -395,7 +468,8 @@ class ChatActionsNotifier extends Notifier<void> {
     final conversation = Conversation.fromJson(createResp.data!);
 
     // 2. Post 第一条 user message → 创建 user + assistant placeholder。
-    final body = UserMessageCreate(text: text, imageData: imageData).toJson();
+    final body = UserMessageCreate(text: text, imageData: imageData).toJson()
+      ..remove('parent_id');
     final sendResp = await dio.post<Map<String, dynamic>>(
       '/api/conversations/${conversation.id}/messages',
       data: body,

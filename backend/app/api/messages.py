@@ -139,7 +139,14 @@ async def create_user_message(
     conversation = await session.get(Conversation, conversation_id)
     if conversation is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "conversation not found")
-    parent_id = body.parent_id if body.parent_id is not None else conversation.current_leaf_id
+    # ``parent_id`` 未提供时追加到 current leaf；显式传入 ``null`` 则表示创建新的
+    # root message。这一差异用于编辑首条 user prompt：它需要和原 root 共享 ``None``
+    # parent，而不是错误地追加到当前 branch。
+    parent_id = (
+        body.parent_id
+        if "parent_id" in body.model_fields_set
+        else conversation.current_leaf_id
+    )
     if parent_id is not None:
         parent = await _load_message(session, conversation_id, parent_id)
         if parent.role == "user":

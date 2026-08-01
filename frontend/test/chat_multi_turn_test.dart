@@ -12,7 +12,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:tan/core/auth/auth_providers.dart';
-import 'package:tan/core/models/message.dart';
 import 'package:tan/core/network/api_client.dart';
 import 'package:tan/features/chat/chat_providers.dart';
 
@@ -97,6 +96,80 @@ void main() {
     expect(path.path[1].message.content, 'Answer1');
     expect(path.path[2].message.content, 'Question2');
     expect(path.path[3].message.content, 'Answer2');
+  });
+
+  test('editing a user message creates a sibling branch', () async {
+    _stubPathLoad(
+      dio,
+      messages: [
+        _createMessageJson(id: 1, role: 'user', content: 'Question1'),
+        _createMessageJson(
+          id: 2,
+          role: 'assistant',
+          content: 'Answer1',
+          parentId: 1,
+        ),
+        _createMessageJson(
+          id: 3,
+          role: 'user',
+          content: 'Question2',
+          parentId: 2,
+        ),
+        _createMessageJson(
+          id: 4,
+          role: 'assistant',
+          content: 'Answer2',
+          parentId: 3,
+        ),
+      ],
+    );
+    _stubSendMessage(dio, userId: 5, assistantId: 6, parentId: 2);
+    _stubStream(dio, <String>[
+      'event: started\ndata: {"message_id":6}\n\n',
+      'event: text_delta\ndata: {"content":"Revised answer"}\n\n',
+      'event: done\ndata: {}\n\n',
+    ]);
+
+    final doneState = Completer<void>();
+    container.listen<StreamState>(streamStateProvider, (_, next) {
+      if (next == StreamState.done && !doneState.isCompleted) {
+        doneState.complete();
+      }
+    });
+
+    final notifier = container.read(
+      currentConversationProvider(_conversationId).notifier,
+    );
+    await container.read(currentConversationProvider(_conversationId).future);
+    final oldUser = container
+        .read(currentConversationProvider(_conversationId))
+        .requireValue
+        .path[2]
+        .message;
+
+    await notifier.editUserMessage(message: oldUser, text: 'Revised question');
+    await doneState.future.timeout(const Duration(seconds: 5));
+
+    final path = container
+        .read(currentConversationProvider(_conversationId))
+        .requireValue;
+    expect(path.path, hasLength(4));
+    expect(path.path.map((node) => node.message.id), <int>[1, 2, 5, 6]);
+    expect(path.path[2].message.content, 'Revised question');
+    expect(path.path[2].message.parentId, 2);
+    expect(path.path[2].siblings.siblings, <int>[3, 5]);
+    expect(path.path[3].message.content, 'Revised answer');
+
+    final requestBody =
+        verify(
+              () => dio.post<Map<String, dynamic>>(
+                '/api/conversations/1/messages',
+                data: captureAny(named: 'data'),
+              ),
+            ).captured.single
+            as Map<String, dynamic>;
+    expect(requestBody['parent_id'], 2);
+    expect(requestBody['text'], 'Revised question');
   });
 }
 

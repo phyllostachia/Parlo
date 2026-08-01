@@ -127,6 +127,15 @@ class _MessageListState extends ConsumerState<MessageList> {
                           )
                           .switchBranch(leafId: leafId);
                     },
+                    onEdit: (message, text) {
+                      return ref
+                          .read(
+                            currentConversationProvider(
+                              widget.conversationId,
+                            ).notifier,
+                          )
+                          .editUserMessage(message: message, text: text);
+                    },
                   ),
                 );
               },
