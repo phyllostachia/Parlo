@@ -12,6 +12,7 @@ header，auth dependency 接受 ``token`` query parameter 中的共享 token。
 
 from __future__ import annotations
 
+import asyncio
 import json
 from collections.abc import AsyncIterator
 from datetime import datetime, timezone
@@ -123,6 +124,30 @@ async def _event_generator(message_id: int, settings: Settings) -> AsyncIterator
             finished_at = reasoning_finished_at or monotonic()
             return max(1, round((finished_at - stream_started_at) * 1000))
 
+        saved = False
+
+        async def persist() -> None:
+            """将已累积的内容写入 assistant 占位消息。
+
+            使用 ``asyncio.shield`` 保护：客户端在 ``done`` 后立即断开时，
+            Starlette 会向 generator 抛出 ``GeneratorExit``/``CancelledError``；
+            若此时正在执行 ``session.commit()``，该 ``await`` 会被取消，导致
+            保存丢失。shield 确保 commit 在取消期间也能完成。
+            """
+            message.content = content_buffer
+            message.reasoning = reasoning_buffer or None
+            message.reasoning_duration_ms = (
+                reasoning_duration_ms or measured_reasoning_duration_ms()
+            )
+            message.reasoning_signature = signature
+            message.is_complete = True
+            conversation.updated_at = datetime.now(timezone.utc)
+            if finished_cleanly:
+                conversation.current_leaf_id = message.id
+            session.add(message)
+            session.add(conversation)
+            await asyncio.shield(session.commit())
+
         yield _sse("started", {"message_id": message_id})
         try:
             async for event in provider.stream(request):
@@ -138,31 +163,31 @@ async def _event_generator(message_id: int, settings: Settings) -> AsyncIterator
                     signature = event.content
                     yield _sse("reasoning_signature", {"content": event.content})
                 elif event.kind == "error":
+                    # 先保存，再向客户端发送 error，确保客户端断开后数据仍在。
+                    await persist()
+                    saved = True
                     yield _sse("error", {"message": event.content})
                     break
                 elif event.kind == "done":
                     finished_cleanly = True
                     reasoning_duration_ms = measured_reasoning_duration_ms()
+                    # 先保存，再向客户端发送 done，确保客户端断开后数据仍在。
+                    await persist()
+                    saved = True
                     yield _sse(
                         "done", {"reasoning_duration_ms": reasoning_duration_ms}
                     )
                     break
         except Exception as exc:  # 将未预期的 adapter failure 返回给客户端
+            # 先保存已累积的部分内容，再向客户端发送错误。
+            if not saved:
+                await persist()
+                saved = True
             yield _sse("error", {"message": f"stream failed: {exc}"})
         finally:
-            message.content = content_buffer
-            message.reasoning = reasoning_buffer or None
-            message.reasoning_duration_ms = (
-                reasoning_duration_ms or measured_reasoning_duration_ms()
-            )
-            message.reasoning_signature = signature
-            message.is_complete = True
-            conversation.updated_at = datetime.now(timezone.utc)
-            if finished_cleanly:
-                conversation.current_leaf_id = message.id
-            session.add(message)
-            session.add(conversation)
-            await session.commit()
+            # 兜底：若因异常退出且尚未保存，则尽力保存。
+            if not saved:
+                await persist()
 
 
 @router.get("/stream")
