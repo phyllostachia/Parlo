@@ -4,5 +4,5 @@
 
 我们偏好简单、优雅且值得信赖的设计。
 
-Backend -> [README](./backend/README.md)
-Frontend -> [README](./frontend/README.md)
+后端 -> [README](./backend/README.md)
+前端 -> [README](./frontend/README.md)
