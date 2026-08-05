@@ -1,7 +1,3 @@
-# Tan Flutter 前端。
-#
-# 这是 `frontend/design.md` 和架构文档中描述的单页 AI chatbot。当前优先支持 Web；
-# 移动端平台将在后续阶段加入（参见开发计划）。
 name: tan
 description: "Tan AI 聊天应用"
 publish_to: "none"
@@ -13,75 +9,32 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
-  # 状态管理。这里使用手动 Riverpod API（Provider、NotifierProvider、
-  # AsyncNotifierProvider），而不是 riverpod_generator codegen 风格。架构文档为
-  # 保持一致选择了 codegen；当前实现使用手动风格，以简化构建并避免 provider 的
-  # 额外代码生成步骤。下方的 freezed 模型仍然使用代码生成。
   flutter_riverpod: ^2.5.1
-
-  # 网络。普通 REST request 使用 Dio。Web SSE 在 sse_connection_web.dart 中直接使用
-  # Fetch + ReadableStream，因为 Dio 默认的 XMLHttpRequest adapter 会缓冲完整 response。
   dio: ^5.7.0
-
-  # 路由。go_router 配合 ShellRoute 可以让侧栏保持挂载，同时切换主区域中的会话，
-  # 因此侧栏状态会在导航时保留。
   go_router: ^14.6.2
-
-  # 数据模型。freezed + json_serializable 会生成不可变 value type 和 JSON converter。
-  # build.yaml 中设置了 field_rename: snake，因此生成的 fromJson 会自动将 snake_case
-  # API 字段映射到 camelCase Dart 字段。
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0
-
-  # 用于保存 bearer token、移动端 base URL 和主题选择的本地偏好设置。Web 会将其映射
-  # 到 localStorage，移动端会将其映射到原生 prefs。
   shared_preferences: ^2.3.3
-
-  # 适合流式渲染的 Markdown renderer（可以在每个 token 到达时重新解析部分文本而不
-  # 闪烁）。用于 assistant 消息正文。v1.x 将 widget 暴露为 `GptMarkdown`，流式支持
-  # 优于使用 `TexMarkdown` 的 0.1.x 系列。
   gpt_markdown: ^1.1.8
-
-  # 接入 gpt_markdown custom code builder 的可选 code highlighter。后续阶段再接入；
-  # 这里先声明依赖，使依赖已准备好。
   flutter_highlight: ^0.7.0
-
-  # 图片附件功能（阶段 5）使用的 file picker。支持 Web（HTML file input）、Android、
-  # iOS 和 desktop，因此所有目标平台都可以使用同一个调用位置。
   file_picker: ^8.1.4
-
-  # `file_picker` 使用的跨平台 `XFile` abstraction。由于图片附件
-  # helper 在 public signature 中导入 `XFile`，因此将其声明为直接依赖。
   cross_file: ^0.3.4+1
-  # WASM Web 使用的 DOM bindings。用于替代依赖 dart:html 的旧版 desktop_drop。
   web: ^1.1.1
   google_fonts: ^8.2.0
+  cupertino_icons: ^1.0.9
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-  # freezed 和 json_serializable 的代码生成 runner。
   build_runner: ^2.4.13
-
-  # 生成不可变 value class（==、hashCode、copyWith、sealed union）。
   freezed: ^2.5.7
-
-  # 为 freezed 模型生成 fromJson / toJson。
   json_serializable: ^6.8.0
-
-  # unit test 和 widget test 用于 mock dio 及其他依赖的 mocking library。
   mocktail: ^1.0.4
-
-  # Flutter 应用推荐的 lint 集合。analysis_options.yaml 中会增加更严格的规则。
   flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true
 
-  # 自托管 UI 和自然语言字体文件（参见架构文档第 9 节）。将可变字体放入应用 bundle，
-  # 应用运行时不需要从网络获取字体，同时可以通过 TextStyle.fontWeight 使用各种字重。
   assets:
     - assets/fonts/
 
